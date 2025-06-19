@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyTask - Início</title>
+    <link rel="stylesheet" href="../../src/css/globalMenu/mainMenu.css">
+    <link rel="stylesheet" href="../../src/components/css/sidebar.css">
+    <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+    <script src="../../src/js/config/storageUtils.js"></script>
+    <script src="../../src/components/js/sidebar.js" defer></script>
+    <script src="../../src/js/globalMenu/mainMenu.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="menu-icon" id="menuToggle">
+        <img src="../../src/imagens/Ícone Menu.png" alt="Abrir Menu">
+    </div>
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fa-solid fa-sun"></i>
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <div class="logo-container">
+        <header>
+            <img src="../../src/imagens/IMAGEM_LOGO_EASYTASK.PNG" alt="Logo EasyTask" class="logo2-icon">
+        </header>
+    </div>
+
+    <div class="welcome-message">
+        <h1>Bem-vindo, ao EasyTask <span id="colaborador-nome"></span>!</h1>
+    </div>
+
+    <div class="main-content-icon">
+        <div class="card">
+            <img src="../../src/imagens/iconeTarefa.png" alt="Ícone do Board" class="icon">
+            <a href="../board/board.html" class="btn">QUADROS</a>
+        </div>
+
+        <div class="card">
+            <img src="../../src/imagens/Ícone Colaboradores.png" alt="Ícone de Colaboradores" class="icon">
+            <a href="../collaborator/collaboratorListScreen.html" class="btn">COLABORADORES</a>
+        </div>
+
+        <div class="card">
+            <img src="../../src/imagens/Ícone Clientes.png" alt="Ícone de Clientes" class="icon">
+            <a href="../client/clientListScreen.html" class="btn">CLIENTES</a>
+        </div>
+
+        <div class="card">
+            <img src="../../src/imagens/Ícone Buscar.png" alt="Ícone de Relatórios" class="icon">
+            <a href="../report/reportDashboard.html" class="btn">RELATÓRIOS</a>
+        </div>
+    </div>
+
+
+
+    <script src="../../src/js/tema/temaSystem.js"></script>
+</body>
+
+</html>

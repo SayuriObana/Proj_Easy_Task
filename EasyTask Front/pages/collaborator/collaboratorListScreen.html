@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Colaboradores</title>
+    <link rel="stylesheet" href="../../src/css/collaborator/collaboratorListScreen.css">
+    <link rel="stylesheet" href="../../src/components/css/sidebar.css">
+    <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+    <script src="../../src/js/config/storageUtils.js"></script>
+    <script src="../../src/components/js/sidebar.js" defer></script>
+    <script src="../../src/js/collaborator/collaboratorListScreen.js" defer></script>
+    <script src="../../src/js/config/databaseMapping.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+    <!-- Botão de menu -->
+    <button class="menu-button" id="menuToggle">
+        <img src="../../src/imagens/Ícone Menu.png" alt="Menu">
+    </button>
+
+    <!-- Sidebar (será carregada dinamicamente via JS) -->
+    <div id="sidebar"></div>
+
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fa-solid fa-sun"></i>
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <!-- Container principal -->
+    <div class="container">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchBar" class="search-bar" placeholder="Pesquisar colaboradores...">
+        </div>
+        <div id="profileGrid" class="profile-grid">
+            <!-- Os cards dos colaboradores serão inseridos aqui via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Botão flutuante para adicionar colaborador -->
+    <button id="fabAddColaborador" class="fab-add" title="Adicionar novo colaborador">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Popup para visualizar colaborador -->
+    <div id="modalVisualizarColaborador" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Dados do Colaborador</h2>
+                <button class="close-btn" id="fecharVisualizacao">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="detalheNome"><strong>Nome:</strong></p>
+                <p id="detalheEmail"><strong>Email:</strong></p>
+                <p id="detalheTelefone"><strong>Telefone:</strong></p>
+                <p id="detalheCargo"><strong>Cargo:</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup para adicionar/editar colaborador -->
+    <div id="modalColaborador" class="modal-edicao" style="display: none;">
+        <div class="modal-content">
+            <button class="close-btn" id="fecharModal">&times;</button>
+            <h2>Cadastrar Novo Colaborador</h2>
+            <form id="formCadastroColaborador">
+                <div class="form-group">
+                    <label for="nome">Nome:</label>
+                    <input type="text" id="nome" name="nome" required placeholder="Digite o nome do colaborador">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required placeholder="Digite o email do colaborador">
+                </div>
+                <div class="form-group">
+                    <label for="telefone">Telefone:</label>
+                    <input type="tel" id="telefone" name="telefone" required placeholder="Digite o telefone do colaborador">
+                </div>
+                <div class="form-group">
+                    <label for="cargo">Cargo:</label>
+                    <input type="text" id="cargo" name="cargo" required placeholder="Digite o cargo do colaborador">
+                </div>
+                <div class="form-group">
+                    <label for="accessLevel">Nível de Acesso:</label>
+                    <select id="accessLevel" name="accessLevel" required class="form-select">
+                        <option value="">Selecione o nível de acesso</option>
+                        <option value="BASICO">Básico</option>
+                        <option value="SUPERIOR">Superior</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" name="senha" placeholder="Digite a senha (obrigatória no cadastro)">
+                </div>
+                <button type="submit" class="save-btn">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../../src/js/tema/temaSystem.js"></script>
+
+</body>
+
+</html>

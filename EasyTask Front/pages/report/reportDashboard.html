@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Relatórios - EasyTask</title>
+    <link rel="stylesheet" href="../../src/css/report/reports.css">
+    <link rel="stylesheet" href="../../src/css/report/dashboard.css">
+    <link rel="stylesheet" href="../../src/components/css/sidebar.css">
+    <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+    <script src="../../src/components/js/sidebar.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Botão do menu (Hambúrguer) -->
+    <div class="navbar">
+        <button class="menu-button" id="menuToggle">
+            <img src="../../src/imagens/Ícone Menu.png" alt="Menu">
+        </button>
+    </div>
+
+    <!-- Sidebar (será carregada dinamicamente via JS) -->
+    <div id="sidebar"></div>
+
+    <button class="theme-toggle">
+        <i class="fa-solid fa-sun"></i>
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <!-- Header Moderno -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="header-text">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-chart-line"></i>
+                    Dashboard de Relatórios
+                </h1>
+                <p class="dashboard-subtitle">Acesse insights valiosos sobre o desempenho do seu sistema</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-card">
+                    <i class="fas fa-tasks"></i>
+                    <div class="stat-info">
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">Relatórios</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Container principal -->
+    <div class="dashboard-container">
+        <!-- Grid de Relatórios -->
+        <div class="reports-grid">
+            <!-- Relatório Estatísticas Gerais -->
+            <div class="report-card" onclick="navigateToReport('generalStatsReport.html')">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="card-badge">
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Estatísticas Gerais</h3>
+                    <p>Visão macro do desempenho do sistema com métricas essenciais para tomada de decisões estratégicas.</p>
+                </div>
+                <div class="card-footer">
+                    <span class="card-tag">Popular</span>
+                    <button class="card-button">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relatório Desempenho do Colaborador -->
+            <div class="report-card" onclick="navigateToReport('collaboratorReport.html')">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="card-badge">
+                        <i class="fas fa-trending-up"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Desempenho do Colaborador</h3>
+                    <p>Avalie a produtividade individual e coletiva da equipe com métricas detalhadas de performance.</p>
+                </div>
+                <div class="card-footer">
+                    <span class="card-tag">Performance</span>
+                    <button class="card-button">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relatório de Tarefas -->
+            <div class="report-card" onclick="navigateToReport('taskReport.html')">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="card-badge">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Relatório de Tarefas</h3>
+                    <p>Acompanhe todas as tarefas por cliente com status, prazos e responsabilidades detalhadas.</p>
+                </div>
+                <div class="card-footer">
+                    <span class="card-tag">Gestão</span>
+                    <button class="card-button">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relatório de Prioridade -->
+            <div class="report-card" onclick="navigateToReport('priorityReport.html')">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="card-badge">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Relatório de Prioridades</h3>
+                    <p>Organize tarefas por nível de prioridade para focar no que realmente importa.</p>
+                </div>
+                <div class="card-footer">
+                    <span class="card-tag">Urgente</span>
+                    <button class="card-button">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relatório Estatísticas do Cliente -->
+            <div class="report-card" onclick="navigateToReport('clientReport.html')">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="card-badge">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>Estatísticas do Cliente</h3>
+                    <p>Analise o progresso das tarefas por cliente e identifique oportunidades de melhoria.</p>
+                </div>
+                <div class="card-footer">
+                    <span class="card-tag">Análise</span>
+                    <button class="card-button">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Ações Rápidas -->
+        <div class="quick-actions">
+            <h3>Ações Rápidas</h3>
+            <div class="actions-grid">
+                <button class="action-btn" onclick="navigateToReport('generalStatsReport.html')">
+                    <i class="fas fa-download"></i>
+                    <span>Exportar Todos</span>
+                </button>
+                <button class="action-btn" onclick="navigateToReport('collaboratorReport.html')">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Atualizar Dados</span>
+                </button>
+                <button class="action-btn" onclick="navigateToReport('taskReport.html')">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../src/js/config/storageUtils.js"></script>
+    <script src="../../src/js/report/reportDashboard.js" defer></script>
+    <script src="../../src/js/tema/temaSystem.js"></script>
+    <script src="https://cdn.jsdelivr/npm/sweetalert2@11"></script>
+</body>
+
+</html> 

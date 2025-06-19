@@ -1,0 +1,450 @@
+/* ======= CONFIGURAÇÃO DE TEMAS ======= */
+body {
+    color: var(--text-color);
+}
+
+/* Tema Escuro (Padrão) */
+:root {
+    --bg-color: #121212;
+    --text-color: #ffffff;
+    --button-bg: #1e1e1e;
+    --button-border: #ffffff;
+    --icon-filter: invert(1); /* Ícones ficam brancos */
+    --input-bg: #1e1e1e;     /* NOVO */
+    --input-text: #ffffff;   /* NOVO */
+}
+
+/* Tema Claro */
+.light-theme {
+    --bg-color: #f5f5f5;
+    --text-color: #222222;
+    --button-bg: #ffffff;
+    --button-border: #222222;
+    --icon-filter: invert(0); /* Agora os ícones pretos aparecem corretamente no fundo claro */
+    --input-bg: #ffffff;     /* NOVO */
+    --input-text: #222222;   /* NOVO */
+}
+
+.light-theme h1,
+.light-theme h2,
+.light-theme h3,
+.light-theme h4,
+.light-theme h5,
+.light-theme h6,
+.light-theme p,
+.light-theme span {
+    color: var(--text-color) !important;
+}
+
+/* Ajustando os ícones */
+.light-theme img {
+    filter: invert(1); /* Isso vai inverter a cor dos ícones/imagens brancas */
+}
+
+/* ======= ESTILOS GERAIS ======= */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ======= ÍCONES E IMAGENS ======= */
+.menu-icon img,
+.icon-item img {
+    width: 80px;
+    height: 80px;
+    filter: var(--icon-filter);
+    transition: filter 0.3s ease;
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: var(--button-bg);
+    border: 2px solid var(--button-border);
+    color: var(--text-color);
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+
+    z-index: 1002; /* 👈 Adicione isso */
+}
+  
+  /* ======= BOTÕES DE AÇÃO ======= */
+  .button {
+    background: var(--button-bg);
+    border: 2px solid var(--button-border);
+    color: var(--text-color);
+    padding: 12px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  
+  .button:hover {
+    background: var(--text-color);
+    color: var(--bg-color);
+  }
+  
+  /* ======= GRID DE ÍCONES ======= */
+  .icon-grid {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 40px;
+  }
+  
+  .icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* ======= RESPONSIVIDADE ======= */
+  @media (max-width: 768px) {
+    .icon-grid {
+      flex-direction: column;
+      gap: 20px;
+    }
+  }
+
+  /* Caixa de login no tema escuro */
+body:not(.light-theme) .modal-content {
+    background-color: #1e1e1e !important; /* Cor escura */
+    color: #ffffff !important; /* Texto branco */
+    border: 1px solid #444; /* Borda mais escura */
+}
+
+/* Caixa de login no tema claro */
+body.light-theme .modal-content {
+    background-color: #ffffff !important; /* Branco */
+    color: #222222 !important; /* Texto preto */
+    border: 1px solid #ccc; /* Borda clara */
+}
+
+.modal-title {
+    font-family: 'Montserrat', sans-serif; /* Fonte bonita */
+    font-size: 2.5rem; /* Tamanho ajustado */
+    font-weight: bold; /* Negrito */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Tema Escuro */
+body:not(.light-theme) .modal-title {
+    color: white;
+}
+
+/* Tema Claro */
+body.light-theme .modal-title {
+    color: black;
+}
+
+/* Sol no tema claro, Lua no tema escuro */
+body.light-theme .fa-sun {
+    display: inline;
+}
+body.light-theme .fa-moon {
+    display: none;
+}
+body:not(.light-theme) .fa-sun {
+    display: none;
+}
+body:not(.light-theme) .fa-moon {
+    display: inline;
+}
+
+/* 🔹 Garante que o texto dos botões fique preto no tema claro */
+body.light-theme .button {
+    color: #222222 !important;  /* Texto preto */
+    border-color: #222222 !important; /* Borda preta */
+}
+
+/* 🔹 Garante que o texto fique visível ao passar o mouse */
+body.light-theme .button:hover {
+    background: #222222 !important;
+    color: #ffffff !important;
+}
+
+/* 🔹 Garante que o texto abaixo dos ícones também fique preto */
+body.light-theme .icon-item p {
+    color: #222222 !important;
+}
+
+/* 🔹 Garante que o texto dos links na sidebar fique branco no tema claro */
+body.light-theme .sidebar a {
+    color: #ffffff !important; /* Branco no tema claro */
+}
+
+body.light-theme .sidebar a,
+body.light-theme .sidebar .dropdown-btn,
+body.light-theme .dropdown-content li a {
+    color: #222222 !important;  /* Preto no tema claro */
+}
+
+
+/* 🔹 Ajusta o campo de pesquisa no tema claro */
+body.light-theme input[type="text"] {
+    background-color: #ffffff !important; /* Fundo branco */
+    color: #222222 !important; /* Texto preto */
+    border: 2px solid #ccc !important; /* Borda mais visível */
+}
+
+/* 🔹 Ajusta os cards no tema claro */
+body.light-theme .profile-card {
+    background-color: #f5f5f5 !important; /* Fundo cinza claro */
+    color: #222222 !important; /* Texto preto */
+    border: 2px solid #ddd !important; /* Borda leve */
+}
+
+/* 🔹 Corrige os botões dentro dos cards */
+body.light-theme .profile-card .btn {
+    border: none !important;
+}
+
+/* 🔹 Ajusta os textos dentro dos cards para ficarem visíveis no tema claro */
+body.light-theme .task-card {
+    color: #222222 !important; /* Texto preto */
+}
+
+/* 🔹 Altera a cor dos botões de status para preto no tema claro */
+body.light-theme .task-status {
+    background-color: #000000 !important; /* Fundo preto */
+    color: #ffffff !important; /* Texto branco */
+}
+
+/* 🔹 Ajusta os cards no tema claro para manter contraste */
+body.light-theme .task-card {
+    background-color: #ffffff !important; /* Fundo branco */
+    border: 2px solid #ddd !important; /* Borda leve */
+}
+
+/* 🔹 Ajusta a cor do texto dentro dos botões dos status */
+body.light-theme .task-status span {
+    color: #ffffff !important; /* Texto branco */
+}
+
+/* 🔹 Corrige o fundo dos quadros de tarefas no modo claro */
+body.light-theme .kanban-column {
+    background-color: #ffffff !important; /* Fundo branco */
+    border: 1px solid #ccc; /* Opcional: borda leve para separação */
+}
+
+body.light-theme .kanban-column {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* 🔹 Corrige o campo de e-mail no tema claro */
+body.light-theme input[type="email"] {
+    background-color: #ffffff !important; /* Fundo branco */
+    color: #222222 !important;            /* Texto escuro */
+    border: 1px solid #ccc !important;
+}
+
+/* 🔹 Corrige campos escuros no modo claro */
+body.light-theme input[type="text"],
+body.light-theme input[type="email"],
+body.light-theme input[type="password"],
+body.light-theme input[type="tel"] {
+    background-color: #ffffff !important;
+    color: #222222 !important;
+    border: 1px solid #ccc !important;
+}
+
+/* 🔹 Corrige os labels que estão invisíveis */
+body.light-theme label {
+    color: #222222 !important;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.menu-button img,
+.menu-icon img {
+    filter: var(--icon-filter);
+    transition: filter 0.3s ease;
+}
+
+body.light-theme .container {
+    background: #ffffff !important;  /* Fundo branco */
+    color: #222222 !important;       /* Texto preto */
+    border: 1px solid #ccc !important;
+}
+
+body.light-theme h2,
+body.light-theme label,
+body.light-theme li {
+    color: #222222 !important; /* Preto no modo claro */
+}
+
+body.light-theme input {
+    background: #ffffff !important;  /* Fundo branco */
+    color: #222222 !important;       /* Texto preto */
+    border: 1px solid #ccc !important;
+}
+
+body.light-theme .edit-btn {
+    background-color: #ffcc00 !important; /* Amarelo */
+    color: #000 !important;               /* Texto preto */
+}
+
+body.light-theme .delete-btn {
+    background-color: #ff3b3b !important; /* Vermelho */
+    color: #fff !important;               /* Texto branco */
+}
+
+body.light-theme .close-btn {
+    color: #ff3b3b !important; /* Vermelho */
+}
+
+/* 🔹 Ajusta os itens da lista de fases no modo claro */
+body.light-theme .phase-list li {
+    background: #ffffff !important; /* Fundo branco */
+    color: #222222 !important; /* Texto preto */
+    border-left: 5px solid #4CAF50; /* Mantém a borda verde */
+}
+
+/* 🔹 Ajusta os botões dentro da lista para manter o contraste */
+body.light-theme .edit-btn {
+    background-color: #ffcc00 !important; /* Mantém amarelo */
+    color: #000 !important; /* Texto preto */
+}
+
+body.light-theme .delete-btn {
+    background-color: #ff3b3b !important; /* Mantém vermelho */
+    color: #fff !important; /* Texto branco */
+}
+
+/* 🔹 No tema claro, o ícone do menu deve ficar preto */
+body.light-theme .menu-icon img {
+    filter: invert(1) !important; /* Inverte para preto */
+}
+
+/* 🔹 No tema escuro, o ícone do menu deve ficar branco */
+body:not(.light-theme) .menu-icon img {
+    filter: invert(0) !important; /* Mantém a cor original (branca) */
+}
+
+.menu-button img {
+    filter: var(--icon-filter);
+    transition: filter 0.3s ease;
+}
+
+:root {
+    --icon-filter: invert(0%);
+}
+
+.light-theme {
+    --icon-filter: invert(100%);
+}
+
+/* Corrige os cards da tela de relatórios no tema claro */
+body.light-theme .report-card {
+    background-color: #ffffff !important; /* fundo branco */
+    color: #222222 !important;            /* texto preto */
+    border: 1px solid #ddd;               /* borda leve */
+}
+
+/* Ajusta o botão PDF se precisar */
+body.light-theme .report-card .btn-pdf {
+    background-color: #28a745 !important; /* verde */
+    color: #fff !important;               /* texto branco */
+}
+
+/* Modo claro para relatório de colaboradores */
+body.light-theme .container {
+    background-color: #ffffff !important; /* fundo branco */
+    color: #222222 !important; /* texto preto */
+}
+
+/* Corrige os itens da lista no tema claro */
+body.light-theme li {
+    background-color: #f5f5f5 !important;
+    color: #222222 !important;
+    border: 1px solid #ddd !important;
+}
+
+body.light-theme li:hover {
+    background-color: #eaeaea !important;
+}
+
+/* ===== Sidebar no Tema Claro ===== */
+body.light-theme .sidebar {
+    background-color: #f5f5f5 !important;
+    color: #222222 !important;
+}
+
+body.light-theme .sidebar-header {
+    color: #222222 !important;
+}
+
+body.light-theme .sidebar-links li a,
+body.light-theme .dropdown-btn,
+body.light-theme .dropdown-content li a {
+    color: #222222 !important;
+}
+
+body.light-theme .sidebar-links li a:hover,
+body.light-theme .dropdown-btn:hover,
+body.light-theme .dropdown-content li a:hover {
+    color: #000000 !important; /* Preto no hover */
+}
+
+/* 🔹 Corrige a cor do botão "RELATÓRIOS" (que é um <span>) no tema claro */
+body.light-theme .dropdown-btn {
+    color: #222222 !important;         /* Texto preto */
+    background-color: #ffffff !important; /* Fundo branco */
+    border-bottom: 1px solid #ccc;     /* Linha de separação opcional */
+    display: block;
+    padding: 8px 0;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Corrige o fundo do botão "RELATÓRIOS" no tema claro */
+body.light-theme .sidebar .dropdown {
+    background-color: #ffffff !important;
+    border: 1px solid #ddd !important;
+}
+
+/* Corrige a cor da seta ▼ no botão "RELATÓRIOS" no tema claro */
+body.light-theme .dropdown-btn::after {
+    color: #222222 !important;
+}
+
+/* Garante que o botão RELATÓRIOS apareça no tema claro */
+body.light-theme .dropdown {
+    background-color: #ffffff !important;
+    color: #222222 !important;
+    border: 1px solid #ddd !important;
+}
+
+body.light-theme .container {
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+    border-radius: 12px; /* Bordas arredondadas, se quiser */
+}
+
+body.light-theme .kanban-column {
+    border: none !important;
+}
+
+body.light-theme .kanban-column {
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Suaviza */
+    border-radius: 12px; /* Bordas mais modernas */
+}
+

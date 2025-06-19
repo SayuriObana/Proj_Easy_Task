@@ -1,0 +1,32 @@
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header" id="user-name">Usuário</div>
+    
+    <ul class="sidebar-links">
+        <li><a href="../../pages/globalMenu/mainMenu.html">MENU</a></li>
+        <li><a href="../../pages/client/clientListScreen.html">CLIENTES</a></li>
+        <li><a href="../../pages/collaborator/collaboratorListScreen.html">COLABORADORES</a></li>
+        <li><a href="../../pages/board/board.html">QUADROS</a></li>
+        <li><a href="../../pages/logs/logsScreen.html">LOGS</a></li>
+        <!-- Dropdown para Relatórios -->
+        <li class="dropdown">
+            <span class="dropdown-btn">RELATÓRIOS ▼</span>
+            <ul class="dropdown-content">
+                <li><a href="../../pages/report/collaboratorReport.html">Relatório de Colaboradores</a></li>
+                <li><a href="../../pages/report/clientReport.html">Relatório de Clientes</a></li>
+                <li><a href="../../pages/report/taskReport.html">Relatório de Tarefas</a></li>
+                <li><a href="../../pages/report/priorityReport.html">Relatório de Prioridades</a></li>
+                <li><a href="../../pages/report/generalStatsReport.html">Relatório de Estatísticas Gerais</a></li>
+            </ul>
+        </li>        
+    </ul>
+
+    <div class="sidebar-footer">
+        <button class="logout-btn" id="logout-sidebar">SAIR</button>
+    </div>
+</div>
+
+<!-- Importando CSS e JS da Sidebar -->
+<link rel="stylesheet" href="../../src/components/css/sidebar.css">
+<link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+<script src="../../src/js/tema/temaSystem.js"></script>
+<script src="../../components/js/sidebar.js" defer></script>

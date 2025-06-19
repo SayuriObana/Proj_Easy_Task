@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Estatísticas Gerais</title>
+    <link rel="stylesheet" href="../../src/css/report/reports.css">
+    <link rel="stylesheet" href="../../src/components/css/sidebar.css">
+    <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+    <script src="../../src/js/config/storageUtils.js"></script>
+    <script src="../../src/components/js/sidebar.js"></script>
+    <script src="../../src/js/tema/temaSystem.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Botão do menu (Hambúrguer) -->
+    <div class="navbar">
+        <button class="menu-button" id="menuToggle">
+            <img src="../../src/imagens/Ícone Menu.png" alt="Menu">
+        </button>
+    </div>
+
+    <!-- Sidebar (será carregada dinamicamente via JS) -->
+    <div id="sidebar"></div>
+
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fa-solid fa-sun"></i>
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <!-- Container central -->
+    <div class="container">
+        <h2>Relatório Estatísticas Gerais</h2>
+        <p>Oferece uma visão geral das principais métricas do sistema, como número total de tarefas criadas, em andamento e concluídas, número de clientes ativos, estágios mais utilizados, entre outros. Tem como objetivo fornecer uma visão macro do desempenho do sistema e dos projetos em execução, ajudando na tomada de decisões estratégicas.</p>
+
+        <!-- Seção de Estatísticas -->
+        <div class="estatisticas-container">
+            <h3>Estatísticas Gerais</h3>
+            <div class="estatisticas-grid">
+                <div class="estatistica-card">
+                    <i class="fas fa-tasks"></i>
+                    <h4>Total de Tarefas</h4>
+                    <p id="totalTarefas">0</p>
+                </div>
+                <div class="estatistica-card">
+                    <i class="fas fa-users"></i>
+                    <h4>Total de Clientes</h4>
+                    <p id="totalClientes">0</p>
+                </div>
+                <div class="estatistica-card">
+                    <i class="fas fa-user-tie"></i>
+                    <h4>Total de Colaboradores</h4>
+                    <p id="totalColaboradores">0</p>
+                </div>
+                <div class="estatistica-card">
+                    <i class="fas fa-check-circle"></i>
+                    <h4>Tarefas Concluídas</h4>
+                    <p id="tarefasConcluidas">0</p>
+                </div>
+                <div class="estatistica-card">
+                    <i class="fas fa-clock"></i>
+                    <h4>Tarefas em Andamento</h4>
+                    <p id="tarefasAndamento">0</p>
+                </div>
+                <div class="estatistica-card">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Tarefas Atrasadas</h4>
+                    <p id="tarefasAtrasadas">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção do Gráfico -->
+        <div class="grafico-container">
+            <h3>Distribuição de Tarefas</h3>
+            <div class="grafico-wrapper">
+                <canvas id="graficoPizza"></canvas>
+            </div>
+        </div>
+
+        <button id="btnDownloadPDF" onclick="gerarPDF()">Baixar Relatório (PDF)</button>
+    </div>
+
+    <script src="../../src/js/report/generalStatsReport.js"></script>
+</body>
+
+</html>

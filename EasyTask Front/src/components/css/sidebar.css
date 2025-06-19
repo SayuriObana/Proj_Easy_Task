@@ -1,0 +1,201 @@
+/* Remover margens e paddings do body e html */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Remove a barra de rolagem desnecessária */
+    height: 100%;
+}
+
+/* Garantir que a sidebar ocupa 100% da altura da tela */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: var(--bg-color); 
+    color: var(--text-color);
+    position: fixed;
+    top: 0;
+    left: -300px; /* Mantém oculta até abrir */
+    z-index: 1000; /* Fica sobre o conteúdo */
+    padding: 20px;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5); /* Efeito de sombra */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Quando aberta */
+.sidebar.open {
+    left: 0;
+}
+
+/* Container dos links com scroll */
+.sidebar-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 100px; /* Espaço para o footer */
+}
+
+/* Garantir que o botão SAIR não passe da tela */
+.sidebar-footer {
+    position: absolute;
+    bottom: 20px; /* Mantém ele no final, mas sem sair da tela */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    text-align: center;
+}
+
+/* Nome do usuário - Destaque maior */
+.sidebar-header {
+    font-size: 24px; /* Aumenta o tamanho da fonte */
+    font-weight: bold;
+    text-transform: uppercase; /* Deixa todas as letras maiúsculas */
+    text-align: center;
+    margin-bottom: 20px;
+    color: white;
+    letter-spacing: 1.5px; /* Espaçamento entre letras para um efeito moderno */
+}
+
+/* Itens do menu - Texto branco por padrão */
+.sidebar-links li a {
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase; /* Deixa todas as letras maiúsculas */
+    text-align: center;
+    display: block;
+    padding: 8px 0;
+    text-decoration: none;
+    color: white;
+    transition: color 0.3s, background 0.3s;
+}
+
+/* Efeito ao passar o mouse - Texto amarelo */
+.sidebar-links li a:hover {
+    color: yellow;
+}
+
+/* Botão do dropdown */
+.dropdown-btn {
+    background-color: transparent;
+    color: var(--text-color);
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+    display: block;
+    padding: 8px 0;
+    cursor: pointer;
+    transition: color 0.3s;
+    width: 100%;
+}
+
+/* Efeito ao passar o mouse no botão RELATÓRIOS */
+.dropdown-btn:hover {
+    color: yellow;
+}
+
+/* Itens do dropdown */
+.dropdown-content {
+    display: none;
+    list-style: none;
+    padding-left: 15px;
+    margin-top: 5px;
+    border-left: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+li.dropdown.active > .dropdown-content {
+    display: block !important;
+}
+
+/* Itens do dropdown - Mesma estilização dos links */
+.dropdown-content li a {
+    text-decoration: none;
+    color: white;
+    display: block;
+    padding: 6px 8px;
+    transition: color 0.3s;
+    font-size: 14px;
+    text-transform: none;
+}
+
+/* Efeito hover nos relatórios */
+.dropdown-content li a:hover {
+    color: yellow;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Botão SAIR - Centralizado e estilizado */
+.sidebar-footer {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    text-align: center;
+}
+
+.logout-btn {
+    background-color: var(--button-bg); /* Muda conforme o tema */
+    color: var(--text-color); /* Mantém contraste com o fundo */
+    border: 2px solid var(--button-border); /* Mantém consistência com outros botões */
+    padding: 12px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 30px; /* Mantém arredondado */
+    transition: all 0.3s;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Suaviza a sombra */
+}
+
+/* Efeito ao passar o mouse */
+.logout-btn:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    border-color: var(--text-color);
+}
+
+/* Adapta links e botões ao tema atual (claro ou escuro) */
+.sidebar-links li a,
+.dropdown-btn,
+.dropdown-content li a {
+    color: var(--text-color);
+}
+
+.sidebar-links li a:hover,
+.dropdown-btn:hover,
+.dropdown-content li a:hover {
+    color: #f6ff43; /* Azul elegante no hover – pode trocar se quiser outro tom */
+}
+
+.sidebar-links li {
+    border: none;
+    margin-bottom: 8px;
+}
+
+/* Scroll personalizado para a sidebar */
+.sidebar-links::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-links::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.sidebar-links::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.sidebar-links::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+
+

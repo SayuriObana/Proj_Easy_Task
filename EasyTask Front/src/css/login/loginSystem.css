@@ -1,0 +1,417 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+/* ====== Home.css ====== */
+
+/* Fundo da página principal */
+/* Reset Geral */
+
+
+body.home {
+    overflow-x: hidden;
+    background-size: cover; /* Ajusta a imagem para cobrir todo o fundo */
+    background-position: center; /* Centraliza a imagem */
+    background-repeat: no-repeat; /* Evita repetição da imagem */
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .logo {
+    width: 100px; 
+    height: auto;
+    margin-left: 0px;
+  }
+  
+  .buttons .button {
+    display: inline-block; /* Torna o botão um bloco inline */
+    background-color: #000000; /* Cor de fundo verde */
+    color: rgb(255, 255, 255); /* Cor do texto branco */
+    text-decoration: none; /* Remove o sublinhado */
+    font-size: 1rem; /* Ajusta o tamanho da fonte */
+    font-weight: bold; /* Negrito no texto */
+    padding: 10px 40px; /* Adiciona espaçamento interno */
+    border: 5px solid #ffffff; /* Remove qualquer borda */
+    border-radius: 20px; /* Bordas arredondadas */
+    cursor: pointer; /* Adiciona o ícone de mão ao passar o mouse */
+    margin-top: -10px; /* Espaço acima do botão */
+    transition: all 0.5s ease-in-out; /* Transição suave */
+  }
+  
+  .buttons .button:hover {
+    background-color: #ffffff;
+    color: #000000;
+    border: 5px solid #e8ff3e; /* Borda branca com 2px de espessura */
+  }
+
+  .mensagem-erro {
+    color: red; /* Define o texto em vermelho */
+    font-size: 0.9rem; /* Ajusta o tamanho da fonte */
+    margin-top: 10px; /* Adiciona espaçamento acima */
+    text-align: center; /* Centraliza o texto */
+    display: none; /* Inicialmente escondida */
+}
+  
+.main-container-home {
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centraliza verticalmente */
+  align-items: center;     /* Centraliza horizontalmente */
+  text-align: center;
+  padding: 0 20px;
+}
+
+  
+  .logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px; /* Ajuste conforme necessário */
+    text-align: center;
+  }
+  
+  .logo-easytask {
+    width: 400px; /* Ajuste o tamanho da primeira imagem (hexágono) conforme necessário */
+    height: auto;
+    margin-bottom: -170px; /* Espaço entre as duas imagens */
+  }
+  
+  .logo-text {
+    width: 500px; /* Ajuste o tamanho da segunda imagem (texto "EasyTask") conforme necessário */
+    height: auto;
+  }
+  
+  .text-container p {
+    font-size: 1.1rem;
+    color: #fff;
+    margin: -100px;;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+  }
+  
+  /* ====== Estilo do Modal de Login ====== */
+  
+  /* Fundo escuro */
+  .modal {
+    display:flex; 
+    position:fixed; 
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    width: 95%; 
+    height: 85%; 
+    overflow:hidden; 
+    background-color: rgb(0,0,0); 
+    background-color: rgba(0,0,0,0.4); 
+  }
+  
+.modal {
+  display: none; /* Oculta inicialmente */
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100vw; /* Ocupa toda a largura da janela */
+  height: 100vh; /* Ocupa toda a altura da janela */
+  background-color: rgba(0, 0, 0, 0.4); /* Fundo escuro */
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Remove qualquer rolagem no modal */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  padding: 40px;
+  border: 1px solid #888;
+  width: 90%; /* Ajusta largura */
+  max-width: 500px; /* Limita a largura */
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  overflow-y: auto; /* Permite rolagem vertical caso necessário */
+  max-height: 90vh; /* Garante que não ultrapasse a altura da janela */
+  position: relative;
+}
+
+.modal-logo {
+  max-width: 80%; /* Ajusta tamanho da logo */
+  height: auto;
+  margin: 20px auto;
+  display: block; /* Centraliza a imagem */
+}
+
+body.modal-open {
+  overflow: hidden; /* Remove a rolagem da página quando o modal está aberto */
+}
+
+input[type=email], input[type=password] {
+  width: calc(100% - 40px); /* Ajusta a largura do input */
+  max-width: 400px; /* Define largura máxima */
+  margin: 10px auto; /* Adiciona espaçamento */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 30px;
+  box-sizing: border-box;
+}
+
+.login-button {
+  max-width: 200px;
+  background-color: #000;
+  color: white;
+  padding: 10px 40px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.5s ease-in-out;
+}
+
+.login-button:hover {
+  background-color: #f7f300;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 24px;
+  color: #cf1818;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  color: red;
+}
+
+#mensagem-erro {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  display: none; /* Inicialmente oculto */
+}
+
+.light-theme .modal-content {
+  background-color: #ffffff; /* Claro no tema claro */
+  color: #000000; /* Texto preto */
+}
+
+.dark-theme .modal-content {
+  background-color: #222222; /* Escuro no tema escuro */
+  color: #ffffff; /* Texto branco */
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+  margin-left: 0; /* tira espaçamento à esquerda */
+  padding-left: 0px; /* encosta sem colar demais */
+}
+
+.top-right-buttons {
+  position: fixed;
+  top: 15px;
+  right: 70px; /* ← aumentei só mais um pouco */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1003;
+}
+
+.cadastrar-topo {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 2px solid var(--button-border);
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.cadastrar-topo:hover {
+  background: var(--text-color);
+  color: var(--bg-color);
+}
+
+
+.theme-toggle {
+  background-color: transparent;
+  border: 2px solid white;
+  border-radius: 10px;
+  padding: 8px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  height: 40px; /* 🔥 Mesma altura */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Cadastro Modal usa o mesmo estilo base do login */
+#cadastroModal .modal-content {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+#cadastroModal input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: var(--input-bg);
+  color: var(--input-text);
+}
+
+#cadastroModal label {
+  display: block;
+  margin-top: 15px;
+  text-align: left;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+#cadastroModal .login-button {
+  margin-top: 20px;
+  width: 100%;
+}
+
+/* ===================== RESPONSIVIDADE ===================== */
+@media (max-width: 1024px) {
+  .logo-easytask {
+    width: 250px;
+    margin-bottom: -100px;
+  }
+  .logo-text {
+    width: 300px;
+  }
+  .modal-content {
+    padding: 20px;
+    max-width: 90vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    padding: 10px;
+  }
+  .logo {
+    width: 70px;
+  }
+  .main-container-home {
+    height: auto;
+    padding: 10px 5px;
+  }
+  .logo-easytask {
+    width: 180px;
+    margin-bottom: -60px;
+  }
+  .logo-text {
+    width: 200px;
+  }
+  .modal-content {
+    padding: 10px;
+    max-width: 98vw;
+  }
+  input[type=email], input[type=password] {
+    max-width: 95vw;
+    padding: 8px;
+  }
+  .login-button {
+    padding: 8px 20px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    padding: 18px 0 28px 0;
+    gap: 18px;
+  }
+  .logo {
+    width: 100px;
+    margin-bottom: 20px;
+  }
+  .main-container-home {
+    padding: 18px 4px;
+    gap: 28px;
+  }
+  .logo-container {
+    gap: 18px;
+    margin-top: 18px;
+    margin-bottom: 18px;
+  }
+  .logo-easytask {
+    width: 180px;
+    margin-bottom: 0;
+    margin-top: 22px;
+  }
+  .logo-text {
+    width: 200px;
+    margin-bottom: 22px;
+  }
+  .text-container {
+    margin: 18px 0 28px 0;
+    padding: 0 12px;
+  }
+  .text-container p {
+    font-size: 1.15rem;
+    margin: 0;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .buttons {
+    margin-top: 22px;
+    margin-bottom: 22px;
+  }
+  .modal-content {
+    padding: 18px 10px;
+    max-width: 99vw;
+    border-radius: 14px;
+  }
+  input[type=email], input[type=password] {
+    max-width: 98vw;
+    padding: 14px;
+    font-size: 1.15rem;
+    margin-bottom: 20px;
+    border-radius: 22px;
+  }
+  .login-button {
+    padding: 14px 28px;
+    font-size: 1.15rem;
+    margin-top: 16px;
+    border-radius: 22px;
+  }
+  .close-button {
+    top: 8px;
+    right: 16px;
+    font-size: 24px;
+  }
+  .modal-title {
+    font-size: 1.35rem;
+    margin-bottom: 16px;
+  }
+}
+

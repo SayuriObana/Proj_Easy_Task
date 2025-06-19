@@ -1,0 +1,714 @@
+/* Reset Geral */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    width: 100vw;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    overflow-x: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+}
+
+
+.navbar {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.menu-button img {
+    width: 50px;
+    height: 50px;
+    transition: transform 0.3s ease;
+}
+
+.menu-button:hover img {
+    transform: scale(1.1);
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+    /* Isso centraliza em telas maiores */
+}
+
+/* Toolbar */
+.toolbar {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin: 40px 0 10px 0; /* Aumenta a distância do topo, reduz a de baixo */
+    width: 80%;
+    display: flex;
+    justify-content: center;
+}
+
+.search-bar {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #fff;
+    background-color: #222;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    width: 250px;
+}
+
+.search-bar::placeholder {
+    color: #aaa;
+}
+
+.profile-card {
+    background-color: #222;
+    color: #fff;
+    width: 320px;
+    height: 220px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    position: relative;
+    padding: 15px;
+}
+
+.profile-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(255, 215, 0, 0.35);
+}
+
+.profile-card p {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+
+.profile-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    /* Aumenta o espaçamento entre os cards */
+    justify-content: center;
+    /* Centraliza os cards na tela */
+    padding: 20px;
+}
+
+.profile-card {
+    margin: 10px;
+    /* Adiciona um pequeno espaço ao redor de cada card */
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    /* cobre toda a tela */
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    /* acima da sidebar */
+    padding: 20px;
+}
+
+.modal-content {
+    background-color: #111;
+    color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+    position: relative;
+    text-align: center;
+}
+
+
+/* 🔹 Título do Modal */
+.modal-content h2 {
+    font-size: 1.6rem;
+    color: #ffffff;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.modal-content p {
+    font-size: 1rem;
+    color: #ffffff;
+    word-wrap: break-word;
+    margin: 5px 0;
+}
+
+/* 🔹 Botão Fechar (Correção Final) */
+.close-btn {
+    position: absolute;
+    top: -20px;
+    right: -10px;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #fff;
+    /* X branco */
+    background: none !important;
+    /* Remove qualquer fundo */
+    border: none;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+/* 🔹 Efeito ao passar o mouse */
+.close-btn:hover {
+    color: red;
+    /* Apenas o "X" fica vermelho */
+    transform: scale(1.2);
+}
+
+/* Garante que os botões fiquem dentro do card branco e alinhados */
+.buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 9px;
+    margin-top: 80px;
+}
+
+.buttons-container button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    font-size: 0.9rem;
+}
+
+
+/* Estilização dos botões */
+.view-btn,
+.edit-btn,
+.delete-btn {
+    flex: 1;
+    /* Faz com que tenham o mesmo tamanho */
+    max-width: 80px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-btn {
+    background-color: #007bff;
+    color: #fff;
+    width: 110px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.view-btn:hover {
+    background-color: #007bff;
+}
+
+.edit-btn {
+    background-color: #ff9900;
+    color: rgb(255, 255, 255);
+}
+
+.edit-btn:hover {
+    background-color: #cc7a00;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #a71d2a;
+}
+
+/* Popup de edição mais elegante */
+.modal-edicao {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(3px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    animation: fadeInModal 0.4s;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-edicao .modal-content {
+    background: rgba(20,20,20,0.98);
+    color: #fff;
+    padding: 2.5rem 2rem 2rem 2rem;
+    border-radius: 18px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.35);
+    position: relative;
+    text-align: center;
+    border: 1.5px solid #FFD700;
+    animation: slideDownModal 0.5s;
+}
+
+@keyframes slideDownModal {
+    from { transform: translateY(-40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-edicao .modal-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #FFD700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+/* Modal de edição de cliente elegante */
+.modal-edicao .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1.2rem;
+    width: 100%;
+}
+.modal-edicao .form-group label {
+    color: #FFD700;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.5px;
+}
+.modal-edicao .form-group input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 2px solid #444;
+    font-size: 1.1rem;
+    background-color: #232323;
+    color: #FFD700;
+    margin-bottom: 0;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.modal-edicao .form-group input:focus {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 2px #FFD70044;
+    outline: none;
+    background: #181818;
+    color: #FFD700;
+}
+
+.modal-edicao .save-btn {
+    width: 100%;
+    padding: 1.1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: linear-gradient(90deg, #FFD700 60%, #fffbe6 100%);
+    color: #000;
+    box-shadow: 0 4px 16px 0 rgba(255,215,0,0.15);
+    margin-top: 0.5rem;
+    transition: background 0.3s, color 0.3s, transform 0.2s;
+}
+.modal-edicao .save-btn:hover {
+    background: #000;
+    color: #FFD700;
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 6px 24px 0 rgba(255,215,0,0.18);
+}
+
+.modal-edicao .close-btn {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    font-size: 1.7rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #fff;
+    background: none;
+    border: none;
+    transition: color 0.3s, transform 0.2s;
+    z-index: 10;
+}
+.modal-edicao .close-btn:hover {
+    color: #FFD700;
+    transform: scale(1.2);
+}
+
+@media (max-width: 600px) {
+    .modal-edicao .modal-content {
+        padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+        max-width: 98vw;
+    }
+    .modal-edicao .form-group input {
+        font-size: 1rem;
+        padding: 10px;
+    }
+    .modal-edicao .form-group label {
+        font-size: 0.95rem;
+    }
+}
+
+/* Botão flutuante de adicionar cliente */
+.fab-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background-color: #FFD700;
+    color: #000;
+    border: 2px solid #000;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+.fab-button:hover {
+    background-color: #000;
+    color: #FFD700;
+    border-color: #FFD700;
+    transform: scale(1.1) rotate(90deg);
+}
+
+/* Botão de salvar no modal */
+.save-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: #FFD700;
+    color: #000;
+    border: 2px solid #000;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 1rem;
+}
+.save-btn:hover {
+    background-color: #000;
+    color: #FFD700;
+    border-color: #FFD700;
+    transform: translateY(-2px);
+}
+
+/* Botão de tema */
+.theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background-color: #FFD700;
+    color: #000;
+    border: 2px solid #000;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 101;
+    padding: 0.75rem;
+    border-radius: 50%;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.theme-toggle:hover {
+    background-color: #000;
+    color: #FFD700;
+    border-color: #FFD700;
+    transform: scale(1.1);
+}
+
+#modalCadastroCliente {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+#modalCadastroCliente.mostrar {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+
+@media (max-width: 500px) {
+    #modalCadastroCliente .modal-content {
+        background-color: #111;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        color: #fff;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        text-align: center;
+    }
+}
+
+#modalCadastroCliente h2 {
+    margin-bottom: 20px;
+    color: #f4ff00;
+    font-size: 1.5rem;
+}
+
+#modalCadastroCliente .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 22px;
+    font-weight: bold;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+#modalCadastroCliente .close-btn:hover {
+    color: red;
+}
+
+#modalCadastroCliente .form-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+#modalCadastroCliente .form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+#modalCadastroCliente .form-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #555;
+    background-color: #222;
+    color: #fff;
+}
+
+#modalCadastroCliente .save-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #28a745;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#modalCadastroCliente .save-btn:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+#modalCadastroCliente .form-group input:focus {
+    border-color: #f4ff00;
+    outline: none;
+    box-shadow: 0 0 5px #f4ff00aa;
+}
+
+button:focus {
+    outline: 2px solid #f4ff00;
+    outline-offset: 2px;
+}
+
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* <-- importante! */
+    padding-top: 40px; /* ajuste conforme necessário */
+    min-height: 100vh;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    html, body {
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+  
+    .main-wrapper {
+      min-height: auto;
+      height: auto;
+    }
+  }
+  
+button,
+input[type="button"],
+input[type="submit"] {
+    background-color: #FFD700 !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover {
+    background-color: #000 !important;
+    color: #FFD700 !important;
+    border-color: #FFD700 !important;
+}
+
+/* Se houver botões específicos, garantir que sigam o padrão */
+.view-btn, .edit-btn, .delete-btn {
+    background-color: #FFD700 !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+    font-weight: 600;
+}
+.view-btn:hover, .edit-btn:hover, .delete-btn:hover {
+    background-color: #000 !important;
+    color: #FFD700 !important;
+    border-color: #FFD700 !important;
+}
+
+/* Botões de ação principais da tela de clientes, exceto close-btn */
+.fab-button,
+.save-btn,
+#fabAddCliente,
+#modalCadastroCliente .save-btn,
+.view-btn, .edit-btn, .delete-btn {
+    background-color: #FFD700 !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+.fab-button:hover,
+.save-btn:hover,
+#fabAddCliente:hover,
+#modalCadastroCliente .save-btn:hover,
+.view-btn:hover, .edit-btn:hover, .delete-btn:hover {
+    background-color: #000 !important;
+    color: #FFD700 !important;
+    border-color: #FFD700 !important;
+}
+
+/* Botão de fechar (X) - estilo original */
+.close-btn {
+    background: none !important;
+    border: none !important;
+    color: #fff !important;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    transition: color 0.3s, transform 0.2s;
+}
+.close-btn:hover {
+    color: red !important;
+    transform: scale(1.2);
+}
+
+/* Remove o amarelo do botão de menu e sidebar (se houver) */
+.menu-button,
+.menu-button img,
+.sidebar button,
+.sidebar .menu-button {
+    background: none !important;
+    color: inherit !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove sobrescrita do botão de sair */
+.logout-btn {
+    background: initial !important;
+    color: initial !important;
+    border: initial !important;
+    font-weight: initial !important;
+    transition: initial !important;
+    box-shadow: initial !important;
+    padding: initial !important;
+    width: initial !important;
+    font-size: initial !important;
+    border-radius: initial !important;
+}
+.logout-btn:hover {
+    background: initial !important;
+    color: initial !important;
+    border-color: initial !important;
+}
+
+.input-view {
+    width: 100%;
+    min-height: 40px;
+    background: #232323;
+    color: #FFD700;
+    border-radius: 10px;
+    border: 2px solid #444;
+    font-size: 1.1rem;
+    padding: 12px 14px;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    margin-top: 0.1rem;
+    word-break: break-all;
+}
+  

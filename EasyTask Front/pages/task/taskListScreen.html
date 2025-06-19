@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quadro de Tarefas</title>
+  <link rel="stylesheet" href="../../src/css/client/clientListScreen.css">
+  <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+  <link rel="stylesheet" href="../../src/css/task/taskListScreen.css">
+  <link rel="stylesheet" href="../../src/components/css/sidebar.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <!-- Scripts externos -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- Scripts de configuração -->
+  <script src="../../src/js/config/storageUtils.js"></script>
+  <script src="../../src/js/config/api.js"></script>
+  
+  <!-- Scripts de autenticação -->
+  <script src="../../src/js/auth/authManager.js"></script>
+  
+  <!-- Scripts da aplicação -->
+  <script src="../../src/components/js/sidebar.js"></script>
+  <script src="../../src/js/tema/temaSystem.js"></script>
+  <script type="module" src="../../src/js/task/taskListScreen.js"></script>
+</head>
+
+<body>
+
+  <div class="navbar">
+    <button class="menu-button" id="menuToggle">
+      <img src="../../src/imagens/Ícone Menu.png" alt="Menu">
+    </button>
+  </div>
+
+  <!-- Sidebar (será carregada dinamicamente via JS) -->
+  <div id="sidebar"></div>
+
+  <button class="theme-toggle">
+    <i class="fa-solid fa-sun"></i>
+    <i class="fa-solid fa-moon"></i>
+  </button>
+
+  <div class="kanban-wrapper">
+    <div id="kanbanContainer" class="kanban-container">
+        <!-- As colunas serão geradas dinamicamente aqui -->
+        <div class="kanban-board">
+            <!-- As colunas do Kanban serão inseridas aqui -->
+        </div>
+    </div>
+
+    <div class="floating-buttons">
+      <button class="btn-floating" id="newTaskBtn" title="Nova Tarefa">
+       Nova Tarefa
+      </button>
+      <button class="btn-floating" id="newCardBtn" title="Novo Card">
+       Novo Card
+      </button>
+    </div>
+    
+
+  <div id="popupDetalhes" class="popup">
+    <div class="popup-content">   
+      <span class="popup-close" onclick="fecharDetalhesTarefa()">×</span>
+      <h2 id="popupTitulo"></h2>
+      <p><strong>Cliente:</strong> <span id="popupCliente"></span></p>
+      <p><strong>Colaborador:</strong> <span id="popupColaborador"></span></p>
+      <p><strong>Descrição:</strong> <span id="popupDescricao"></span></p>
+      <p><strong>Prioridade:</strong> <span id="popupPrioridade"></span></p>
+      <p><strong>Data de Entrega:</strong> <span id="popupDataEntrega"></span></p>
+
+      <div id="comentarios-section">
+        <h3>Comentários</h3>
+        <div id="comentarios-lista" class="comentarios-lista"></div>
+        <form id="comentario-form">
+          <textarea id="comentario-input" placeholder="Digite um comentário..." required></textarea>
+          <button type="submit">Comentar</button>
+        </form>
+      </div>       
+
+      <div class="popup-buttons">
+        <button id="btnEditar" class="btn-editar" onclick="abrirEdicaoTarefa()">Editar</button>
+        <button class="btn-excluir" onclick="excluirTarefa()">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Tarefa -->
+  <div id="taskModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" id="closeTaskModalBtn">&times;</span>
+      <div class="taskForm-form">
+        <div class="taskForm-header">
+          <h2 id="taskModalTitle">Nova Tarefa</h2>
+        </div>
+        <form id="tarefaForm">
+          <div class="taskForm-input-group">
+            <label for="tituloTarefa">Título da Tarefa</label>
+            <input type="text" id="tituloTarefa" class="taskForm-input" required placeholder="Digite o título da tarefa">
+          </div>
+          <div class="taskForm-input-group">
+            <label for="colaborador">Nome do Colaborador</label>
+            <select id="colaborador" class="taskForm-select"></select>
+          </div>
+          <div class="taskForm-input-group">
+            <label for="cliente">Nome do Cliente</label>
+            <select id="cliente" class="taskForm-select"></select>
+          </div>
+          <div class="taskForm-row">
+            <div class="taskForm-input-group">
+              <label for="prioridade">Prioridade</label>
+              <select id="prioridade" class="taskForm-select" required>
+                <option value="">Selecione a prioridade</option>
+                <option value="1">1 - Baixa</option>
+                <option value="2">2 - Média</option>
+                <option value="3">3 - Alta</option>
+              </select>
+            </div>
+            <div class="taskForm-input-group">
+              <label for="dataEntrega">Data de entrega</label>
+              <input type="date" id="dataEntrega" class="taskForm-input" required>
+            </div>
+          </div>
+          <div class="taskForm-input-group">
+            <label for="descricao">Descrição</label>
+            <textarea id="descricao" class="taskForm-textarea"></textarea>
+          </div>
+          <div class="taskForm-input-group">
+            <label for="fase">Fase da Tarefa</label>
+            <select id="fase" class="taskForm-select"></select>
+          </div>
+          <button type="submit" class="taskForm-button">SALVAR</button>
+          <button type="button" class="taskForm-button deletar-btn" id="btnDeletarRascunho">DELETAR</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Fases -->
+  <div id="cardModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Gerenciar Fases</h2>
+            <button id="closeCardModalBtn" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="formNovaFase" class="new-phase-form">
+                <div class="form-group">
+                    <label for="nomeFase">Nome da Fase</label>
+                    <input type="text" id="nomeFase" name="nomeFase" required placeholder="Digite o nome da fase">
+                </div>
+                <div class="form-group">
+                    <label for="descricaoFase">Descrição (opcional)</label>
+                    <textarea id="descricaoFase" name="descricaoFase" placeholder="Digite uma descrição para a fase"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">
+                        Salvar Fase
+                    </button>
+                </div>
+            </form>
+            
+            <div class="phases-section">
+                <h3>Fases Disponíveis</h3>
+                <div class="phases-table-container">
+                    <table id="phasesTable" class="phases-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Descrição</th>
+                                <th>Sequência</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="phasesTableBody">
+                            <!-- Fases serão carregadas dinamicamente aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</body>
+
+</html>

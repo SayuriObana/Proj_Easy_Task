@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Clientes</title>
+    <link rel="stylesheet" href="../../src/css/report/reports.css">
+    <link rel="stylesheet" href="../../src/components/css/sidebar.css">
+    <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+    <script src="../../src/components/js/sidebar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- 🔹 Botão do menu (Hambúrguer) -->
+    <div class="navbar">
+        <button class="menu-button" id="menuToggle">
+            <img src="../../src/imagens/Ícone Menu.png" alt="Menu">
+        </button>
+    </div>
+
+    <!-- Sidebar vazia que vai ser preenchida via JS -->
+    <div id="sidebar"></div>
+
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fa-solid fa-sun"></i>
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <!-- 🔹 Agora a container está fora da sidebar -->
+    <div class="container">
+        <h2>Relatório de Clientes</h2>
+        <p>Este relatório apresenta as estatísticas de cada cliente em relação às tarefas atribuídas a ele. Pode incluir informações como número de tarefas concluídas, demais estágios e tarefas dentro e fora do prazo.</p>
+
+        <!-- Seção de Estatísticas -->
+        <div class="estatisticas-container">
+            <h3>Estatísticas Gerais dos Clientes</h3>
+            <div class="estatisticas-grid">
+                <div class="estatistica-card">
+                    <i class="fas fa-users"></i>
+                    <h4>Total de Clientes</h4>
+                    <p id="totalClientes">0</p>
+                </div>
+                <div class="estatistica-card">
+                    <i class="fas fa-tasks"></i>
+                    <h4>Total de Tarefas</h4>
+                    <p id="totalTarefas">0</p>
+                </div>
+                <div class="estatistica-card">
+                    <i class="fas fa-check-circle"></i>
+                    <h4>Tarefas Concluídas</h4>
+                    <p id="tarefasConcluidas">0</p>
+                </div>
+                <div class="estatistica-card">
+                    <i class="fas fa-clock"></i>
+                    <h4>Tarefas em Andamento</h4>
+                    <p id="tarefasAndamento">0</p>
+                </div>
+                <div class="estatistica-card">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Tarefas Atrasadas</h4>
+                    <p id="tarefasAtrasadas">0</p>
+                </div>
+                <div class="estatistica-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Média de Tarefas por Cliente</h4>
+                    <p id="mediaTarefasCliente">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="listaClientes">
+            <!-- Lista de clientes será carregada via JS -->
+        </div>
+        <button id="btnDownloadPDF" onclick="gerarPDF()">Baixar Relatório (PDF)</button>
+    </div>
+
+    <script src="../../src/js/config/storageUtils.js"></script>
+    <script src="../../src/components/js/sidebar.js"></script>
+    <script src="../../src/js/tema/temaSystem.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="../../src/js/report/clientReport.js"></script>
+</body>
+
+</html>

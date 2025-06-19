@@ -1,0 +1,771 @@
+/* Estilos gerais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #111;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Header e Navbar */
+.navbar {
+    display: none;
+}
+
+/* Botão de tema */
+.theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 101;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.theme-toggle:hover {
+    background-color: var(--hover-color);
+}
+
+.theme-toggle .fa-sun {
+    display: none;
+}
+
+.theme-toggle .fa-moon {
+    display: inline-block;
+}
+
+body.light-theme .theme-toggle .fa-sun {
+    display: inline-block;
+}
+
+body.light-theme .theme-toggle .fa-moon {
+    display: none;
+}
+
+/* Container principal */
+.container {
+    flex: 1;
+    padding: 6rem 2rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    background: none;
+    color: inherit;
+    margin-top: 0;
+}
+
+/* Barra de pesquisa */
+.search-container {
+    margin-bottom: 2rem;
+    position: relative;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.search-bar:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-color);
+    opacity: 0.7;
+    font-size: 1.2rem;
+}
+
+/* Grid de colaboradores */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.profile-card {
+    background-color: var(--card-background);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-color);
+}
+
+.profile-card p {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.buttons-container {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.profile-card button {
+    flex: 1;
+    min-width: 90px;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.view-btn {
+    background-color: var(--primary-color);
+    color: #000;
+    border: 2px solid #000;
+    font-weight: 600;
+}
+
+.edit-btn {
+    background-color: #000;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    font-weight: 600;
+}
+
+.delete-btn {
+    background-color: var(--primary-color);
+    color: #000;
+    border: 2px solid #000;
+    font-weight: 600;
+}
+
+.view-btn:hover { 
+    background-color: #000;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.edit-btn:hover { 
+    background-color: var(--primary-color);
+    color: #000;
+    border-color: #000;
+    transform: translateY(-2px);
+}
+
+.delete-btn:hover { 
+    background-color: #000;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+/* Botão flutuante */
+.fab-add {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background-color: #FFD700;
+    color: #000;
+    border: 2px solid #000;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    font-weight: 700;
+}
+
+.fab-add:hover {
+    background-color: #000;
+    color: #FFD700;
+    border-color: #FFD700;
+    transform: scale(1.1) rotate(90deg);
+}
+
+/* Modal */
+.modal, .modal-edicao {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.show, .modal-edicao.show {
+    display: flex;
+}
+
+.modal-content, .modal-edicao .modal-content {
+    background: var(--bg-color, #fff);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 100%;
+    margin: auto;
+}
+
+.modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--primary-color);
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin: 0;
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.close-btn {
+    margin-left: 10px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-color, #000);
+    transition: color 0.3s;
+}
+
+.close-btn:hover {
+    color: yellow;
+}
+
+/* Formulário */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.form-group input::placeholder {
+    color: var(--placeholder-color);
+}
+
+.form-group select {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all 0.3s;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.2rem;
+    padding-right: 2.5rem;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.form-group select option {
+    background-color: var(--card-background);
+    color: var(--text-color);
+    padding: 0.5rem;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: #000;
+    border: 2px solid #000;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 1rem;
+}
+
+.save-btn:hover {
+    background-color: #000;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.save-btn:active {
+    transform: translateY(0);
+}
+
+/* Mensagem vazia */
+.mensagem-vazia {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    background-color: var(--card-background);
+    border-radius: 12px;
+    border: 2px dashed var(--border-color);
+}
+
+.mensagem-vazia i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.mensagem-vazia p {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+/* Animações */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding: 5rem 1rem 1rem;
+    }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+
+    .buttons-container {
+        flex-direction: column;
+    }
+
+    .profile-card button {
+        width: 100%;
+    }
+
+    .fab-add {
+        width: 3.5rem;
+        height: 3.5rem;
+        font-size: 1.25rem;
+        bottom: 1.5rem;
+        right: 1.5rem;
+    }
+}
+
+/* Tema escuro */
+[data-theme="dark"] {
+    --background-color: #1a1a1a;
+    --card-background: #2d2d2d;
+    --text-color: #ffffff;
+    --border-color: #404040;
+    --input-background: #333333;
+    --placeholder-color: #888888;
+    --primary-color: #FFD700;
+    --primary-rgb: 255, 215, 0;
+    --secondary-color: #666666;
+    --hover-color: #357abd;
+    --info-color: #17a2b8;
+    --info-hover: #138496;
+    --warning-color: #ffc107;
+    --warning-hover: #e0a800;
+    --danger-color: #dc3545;
+    --danger-hover: #c82333;
+}
+
+/* Tema claro */
+[data-theme="light"] {
+    --background-color: #f5f5f5;
+    --card-background: #ffffff;
+    --text-color: #000000;
+    --border-color: #dee2e6;
+    --input-background: #ffffff;
+    --placeholder-color: #999999;
+    --primary-color: #FFD700;
+    --primary-rgb: 255, 215, 0;
+    --secondary-color: #6c757d;
+    --hover-color: #0056b3;
+    --info-color: #17a2b8;
+    --info-hover: #138496;
+    --warning-color: #ffc107;
+    --warning-hover: #e0a800;
+    --danger-color: #dc3545;
+    --danger-hover: #c82333;
+}
+
+/* 🔹 Responsividade */
+@media (max-width: 768px) {
+    .container {
+        margin-left: 0;
+        width: 95%;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        left: -100%;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .modal-content {
+        width: 90%;
+    }
+}
+
+/* 🔹 Ocultar os três pontinhos quando a sidebar está aberta */
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    html, body {
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+.modal-edicao .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1.2rem;
+    width: 100%;
+}
+.modal-edicao .form-group label {
+    color: #FFD700 !important;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.5px;
+}
+.modal-edicao .form-group input,
+.modal-edicao .form-group select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 2px solid #444;
+    font-size: 1.1rem;
+    background-color: #232323;
+    color: #FFD700;
+    margin-bottom: 0;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.modal-edicao .form-group input:focus,
+.modal-edicao .form-group select:focus {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 2px #FFD70044;
+    outline: none;
+    background: #181818;
+    color: #FFD700;
+}
+
+@media (max-width: 600px) {
+    .modal-edicao .modal-content {
+        padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+        max-width: 98vw;
+    }
+    .modal-edicao .form-group input,
+    .modal-edicao .form-group select {
+        font-size: 1rem;
+        padding: 10px;
+    }
+    .modal-edicao .form-group label {
+        font-size: 0.95rem;
+    }
+}
+
+/* Labels e títulos em amarelo */
+.modal-edicao .form-group label,
+.modal-edicao h2,
+.modal-edicao .modal-content h2 {
+    color: #FFD700 !important;
+}
+
+/* Inputs e selects */
+.modal-edicao .form-group input,
+.modal-edicao .form-group select {
+    background-color: #232323;
+    color: #FFD700;
+    border: 2px solid #444;
+}
+.modal-edicao .form-group input:focus,
+.modal-edicao .form-group select:focus {
+    border-color: #FFD700;
+    color: #FFD700;
+    background: #181818;
+}
+
+/* Botão de salvar */
+.save-btn {
+    background-color: #FFD700;
+    color: #000;
+    border: 2px solid #000;
+    font-weight: 700;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+}
+.save-btn:hover {
+    background: #000;
+    color: #FFD700;
+    border-color: #FFD700;
+}
+
+/* Botão flutuante de adicionar */
+.fab-add {
+    background-color: #FFD700;
+    color: #000;
+    border: 2px solid #000;
+    font-weight: 700;
+    transition: all 0.3s;
+}
+.fab-add:hover {
+    background: #000;
+    color: #FFD700;
+    border-color: #FFD700;
+}
+
+/* Botão de fechar (X) */
+.close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    transition: color 0.3s, transform 0.2s;
+}
+.close-btn:hover {
+    color: #FFD700;
+    transform: scale(1.2);
+}
+
+/* Tema claro */
+body.light-theme {
+    background-color: #fff;
+    color: #111;
+}
+body.light-theme .modal-edicao .form-group label,
+body.light-theme .modal-edicao h2,
+body.light-theme .modal-edicao .modal-content h2 {
+    color: #FFD700 !important;
+}
+body.light-theme .modal-edicao .form-group input,
+body.light-theme .modal-edicao .form-group select {
+    background-color: #fffbe6;
+    color: #222;
+    border: 2px solid #FFD700;
+}
+body.light-theme .modal-edicao .form-group input:focus,
+body.light-theme .modal-edicao .form-group select:focus {
+    border-color: #FFD700;
+    color: #FFD700;
+    background: #fffbe6;
+}
+body.light-theme .save-btn {
+    background-color: #FFD700;
+    color: #000;
+    border: 2px solid #FFD700;
+}
+body.light-theme .save-btn:hover {
+    background: #000;
+    color: #FFD700;
+    border-color: #FFD700;
+}
+body.light-theme .fab-add {
+    background-color: #FFD700;
+    color: #000;
+    border: 2px solid #FFD700;
+}
+body.light-theme .fab-add:hover {
+    background: #000;
+    color: #FFD700;
+    border-color: #FFD700;
+}
+body.light-theme .close-btn {
+    color: #111;
+}
+body.light-theme .close-btn:hover {
+    color: #FFD700;
+}
+
+/* Botões amarelos padrão para toda a tela de colaboradores, exceto sidebar/menu */
+button,
+input[type="button"],
+input[type="submit"],
+.save-btn,
+.fab-add,
+.view-btn, .edit-btn, .delete-btn {
+    background-color: #FFD700 !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+.save-btn:hover,
+.fab-add:hover,
+.view-btn:hover, .edit-btn:hover, .delete-btn:hover {
+    background-color: #000 !important;
+    color: #FFD700 !important;
+    border-color: #FFD700 !important;
+}
+
+/* Remove amarelo dos botões da sidebar e menu */
+.menu-button,
+.menu-button img,
+.sidebar button,
+.sidebar .menu-button {
+    background: none !important;
+    color: inherit !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Adicionando o botão de menu fixo no canto superior esquerdo */
+.menu-button {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1002;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: inherit !important;
+}
+
+.menu-button img {
+    width: 40px;
+    height: 40px;
+}
+
+/* Estilo para o botão de fechar (x) dos modais, posicionado ao lado do título */
+.modal-header, .modal-edicao .modal-content h2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.close-btn {
+    margin-left: 10px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-color, #000);
+    transition: color 0.3s;
+}
+
+.close-btn:hover {
+    color: yellow;
+}
+
+

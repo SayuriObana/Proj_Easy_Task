@@ -1,0 +1,451 @@
+/* Reset Geral */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Tema Escuro (padrão) */
+:root {
+    --bg-color: #121212;
+    --text-color: #ffffff;
+    --card-bg: #1f1f1f;
+    --card-hover: #2a2a2a;
+    --icon-filter: brightness(0) invert(1);
+}
+
+/* Tema Claro */
+body.light-theme {
+    --bg-color: #f5f5f5;
+    --text-color: #222222;
+    --card-bg: #ffffff;
+    --card-hover: #f0f0f0;
+    --icon-filter: none;
+}
+
+body.light-theme .icon,
+body.light-theme .main-content-icon img,
+body.light-theme .logo2-icon {
+  filter: invert(1) brightness(0.8) !important;
+}
+body.light-theme i,
+body.light-theme .fa,
+body.light-theme .fa-solid,
+body.light-theme .fa-moon,
+body.light-theme .fa-sun {
+  color: #000 !important;
+}
+
+.navbar {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.menu-button img {
+    width: 50px;
+    height: 50px;
+    transition: transform 0.3s ease;
+    filter: var(--icon-filter);
+}
+
+.menu-button:hover img {
+    transform: scale(1.1);
+}
+
+/* Estilo do ícone de menu */
+.menu-icon {
+    position: fixed;
+    top: 20px;
+    /* Mantém o ícone no topo */
+    left: 20px;
+    /* Ajuste padrão */
+    z-index: 1001;
+    /* Garante que o ícone fique acima da NavBar */
+    cursor: pointer;
+    transition: left 0.3s ease-in-out;
+    /* Suaviza o movimento lateral */
+}
+
+.menu-icon.hidden {
+    display: none;
+    /* Esconde o ícone */
+}
+
+.sidebar.open~.menu-icon {
+    left: 270px;
+    /* Ajuste para alinhar com a barra lateral aberta */
+}
+
+.menu-icon img {
+    width: 130px;
+    height: auto;
+    transition: transform 0.3s ease;
+    /* Adiciona uma animação ao ícone */
+}
+
+/* Estilo do Corpo */
+body {
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #000000;
+    font-family: 'Montserrat', sans-serif;
+    color: #fff;
+    padding: 10px 5px 20px;
+    width: 100%;
+    max-width: 100%;
+    padding: 20px 10px 40px;
+}
+
+/* Estilo para a mensagem de boas-vindas */
+.welcome-message {
+    text-align: center;
+    margin: 20px 0;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Estilo para o nome do colaborador */
+.welcome-message #colaborador-nome {
+    color: #FFD700;
+    /* Destaque com cor dourada */
+}
+
+#welcome-message #colaborador-nome,
+.welcome-message #colaborador-nome,
+body.light-theme #colaborador-nome,
+body.light-theme .welcome-message #colaborador-nome {
+  color: #FFD700 !important;
+}
+
+/* Contêiner exclusivo para a logo */
+.logo-container {
+    text-align: center;
+    /* Centraliza a logo horizontalmente */
+    margin-top: -10px;
+    /* Ajuste a posição da logo para cima */
+    margin-bottom: 10px;
+    /* Espaçamento abaixo da logo */
+}
+
+@media (max-width: 414px) {
+    .logo-container .logo2-icon {
+        max-width: 100px;
+        height: auto;
+    }
+}
+
+.main-content-icon {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+    padding: 2rem;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text-color);
+    min-width: 200px;
+    max-width: 250px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    background: var(--card-hover);
+}
+
+.card .icon {
+    width: 120px;
+    height: auto;
+    transition: transform 0.3s ease;
+    filter: var(--icon-filter);
+}
+
+.card:hover .icon {
+    transform: scale(1.1);
+}
+
+.card .btn {
+    background: var(--text-color);
+    color: var(--bg-color);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.card .btn:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 2px solid var(--text-color);
+    color: var(--text-color);
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 18px;
+    z-index: 1001;
+    display: flex;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background: var(--card-hover);
+    transform: scale(1.05);
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+@media (max-width: 600px) {
+    body {
+        min-height: 100vh;
+        overflow-y: auto !important;
+    }
+
+    .card .icon {
+        width: 180px;
+        margin-bottom: 10px;
+    }
+
+    .card .btn {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+
+    .main-content-icon {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .logo-container .logo2-icon {
+        max-width: 180px;
+    }
+
+    .welcome-message {
+        font-size: 0.85rem;
+        padding: 0 10px;
+    }
+
+    .menu-icon img {
+        width: 80px;
+    }
+}
+
+@media (max-width: 375px) {
+    .card .icon {
+        width: 150px;
+        margin-bottom: -30px;
+    }
+
+    .card .btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+
+    .logo-container .logo2-icon {
+        max-width: 150px;
+    }
+
+    .welcome-message {
+        font-size: 0.75rem;
+    }
+
+}
+
+@media (max-width: 360px) {
+
+    .welcome-message h1 {
+        font-size: 0.85rem;
+        overflow-wrap: break-word;
+        padding: 0 10px;
+        line-height: 1.2rem;
+    }
+
+    .logo-container .logo2-icon {
+        max-width: 100px;
+    }
+
+    .card {
+        gap: 10px;
+        padding-top: 10px;
+    }
+
+    .card .icon {
+        max-width: 120px;
+        margin-bottom: 8px;
+    }
+
+    .card .btn {
+        font-size: 0.7rem;
+        padding: 6px 10px;
+        max-width: 140px;
+    }
+
+    .menu-icon img {
+        width: 50px;
+    }
+}
+
+
+@media (max-width: 320px) {
+    .card .icon {
+        width: 120px;
+    }
+
+    .card .btn {
+        font-size: 0.7rem;
+        padding: 6px 8px;
+    }
+
+    .logo-container .logo2-icon {
+        max-width: 120px;
+    }
+
+    .menu-icon img {
+        width: 60px;
+    }
+
+    .welcome-message h1 {
+        font-size: 0.8rem;
+        padding: 0 10px;
+        line-height: 1.1rem;
+    }
+
+}
+
+@media (max-width: 414px) {
+    .welcome-message h1 {
+        font-size: 0.95rem;
+        line-height: 1.2rem;
+        margin: 10px 0;
+        padding: 0 10px;
+    }
+
+    .menu-icon img {
+        width: 60px;
+    }
+}
+
+@media (max-width: 414px) {
+    .menu-icon img {
+        width: 60px;
+    }
+}
+
+@media (max-width: 280px) {
+    .card .btn {
+        font-size: 0.65rem;
+        padding: 5px 6px;
+        max-width: 120px;
+    }
+
+    .card .icon {
+        max-width: 100px;
+    }
+
+    .logo-container .logo2-icon {
+        max-width: 90px;
+    }
+
+    .welcome-message h1 {
+        font-size: 0.75rem;
+    }
+}
+
+@media (min-width: 768px) {
+
+    .main-content-icon {
+        gap: 40px;
+    }
+
+    .card .icon {
+      max-width: 200px;
+    }
+  
+    .card .btn {
+      font-size: 1rem;
+      max-width: 200px;
+      padding: 12px 24px;
+    }
+  
+    .logo-container .logo2-icon {
+      max-width: 180px;
+    }
+  
+    .welcome-message h1 {
+      font-size: 1.3rem;
+      margin: 20px 0;
+    }
+  }
+
+@media (max-width: 768px) {
+    .main-content-icon {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+.superior-badge {
+    background-color: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: 8px;
+    font-weight: normal;
+  }
+  

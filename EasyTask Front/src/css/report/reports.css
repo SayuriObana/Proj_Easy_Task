@@ -1,0 +1,657 @@
+/* Reset Geral */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Variáveis de cores */
+:root {
+    --cor-primaria: #FFD700; /* Amarelo */
+    --cor-secundaria: #000000; /* Preto */
+    --cor-texto: #FFFFFF; /* Branco */
+    --cor-fundo: #1a1a1a; /* Preto mais claro para fundo */
+    --cor-card: #2a2a2a; /* Preto ainda mais claro para cards */
+    --cor-borda: #333333;
+    --cor-hover: #FFE44D; /* Amarelo mais claro para hover */
+    --cor-sombra: rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para scroll */
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body {
+    min-height: 100vh;
+    position: relative;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    overflow-y: auto !important;
+}
+
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* Navbar e Menu */
+.navbar {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.menu-button img {
+    width: 50px;
+    height: 50px;
+    transition: transform 0.3s ease;
+}
+
+.menu-button:hover img {
+    transform: scale(1.1);
+}
+
+/* Container Principal */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: var(--cor-fundo);
+    border-radius: 15px;
+    box-shadow: 0 4px 6px var(--cor-sombra);
+    min-height: calc(100vh - 100px);
+    position: relative;
+    overflow: visible;
+}
+
+/* Ajuste para o conteúdo dentro do container */
+.container > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Ajuste para as seções de estatísticas e gráficos */
+.estatisticas-container,
+.grafico-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 30px;
+    background-color: var(--cor-card);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px var(--cor-sombra);
+}
+
+/* Ajuste para a lista de tarefas */
+.lista-tarefas {
+    position: relative;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.container h2 {
+    color: var(--cor-primaria);
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.container p {
+    color: var(--cor-texto);
+    text-align: center;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+/* Filtros */
+.filtros {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.filtros select {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 2px solid var(--cor-primaria);
+    background-color: var(--cor-secundaria);
+    color: var(--cor-texto);
+    min-width: 200px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filtros select:hover {
+    border-color: var(--cor-hover);
+}
+
+.filtros select:focus {
+    outline: none;
+    border-color: var(--cor-hover);
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+}
+
+/* Grid de Tarefas */
+.tarefas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+/* Cards de Tarefas */
+.tarefa-card {
+    background-color: var(--cor-card);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px var(--cor-sombra);
+    transition: all 0.3s ease;
+    border: 1px solid var(--cor-borda);
+}
+
+.tarefa-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px var(--cor-sombra);
+    border-color: var(--cor-primaria);
+}
+
+.tarefa-card h4 {
+    color: var(--cor-primaria);
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    border-bottom: 2px solid var(--cor-primaria);
+    padding-bottom: 8px;
+}
+
+.tarefa-card p {
+    color: var(--cor-texto);
+    margin: 8px 0;
+    font-size: 0.95em;
+    text-align: left;
+}
+
+.tarefa-card p strong {
+    color: var(--cor-primaria);
+}
+
+/* Seções de Cliente/Prioridade */
+.cliente-section,
+.prioridade-section {
+    margin-bottom: 40px;
+    padding: 25px;
+    background-color: var(--cor-card);
+    border-radius: 15px;
+    box-shadow: 0 4px 6px var(--cor-sombra);
+    border: 1px solid var(--cor-borda);
+}
+
+.cliente-section h3,
+.prioridade-section h3 {
+    color: var(--cor-primaria);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--cor-primaria);
+    font-size: 1.4em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Botão de Download PDF */
+#btnDownloadPDF {
+    margin: 30px auto;
+    padding: 12px 25px;
+    background-color: var(--cor-primaria);
+    color: var(--cor-secundaria);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.1em;
+    font-weight: bold;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#btnDownloadPDF:hover {
+    background-color: var(--cor-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--cor-sombra);
+}
+
+/* Prioridades específicas */
+.prioridade-section[data-prioridade="ALTA"] h3 {
+    color: #ff4444;
+    border-bottom-color: #ff4444;
+}
+
+.prioridade-section[data-prioridade="MEDIA"] h3 {
+    color: #ffbb33;
+    border-bottom-color: #ffbb33;
+}
+
+.prioridade-section[data-prioridade="BAIXA"] h3 {
+    color: #00C851;
+    border-bottom-color: #00C851;
+}
+
+/* Tema Claro */
+body.light-theme {
+    --bg-color: #f5f5f5;
+    --text-color: #222222;
+    --card-bg: #ffffff;
+    --card-hover: #f0f0f0;
+    --icon-filter: none;
+}
+
+body.light-theme .container {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+body.light-theme .tarefa-card {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--text-color);
+}
+
+body.light-theme .tarefa-card:hover {
+    background-color: var(--card-hover);
+}
+
+body.light-theme .filtros select {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--text-color);
+}
+
+body.light-theme .filtros select:hover {
+    background-color: var(--card-hover);
+}
+
+body.light-theme #btnDownloadPDF {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--text-color);
+}
+
+body.light-theme #btnDownloadPDF:hover {
+    background-color: var(--text-color);
+    color: var(--card-bg);
+}
+
+body.light-theme .theme-toggle {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--text-color);
+}
+
+body.light-theme .theme-toggle:hover {
+    background-color: var(--text-color);
+    color: var(--card-bg);
+}
+
+body.light-theme .menu-button img {
+    filter: invert(1);
+}
+
+body.light-theme .cliente-section,
+body.light-theme .prioridade-section {
+    background-color: var(--cor-card);
+    border-color: var(--cor-borda);
+}
+
+/* Estatísticas */
+.estatisticas-container {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: var(--cor-card);
+    border-radius: 15px;
+    box-shadow: 0 4px 6px var(--cor-sombra);
+    border: 1px solid var(--cor-borda);
+}
+
+.estatisticas-container h3 {
+    color: var(--cor-primaria);
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 1.5em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.estatisticas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.estatistica-card {
+    background-color: var(--cor-card);
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.estatistica-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px var(--cor-sombra);
+    border-color: var(--cor-primaria);
+}
+
+.estatistica-card i {
+    font-size: 2.5em;
+    color: var(--cor-primaria);
+    margin-bottom: 15px;
+}
+
+.estatistica-card h3 {
+    color: var(--cor-primaria);
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.estatistica-card p {
+    color: var(--cor-texto);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Cores específicas para prioridades */
+.estatistica-card.prioridade-alta {
+    border-color: #ff4444;
+}
+
+.estatistica-card.prioridade-alta i {
+    color: #ff4444;
+}
+
+.estatistica-card.prioridade-media {
+    border-color: #ffbb33;
+}
+
+.estatistica-card.prioridade-media i {
+    color: #ffbb33;
+}
+
+.estatistica-card.prioridade-baixa {
+    border-color: #00C851;
+}
+
+.estatistica-card.prioridade-baixa i {
+    color: #00C851;
+}
+
+/* Tema claro para estatísticas */
+body.light-theme .estatisticas-container {
+    background-color: var(--cor-card);
+}
+
+body.light-theme .estatistica-card {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--text-color);
+}
+
+body.light-theme .estatistica-card:hover {
+    background-color: var(--card-hover);
+}
+
+body.light-theme .estatistica-card i {
+    color: var(--text-color);
+}
+
+body.light-theme .estatistica-card h4 {
+    color: var(--text-color);
+}
+
+/* Estilos para o Gráfico */
+.grafico-container {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: var(--cor-card);
+    border-radius: 15px;
+    box-shadow: 0 4px 6px var(--cor-sombra);
+}
+
+.grafico-container h3 {
+    color: var(--cor-primaria);
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.grafico-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--cor-fundo);
+    border-radius: 10px;
+}
+
+/* Tema Claro para o Gráfico */
+body.light-theme .grafico-container {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+body.light-theme .grafico-wrapper {
+    background-color: var(--bg-color);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        margin: 20px auto;
+        padding: 15px;
+        min-height: calc(100vh - 40px);
+    }
+
+    .filtros {
+        flex-direction: column;
+    }
+
+    .filtros select {
+        width: 100%;
+    }
+
+    .tarefas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .estatisticas-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .estatisticas-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Estilos para mensagens de "sem dados" */
+.sem-dados {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--cor-card);
+    border-radius: 12px;
+    border: 2px dashed var(--cor-borda);
+    margin: 20px 0;
+}
+
+.sem-dados i {
+    font-size: 3em;
+    color: var(--cor-primaria);
+    margin-bottom: 15px;
+    display: block;
+}
+
+.sem-dados p {
+    color: var(--cor-texto);
+    font-size: 1.1em;
+    margin: 10px 0;
+    text-align: center;
+}
+
+/* Estilos para grid de colaboradores */
+.colaboradores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.colaborador-card {
+    background-color: var(--cor-card);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px var(--cor-sombra);
+    transition: all 0.3s ease;
+    border: 1px solid var(--cor-borda);
+}
+
+.colaborador-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px var(--cor-sombra);
+    border-color: var(--cor-primaria);
+}
+
+.colaborador-card h4 {
+    color: var(--cor-primaria);
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    border-bottom: 2px solid var(--cor-primaria);
+    padding-bottom: 8px;
+}
+
+.colaborador-card p {
+    color: var(--cor-texto);
+    margin: 8px 0;
+    font-size: 0.95em;
+    text-align: left;
+}
+
+.colaborador-card p strong {
+    color: var(--cor-primaria);
+}
+
+/* Estilos para botões PDF */
+.btn-pdf {
+    background-color: var(--cor-primaria);
+    color: var(--cor-secundaria);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-pdf:hover {
+    background-color: var(--cor-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--cor-sombra);
+}
+
+/* Estilos para lista de clientes */
+#listaClientes {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+#listaClientes li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--cor-card);
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--cor-borda);
+    transition: all 0.3s ease;
+}
+
+#listaClientes li:hover {
+    border-color: var(--cor-primaria);
+    transform: translateX(5px);
+}
+
+#listaClientes li:last-child {
+    margin-bottom: 0;
+}
+
+/* Tema claro para novos elementos */
+body.light-theme .sem-dados {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+body.light-theme .sem-dados p {
+    color: #495057;
+}
+
+body.light-theme .colaborador-card {
+    background-color: #ffffff;
+    border-color: #dee2e6;
+}
+
+body.light-theme .colaborador-card:hover {
+    border-color: var(--cor-primaria);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .colaborador-card h4 {
+    color: var(--cor-primaria);
+}
+
+body.light-theme .colaborador-card p {
+    color: #495057;
+}
+
+body.light-theme .btn-pdf {
+    background-color: var(--cor-primaria);
+    color: #000000;
+}
+
+body.light-theme .btn-pdf:hover {
+    background-color: var(--cor-hover);
+}
+
+body.light-theme #listaClientes li {
+    background-color: #ffffff;
+    border-color: #dee2e6;
+}
+
+body.light-theme #listaClientes li:hover {
+    border-color: var(--cor-primaria);
+}
+

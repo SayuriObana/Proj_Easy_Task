@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>clientListScreen</title>
+    <link rel="stylesheet" href="../../src/css/client/clientListScreen.css">
+    <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+    <link rel="stylesheet" href="../../src/components/css/sidebar.css">
+    <script src="../../src/js/config/storageUtils.js"></script>
+    <script src="../../src/js/client/clientListScreen.js" defer></script>
+    <script src="../../src/components/js/sidebar.js" defer></script>
+    <script src="../../src/js/config/databaseMapping.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+    <div class="navbar">
+        <button class="menu-button" id="menuToggle">
+            <img src="../../src/imagens/Ícone Menu.png" alt="Menu">
+        </button>
+    </div>
+
+    <!-- Sidebar (será carregada dinamicamente via JS) -->
+    <div id="sidebar"></div>
+
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fa-solid fa-sun"></i>
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <!-- Barra de pesquisa -->
+            <div class="toolbar">
+                <input type="text" id="searchBar" class="search-bar" placeholder="Pesquisar cliente...">
+            </div>
+
+            <!-- Grade de clientes -->
+            <div class="profile-grid" id="profileGrid">
+                <!-- Clientes serão carregados dinamicamente -->
+            </div>
+
+            <!-- Popup Detalhes do Cliente -->
+            <div id="detalhesCliente" class="modal-edicao">
+                <div class="modal-content">
+                    <button class="close-btn" onclick="fecharDetalhes()">&times;</button>
+                    <h2>Dados do Cliente</h2>
+                    <div class="form-group">
+                        <label>Nome do Cliente</label>
+                        <div class="input-view" id="nomeCliente"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <div class="input-view" id="emailCliente"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <div class="input-view" id="telefoneCliente"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>CNPJ</label>
+                        <div class="input-view" id="cnpjCliente"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="fabAddCliente" class="fab-button" onclick="abrirModalCadastroCliente()">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+
+            <!-- Modal de cadastro de cliente -->
+            <div id="modalCadastroCliente" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn" onclick="fecharModalCadastroCliente()">&times;</span>
+                    <h2>Cadastrar Novo Cliente</h2>
+                    <form id="formCadastroCliente">
+                        <div class="form-group">
+                            <label for="nomeClienteNovo">Nome do Cliente</label>
+                            <input type="text" id="nomeClienteNovo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emailClienteNovo">Email</label>
+                            <input type="email" id="emailClienteNovo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefoneClienteNovo">Telefone</label>
+                            <input type="tel" id="telefoneClienteNovo" required maxlength="15" oninput="mascaraTelefone(this)">
+                        </div>
+                        <div class="form-group">
+                            <label for="cnpjClienteNovo">CNPJ</label>
+                            <input type="text" id="cnpjClienteNovo" required maxlength="18" oninput="mascaraCNPJ(this)">
+                        </div>
+                        <button type="submit" class="save-btn">SALVAR</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal de edição de cliente -->
+            <div id="modalEdicaoCliente" class="modal-edicao">
+                <div class="modal-content">
+                    <button class="close-btn" onclick="fecharModalEdicaoCliente()">&times;</button>
+                    <h2>Editar Cliente</h2>
+                    <form id="formEdicaoCliente">
+                        <div class="form-group">
+                            <label for="nomeClienteEditar">Nome do Cliente</label>
+                            <input type="text" id="nomeClienteEditar" placeholder="Nome do Cliente" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emailClienteEditar">Email</label>
+                            <input type="email" id="emailClienteEditar" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefoneClienteEditar">Telefone</label>
+                            <input type="tel" id="telefoneClienteEditar" placeholder="Telefone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cnpjClienteEditar">CNPJ</label>
+                            <input type="text" id="cnpjClienteEditar" placeholder="CNPJ" required>
+                        </div>
+                        <button type="submit" class="save-btn">SALVAR ALTERAÇÕES</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../../src/js/tema/temaSystem.js"></script>
+</body>
+
+</html>
