@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const refreshResp = await fetch('http://localhost:8080/collaborators/refresh', {
+            const refreshResp = await fetch('http://localhost:8080/collaborators/refresh-token', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -100,12 +100,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const data = await refreshResp.json();
-            if (!data.accessToken || !data.refreshToken) {
+            if (!data.accessToken) {
                 throw new Error('Resposta inválida do servidor');
             }
 
             localStorage.setItem('accessToken', data.accessToken);
-            localStorage.setItem('refreshToken', data.refreshToken);
+            // Não atualiza o refreshToken, mantém o mesmo
             return data.accessToken;
         } catch (error) {
             console.error('Erro ao renovar token:', error);
@@ -288,21 +288,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🔹 Função para fechar o modal de detalhes
     window.fecharDetalhes = () => {
-        modal.style.display = "none";
+        const modalDetalhes = document.getElementById("detalhesCliente");
+        if (modalDetalhes) {
+            modalDetalhes.style.display = "none";
+            console.log("✅ Modal de detalhes fechado");
+        }
     };
 
-    // 🔹 Edição de cliente (usando modal estático estilizado)
+    // 🔹 Editar cliente
     window.editarCliente = (id_client) => {
-        clienteSelecionadoId = Number(id_client);
-        const cliente = clientes.find(c => c.id_client === clienteSelecionadoId);
-        if (!cliente) {
-            Swal.fire({ title: "Erro!", text: "Cliente não encontrado.", icon: "error", confirmButtonColor: "#d33", confirmButtonText: "OK" });
+        // Verificar permissão de SUPERIOR
+        const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+        if (!isUsuarioSuperior) {
+            Swal.fire('Acesso Negado', 'Apenas usuários com nível SUPERIOR podem editar clientes.', 'error');
             return;
         }
-        document.getElementById("nomeClienteEditar").value = cliente.name || '';
-        document.getElementById("emailClienteEditar").value = cliente.email || '';
-        document.getElementById("telefoneClienteEditar").value = cliente.phone || '';
-        document.getElementById("cnpjClienteEditar").value = cliente.cnpj || '';
+
+        const clientId = Number(id_client);
+        const cliente = clientes.find(c => c.id_client === clientId);
+        if (!cliente) {
+            Swal.fire('Erro', 'Cliente não encontrado.', 'error');
+            return;
+        }
+        clienteSelecionadoId = clientId;
+        document.getElementById("nomeClienteEditar").value = cliente.name || cliente.nome;
+        document.getElementById("emailClienteEditar").value = cliente.email;
+        document.getElementById("telefoneClienteEditar").value = cliente.phone || cliente.telefone;
+        document.getElementById("cnpjClienteEditar").value = cliente.cnpj;
         document.getElementById("modalEdicaoCliente").style.display = "flex";
     };
 
@@ -359,6 +371,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🔹 Excluir cliente
     window.excluirCliente = async (id_client) => {
+        // Verificar permissão de SUPERIOR
+        const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+        if (!isUsuarioSuperior) {
+            Swal.fire('Acesso Negado', 'Apenas usuários com nível SUPERIOR podem excluir clientes.', 'error');
+            return;
+        }
+
         const clientId = Number(id_client);
         const confirm = await Swal.fire({
             title: 'Tem certeza?',
@@ -387,13 +406,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🔹 Função para abrir modal de cadastro de cliente
     window.abrirModalCadastroCliente = () => {
-        document.getElementById("modalCadastroCliente").style.display = "flex";
+        console.log("🔍 Função abrirModalCadastroCliente chamada");
+        
+        // Verificar permissão de SUPERIOR
+        const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+        console.log("👤 Usuário é superior:", isUsuarioSuperior);
+        
+        if (!isUsuarioSuperior) {
+            Swal.fire('Acesso Negado', 'Apenas usuários com nível SUPERIOR podem criar clientes.', 'error');
+            return;
+        }
+
+        const modal = document.getElementById("modalCadastroCliente");
+        console.log("🔍 Modal encontrado:", modal);
+        
+        if (modal) {
+            modal.classList.add('mostrar');
+            console.log("✅ Modal de cadastro de cliente aberto");
+            console.log("🔍 Classes do modal:", modal.className);
+        } else {
+            console.error("❌ Modal de cadastro de cliente não encontrado");
+        }
     };
 
     // 🔹 Função para fechar modal de cadastro de cliente
     window.fecharModalCadastroCliente = () => {
-        document.getElementById("modalCadastroCliente").style.display = "none";
-        document.getElementById("formCadastroCliente").reset();
+        const modal = document.getElementById("modalCadastroCliente");
+        if (modal) {
+            modal.classList.remove('mostrar');
+            document.getElementById("formCadastroCliente").reset();
+            console.log("✅ Modal de cadastro de cliente fechado");
+        }
     };
 
     // 🔹 Submeter cadastro de cliente

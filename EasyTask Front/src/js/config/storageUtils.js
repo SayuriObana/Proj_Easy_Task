@@ -201,13 +201,13 @@ window.StorageUtils = {
     // Verificar se o usuário está autenticado
     isAuthenticated: function() {
         const token = this.getToken();
-        return token !== null && token !== undefined;
+        return token && token.length > 0;
     },
 
     // Verificar se o usuário é superior
     isSuperiorUser: function() {
         const isSuperior = this.getLocalItem('isUsuarioSuperior');
-        return isSuperior === 'true';
+        return isSuperior === 'true' || isSuperior === true;
     },
 
     // Obter dados do usuário logado
@@ -265,6 +265,46 @@ window.StorageUtils = {
             this.setLocalItem('refreshToken', refreshToken);
             this.setSessionItem('refreshToken', refreshToken);
         }
+    },
+
+    // Verificar permissão para ações administrativas
+    hasAdminPermission: function() {
+        return this.isSuperiorUser();
+    },
+
+    // Verificar se o usuário pode criar/editar/excluir colaboradores
+    canManageCollaborators: function() {
+        return this.isSuperiorUser();
+    },
+
+    // Verificar se o usuário pode criar/editar/excluir clientes
+    canManageClients: function() {
+        return this.isSuperiorUser();
+    },
+
+    // Verificar se o usuário pode excluir tarefas
+    canDeleteTasks: function() {
+        return this.isSuperiorUser();
+    },
+
+    // Verificar se o usuário pode excluir boards
+    canDeleteBoards: function() {
+        return this.isSuperiorUser();
+    },
+
+    // Verificar se o usuário pode excluir fases
+    canDeletePhases: function() {
+        return this.isSuperiorUser();
+    },
+
+    // Verificar se o usuário pode acessar logs
+    canAccessLogs: function() {
+        return this.isSuperiorUser();
+    },
+
+    // Verificar se o usuário pode acessar relatórios
+    canAccessReports: function() {
+        return this.isAuthenticated();
     }
 };
 

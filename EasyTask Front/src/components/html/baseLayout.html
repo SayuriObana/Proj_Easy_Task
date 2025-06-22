@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyTask - {{PAGE_TITLE}}</title>
+    
+    <!-- Estilos Base -->
+    <link rel="stylesheet" href="../../src/css/global/base.css">
+    <link rel="stylesheet" href="../../src/css/global/sidebar.css">
+    <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Scripts Base -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../src/js/utils/authUtils.js" defer></script>
+    <script src="../../src/js/utils/httpUtils.js" defer></script>
+    <script src="../../src/js/tema/temaSystem.js" defer></script>
+    <script src="../../src/js/shared/loadSidebar.js" defer></script>
+    
+    <!-- Estilos e Scripts Específicos da Página -->
+    {{PAGE_STYLES}}
+    {{PAGE_SCRIPTS}}
+</head>
+
+<body>
+    <!-- Botão de Menu -->
+    <div class="menu-icon" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Botão de Tema -->
+    <button class="theme-toggle">
+        <i class="fa-solid fa-sun"></i>
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <!-- Cabeçalho da Página -->
+    <header class="page-header">
+        <div class="header-content">
+            <h1>{{PAGE_HEADER}}</h1>
+            {{PAGE_SUBTITLE}}
+        </div>
+        {{PAGE_ACTIONS}}
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        {{PAGE_CONTENT}}
+    </main>
+
+    <!-- Rodapé da Página -->
+    <footer class="page-footer">
+        {{PAGE_FOOTER}}
+    </footer>
+
+    <!-- Modais da Página -->
+    {{PAGE_MODALS}}
+</body>
+</html> 

@@ -1,0 +1,312 @@
+/* Reset e Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    display: flex;
+}
+
+/* Container Principal */
+.main-wrapper {
+    flex: 1;
+    padding: 20px;
+    margin-left: 250px;
+    transition: margin-left 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+body.sidebar-collapsed .main-wrapper {
+    margin-left: 0;
+}
+
+/* Logo Container */
+.logo-container {
+    text-align: center;
+    margin: 20px 0 40px;
+    transition: all 0.3s ease;
+}
+
+.logo2-icon {
+    max-width: 200px;
+    height: auto;
+}
+
+/* Controle de visibilidade dos logos */
+.logo-light, .logo-dark {
+    display: none;
+}
+
+body.light-theme .logo-dark {
+    display: block;
+}
+
+body:not(.light-theme) .logo-light {
+    display: block;
+}
+
+/* Container do Conteúdo */
+.container {
+    max-width: 1200px;
+    width: 100%;
+    padding: 20px;
+}
+
+/* Título */
+h1 {
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* Barra de Pesquisa */
+.toolbar {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.search-bar {
+    width: 100%;
+    max-width: 500px;
+    padding: 12px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-bar:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+/* Grade de Colaboradores */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 20px;
+    width: 100%;
+}
+
+/* Cards */
+.profile-card {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-color);
+    padding: 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-color);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.profile-card p {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin: 5px 0;
+}
+
+/* Botões */
+.buttons-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.view-btn, .edit-btn, .delete-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.view-btn { background-color: #17a2b8; color: white; }
+.edit-btn { background-color: var(--accent-color); color: black; }
+.delete-btn { background-color: #dc3545; color: white; }
+
+.view-btn:hover { background-color: #138496; }
+.edit-btn:hover { opacity: 0.9; }
+.delete-btn:hover { background-color: #c82333; }
+
+/* Botão Flutuante */
+.fab-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    color: black;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.fab-button:hover {
+    transform: scale(1.1);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+.save-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--accent-color);
+    color: black;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+    opacity: 0.9;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 100;
+    color: var(--text-color);
+    font-size: 1.5rem;
+}
+
+body.light-theme .theme-toggle .fa-sun {
+    display: none;
+}
+
+body.light-theme .theme-toggle .fa-moon {
+    display: inline;
+}
+
+body:not(.light-theme) .theme-toggle .fa-sun {
+    display: inline;
+}
+
+body:not(.light-theme) .theme-toggle .fa-moon {
+    display: none;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .main-wrapper {
+        margin-left: 0;
+        padding: 10px;
+    }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+
+    .buttons-container {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .view-btn,
+    .edit-btn,
+    .delete-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .logo2-icon {
+        max-width: 150px;
+    }
+
+    .search-bar {
+        max-width: 100%;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+        padding: 20px;
+    }
+} 

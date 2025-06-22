@@ -34,247 +34,211 @@ console.log('  - localStorage.usuarioEmail:', localStorage.getItem('usuarioEmail
 // Função para adicionar fase ao Kanban (escopo global)
 window.adicionarFaseAoKanban = async function(phaseId) {
     try {
-        console.log(`🔗 Adicionando fase ${phaseId} ao quadro`);
-        console.log(`🔍 DEBUG - Tipo do phaseId:`, typeof phaseId);
-        console.log(`🔍 DEBUG - Valor do phaseId:`, phaseId);
-        console.log(`🔍 DEBUG - Board ID atual:`, window.__quadroId);
-        console.log(`🔍 DEBUG - Board ID que será usado:`, window.__quadroId || 1);
-
-        if (!phaseId || phaseId === 'undefined' || phaseId === undefined) {
-            throw new Error('ID da fase é inválido ou undefined');
+        const boardId = window.__quadroId;
+        if (!boardId) {
+            throw new Error('ID do quadro não encontrado');
         }
 
-        const boardId = window.__quadroId || 1;
-        console.log(`📡 Fazendo POST para /boards/${boardId}/phases`);
+        console.log(`🔗 Adicionando fase ${phaseId} ao quadro ${boardId}`);
 
         const response = await window.authManager.fetchWithAuth(
-            window.API_CONFIG.BASE_URL + `/boards/${boardId}/phases`,
+            `${window.API_CONFIG.BASE_URL}/boards/${boardId}/phases`,
             {
                 method: 'POST',
                 body: JSON.stringify({
-                    phaseIds: [phaseId]
+                    phaseId: phaseId // CORREÇÃO: Enviando o objeto esperado pelo backend
                 })
             }
         );
 
         if (!response.ok) {
             const errorData = await response.text();
-            throw new Error(`Erro ao adicionar fase ao quadro: ${response.status} - ${errorData}`);
+            if (response.status === 409) { // Conflict
+                throw new Error(`Esta fase já está no quadro.`);
+            }
+            throw new Error(`Erro ao adicionar fase: ${response.status} - ${errorData}`);
         }
 
         console.log("✅ Fase adicionada ao Kanban com sucesso");
-        window.mostrarNotificacao("Fase adicionada ao Kanban com sucesso!", "success");
+        window.mostrarNotificacao("Fase adicionada ao quadro com sucesso!", "success");
         
-        // Atualizar o Kanban
-        await window.gerarColunasKanban();
+        // Recarrega o kanban principal e as duas tabelas do modal
+        await Promise.all([
+            carregarFases(),
+            carregarFasesDoQuadroNoModal(),
+            carregarFasesNaTabela()
+        ]);
+
     } catch (error) {
         console.error("❌ Erro ao adicionar fase ao Kanban:", error);
-        window.mostrarNotificacao("Erro ao adicionar fase ao Kanban. Tente novamente.", "error");
+        window.mostrarNotificacao(error.message, "error");
+    }
+};
+
+// Função para remover fase do quadro (não a exclui do sistema)
+window.removerFaseDoQuadro = async function(phaseId) {
+    const boardId = window.__quadroId;
+    if (!boardId) {
+        window.mostrarNotificacao("ID do quadro não encontrado.", "error");
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: "Remover fase do quadro?",
+        text: "A fase não será excluída do sistema, apenas deste quadro.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sim, remover!",
+        cancelButtonText: "Cancelar"
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await window.authManager.fetchWithAuth(
+                `${window.API_CONFIG.BASE_URL}/boards/${boardId}/phases/${phaseId}`, 
+                { method: 'DELETE' }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Erro ao remover fase: ${response.status}`);
+            }
+
+            window.mostrarNotificacao("Fase removida do quadro com sucesso!", "success");
+
+            // Recarrega o kanban principal e as duas tabelas do modal
+            await Promise.all([
+                carregarFases(),
+                carregarFasesDoQuadroNoModal(),
+                carregarFasesNaTabela()
+            ]);
+
+        } catch (error) {
+            console.error("❌ Erro ao remover fase do quadro:", error);
+            window.mostrarNotificacao("Erro ao remover fase do quadro.", "error");
+        }
     }
 };
 
 // Função para editar fase
-window.editarFase = function(id, nomeAtual, descricaoAtual) {
+window.editarFase = async function(id, nomeAtual, descricaoAtual) {
     console.log('✏️ Editando fase:', id);
-    console.log('🔍 DEBUG - Tipo do ID:', typeof id);
-    console.log('🔍 DEBUG - Valor do ID:', id);
-    
-    // Verificar se o ID é válido
-    if (!id || id === 'undefined' || id === undefined) {
-        console.error('❌ ID da fase é inválido:', id);
-        alert('Erro: ID da fase não encontrado. Tente recarregar a página.');
+    if (!id) {
+        window.mostrarNotificacao('Erro: ID da fase não encontrado.', 'error');
         return;
     }
     
-    // Verificar permissão
     if (!window.hasAdminPermission()) {
-        alert('❌ Você não tem permissão para editar fases. Apenas usuários SUPERIOR podem realizar esta ação.');
+        Swal.fire('Acesso Negado', 'Apenas usuários SUPERIOR podem editar fases.', 'error');
         return;
     }
     
-    const novoNome = prompt('Digite o novo nome da fase:', nomeAtual);
-    if (!novoNome || novoNome.trim() === '') {
-        alert('Nome da fase é obrigatório!');
-        return;
-    }
-    
-    const novaDescricao = prompt('Digite a nova descrição da fase (opcional):', descricaoAtual);
-    
-    const token = window.authManager ? window.authManager.getToken() : localStorage.getItem('accessToken');
-    if (!token) {
-        console.error('❌ Token não encontrado');
-        return;
-    }
-    
-    console.log('📡 Fazendo requisição PUT para:', `${window.API_CONFIG.BASE_URL}/phases/${id}`);
-    
-    fetch(`${window.API_CONFIG.BASE_URL}/phases/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            name: novoNome.trim(),
-            description: novaDescricao ? novaDescricao.trim() : null
-        })
-    })
-    .then(response => {
-        console.log('📡 Resposta do servidor:', response.status);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const { value: formValues } = await Swal.fire({
+        title: 'Editar Fase',
+        html:
+            `<input id="swal-input-name" class="swal2-input" value="${nomeAtual}" placeholder="Nome da Fase">` +
+            `<textarea id="swal-input-description" class="swal2-textarea" placeholder="Descrição (opcional)">${descricaoAtual || ''}</textarea>`,
+        focusConfirm: false,
+        preConfirm: () => {
+            const name = document.getElementById('swal-input-name').value;
+            if (!name || name.trim() === '') {
+                Swal.showValidationMessage(`Nome da fase é obrigatório!`);
+                return false;
+            }
+            return {
+                name: name,
+                description: document.getElementById('swal-input-description').value
+            };
         }
-        return response.json();
-    })
-    .then(data => {
-        console.log('✅ Fase editada:', data);
-        alert('✅ Fase editada com sucesso!');
-        window.carregarFasesNaTabela();
-    })
-    .catch(error => {
-        console.error('❌ Erro ao editar fase:', error);
-        alert('Erro ao editar fase: ' + error.message);
     });
+
+    if (formValues) {
+        try {
+            const response = await window.authManager.fetchWithAuth(
+                `${window.API_CONFIG.BASE_URL}/phases/${id}`, 
+                {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        name: formValues.name.trim(),
+                        description: formValues.description ? formValues.description.trim() : null
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+            }
+            
+            await response.json();
+            window.mostrarNotificacao("Fase editada com sucesso!", "success");
+
+            await Promise.all([
+                carregarFases(),
+                carregarFasesDoQuadroNoModal(),
+                carregarFasesNaTabela()
+            ]);
+
+        } catch (error) {
+            console.error('❌ Erro ao editar fase:', error);
+            window.mostrarNotificacao('Erro ao editar fase: ' + error.message, "error");
+        }
+    }
 };
 
-// Função para excluir fase
+// Função para excluir fase do sistema
 window.excluirFase = async function(id) {
-    console.log('🗑️ Excluindo fase:', id);
-    console.log('🔍 DEBUG - Tipo do ID:', typeof id);
-    console.log('🔍 DEBUG - Valor do ID:', id);
-    
-    // Verificar se o ID é válido
-    if (!id || id === 'undefined' || id === undefined) {
-        console.error('❌ ID da fase é inválido:', id);
-        alert('Erro: ID da fase não encontrado. Tente recarregar a página.');
+    console.log('🗑️ Excluindo fase do sistema:', id);
+    if (!id) {
+        window.mostrarNotificacao('Erro: ID da fase não encontrado.', 'error');
         return;
     }
-    
-    // Verificar permissão com logs detalhados
-    console.log('🔐 DEBUG - Verificando permissões do usuário:');
-    console.log('  - StorageUtils disponível:', typeof StorageUtils !== 'undefined');
-    console.log('  - localStorage.isUsuarioSuperior:', localStorage.getItem('isUsuarioSuperior'));
-    console.log('  - localStorage.usuarioLogado:', localStorage.getItem('usuarioLogado'));
-    console.log('  - localStorage.usuarioEmail:', localStorage.getItem('usuarioEmail'));
-    
-    if (typeof StorageUtils !== 'undefined') {
-        console.log('  - StorageUtils.isSuperiorUser():', StorageUtils.isSuperiorUser());
-        console.log('  - StorageUtils.getCurrentUser():', StorageUtils.getCurrentUser());
-    }
-    
-    const hasPermission = window.hasAdminPermission();
-    console.log('  - window.hasAdminPermission():', hasPermission);
-    
-    // Decodificar JWT para verificar claims
-    const token = window.authManager ? window.authManager.getToken() : localStorage.getItem('accessToken');
-    if (token) {
-        const decodedToken = window.decodeJWT(token);
-        console.log('  - JWT decodificado:', decodedToken);
-        if (decodedToken) {
-            console.log('  - Claims do JWT:', {
-                sub: decodedToken.sub,
-                email: decodedToken.email,
-                roles: decodedToken.roles,
-                authorities: decodedToken.authorities,
-                accessLevel: decodedToken.accessLevel
-            });
-        }
-    }
-    
-    if (!hasPermission) {
-        alert('❌ Você não tem permissão para excluir fases. Apenas usuários SUPERIOR podem realizar esta ação.');
+
+    if (!window.hasAdminPermission()) {
+        Swal.fire('Acesso Negado', 'Apenas usuários SUPERIOR podem excluir fases.', 'error');
         return;
     }
-    
-    const confirmacao = confirm('Tem certeza que deseja excluir esta fase? Esta ação não pode ser desfeita.');
-    if (!confirmacao) {
-        return;
-    }
-    
-    // Verificar se a fase tem tarefas associadas
-    console.log('🔍 Verificando se a fase tem tarefas associadas...');
-    try {
-        const tarefasResponse = await fetch(`${window.API_CONFIG.BASE_URL}/tasks`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (tarefasResponse.ok) {
-            const tarefas = await tarefasResponse.json();
-            const tarefasNaFase = tarefas.filter(tarefa => 
-                (tarefa.idPhase || tarefa.id_phase || tarefa.phaseId) == id
-            );
-            
-            console.log(`🔍 Tarefas encontradas na fase ${id}:`, tarefasNaFase.length);
-            if (tarefasNaFase.length > 0) {
-                const confirmarExclusao = confirm(
-                    `Esta fase possui ${tarefasNaFase.length} tarefa(s) associada(s). ` +
-                    `Excluir a fase também removerá todas as tarefas. Deseja continuar?`
-                );
-                if (!confirmarExclusao) {
-                    return;
-                }
-            }
-        }
-    } catch (error) {
-        console.warn('⚠️ Não foi possível verificar tarefas associadas:', error);
-    }
-    
-    if (!token) {
-        console.error('❌ Token não encontrado');
-        return;
-    }
-    
-    console.log('🗑️ Fazendo requisição DELETE para:', `${window.API_CONFIG.BASE_URL}/phases/${id}`);
-    console.log('🔐 Token usado:', token.substring(0, 20) + '...');
-    
-    fetch(`${window.API_CONFIG.BASE_URL}/phases/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => {
-        console.log('📡 Resposta do servidor:', response.status);
-        console.log('📡 Headers da resposta:', response.headers);
-        
-        if (!response.ok) {
-            // Capturar o corpo da resposta de erro
-            return response.text().then(errorText => {
-                console.error('📡 Corpo da resposta de erro:', errorText);
-                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
-            });
-        }
-        return response.text();
-    })
-    .then(data => {
-        console.log('✅ Fase excluída:', data);
-        alert('✅ Fase excluída com sucesso!');
-        window.carregarFasesNaTabela();
-    })
-    .catch(error => {
-        console.error('❌ Erro ao excluir fase:', error);
-        
-        // Mensagem mais específica baseada no erro
-        if (error.message.includes('403')) {
-            alert('❌ Erro 403: Você não tem permissão para excluir esta fase. Verifique se é usuário SUPERIOR.');
-        } else if (error.message.includes('409')) {
-            alert('❌ Erro 409: Esta fase não pode ser excluída porque possui tarefas associadas.');
-        } else if (error.message.includes('404')) {
-            alert('❌ Erro 404: Fase não encontrada no servidor.');
-        } else {
-            alert('Erro ao excluir fase: ' + error.message);
-        }
+
+    const result = await Swal.fire({
+        title: "Excluir esta fase permanentemente?",
+        text: "Esta ação não pode ser desfeita e removerá a fase de todos os quadros.",
+        icon: "error",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Sim, excluir!",
+        cancelButtonText: "Cancelar"
     });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await window.authManager.fetchWithAuth(
+                `${window.API_CONFIG.BASE_URL}/phases/${id}`, 
+                { method: 'DELETE' }
+            );
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Erro ao excluir fase: ${response.status} - ${errorText}`);
+            }
+            
+            window.mostrarNotificacao("Fase excluída com sucesso!", "success");
+
+            await Promise.all([
+                carregarFases(),
+                carregarFasesDoQuadroNoModal(),
+                carregarFasesNaTabela()
+            ]);
+        
+        } catch (error) {
+            console.error('❌ Erro ao excluir fase:', error);
+            window.mostrarNotificacao('Erro ao excluir fase: ' + error.message, 'error');
+        }
+    }
 };
 
 // Função para carregar fases na tabela do modal
-window.carregarFasesNaTabela = function() {
-    console.log('🔄 Carregando fases na tabela...');
+window.carregarFasesNaTabela = async function() {
+    console.log('🔄 Carregando fases disponíveis para adicionar...');
     
     const token = window.authManager ? window.authManager.getToken() : localStorage.getItem('accessToken');
     if (!token) {
@@ -282,84 +246,65 @@ window.carregarFasesNaTabela = function() {
         return;
     }
 
-    fetch(`${window.API_CONFIG.BASE_URL}/phases`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+    try {
+        // Verificar se temos um board ID
+        const boardId = window.__quadroId;
+        if (!boardId || boardId <= 0) {
+            console.error('❌ Board ID inválido:', boardId);
+            throw new Error('Board ID inválido. Verifique se você está acessando um quadro válido.');
         }
-    })
-    .then(response => {
-        console.log('📡 Resposta do servidor:', response.status);
+
+        // Buscar todas as fases do sistema (endpoint que existe)
+        console.log(`🔍 Buscando todas as fases do sistema...`);
+        const response = await window.authManager.fetchWithAuth(
+            window.API_CONFIG.BASE_URL + `/phases`
+        );
+          
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error(`Erro ao buscar fases do sistema: ${response.status} ${response.statusText}`);
         }
-        return response.json();
-    })
-    .then(fases => {
-        console.log('✅ Fases carregadas:', fases);
-        console.log('🔍 DEBUG - Estrutura da primeira fase:', fases[0]);
-        console.log('🔍 DEBUG - Chaves da primeira fase:', fases[0] ? Object.keys(fases[0]) : 'Nenhuma fase');
+
+        const allPhases = await response.json();
+        console.log(`✅ Todas as fases do sistema recebidas:`, allPhases);
+
+        // Buscar tarefas do board para verificar quais fases estão sendo usadas
+        const tasksResponse = await window.authManager.fetchWithAuth(
+            window.API_CONFIG.BASE_URL + `/tasks/boards/${boardId}`
+        );
         
-        const tbody = document.querySelector('#phasesTableBody');
-        if (!tbody) {
-            console.error('❌ Tbody não encontrado');
-            console.error('🔍 DEBUG - Elementos com ID phasesTableBody:', document.querySelectorAll('#phasesTableBody'));
-            console.error('🔍 DEBUG - Elementos com ID phasesTable:', document.querySelectorAll('#phasesTable'));
-            return;
+        let boardPhases = [];
+        if (tasksResponse.ok) {
+            const tasks = await tasksResponse.json();
+            console.log(`✅ Tarefas do board ${boardId}:`, tasks);
+            
+            // Extrair fases únicas das tarefas
+            const usedPhaseIds = [...new Set(tasks.map(task => 
+                task.phaseId || task.phase?.idPhase || task.idPhase
+            ).filter(id => id))];
+            
+            boardPhases = allPhases.filter(phase => 
+                usedPhaseIds.includes(phase.idPhase)
+            );
         }
-        
-        tbody.innerHTML = '';
-        
-        // Verificar permissão do usuário
-        const hasAdminPermission = window.hasAdminPermission();
-        console.log('🔐 Usuário tem permissão administrativa:', hasAdminPermission);
-        
-        fases.forEach((fase, index) => {
-            console.log(`🔍 DEBUG - Fase ${index}:`, fase);
-            console.log(`🔍 DEBUG - ID da fase ${index}:`, fase.id_phase || fase.id);
-            console.log(`🔍 DEBUG - Todas as chaves da fase ${index}:`, Object.keys(fase));
-            
-            // Determinar o ID correto da fase
-            const phaseId = fase.idPhase || fase.id_phase || fase.id || fase.phaseId || fase.phase_id;
-            console.log(`🔍 DEBUG - ID final da fase ${index}:`, phaseId);
-            
-            if (!phaseId) {
-                console.error(`❌ ID não encontrado para fase ${index}:`, fase);
-                return; // Pular esta fase
-            }
-            
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${fase.name}</td>
-                <td>${fase.description || '-'}</td>
-                <td>${fase.sequence || '-'}</td>
-                <td>
-                    <button class="btn-add-phase" onclick="window.adicionarFaseAoKanban(${phaseId})" 
-                            title="Adicionar ao Kanban">
-                        <i class="fas fa-plus"></i> Adicionar
-                    </button>
-                    ${hasAdminPermission ? `
-                        <button class="btn-edit-phase" onclick="window.editarFase(${phaseId}, '${fase.name}', '${fase.description || ''}')" 
-                                title="Editar fase">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn-delete-phase" onclick="window.excluirFase(${phaseId})" 
-                                title="Excluir fase">
-                            <i class="fas fa-trash"></i> Excluir
-                        </button>
-                    ` : ''}
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-        
-        console.log('✅ Tabela de fases atualizada');
-    })
-    .catch(error => {
-        console.error('❌ Erro ao carregar fases:', error);
-        alert('Erro ao carregar fases: ' + error.message);
-    });
+
+        console.log(`✅ Fases do quadro ${boardId} identificadas:`, boardPhases);
+
+        if (!boardPhases || boardPhases.length === 0) {
+            console.warn("⚠️ Nenhuma fase encontrada para este quadro. Criando colunas padrão...");
+            criarColunasPadrao();
+        } else {
+            renderizarFases(boardPhases);
+        }
+
+        // Carregar tarefas após criar as colunas
+        await carregarTarefas();
+
+    } catch (error) {
+        console.error('❌ Erro ao gerar colunas Kanban:', error);
+        window.mostrarNotificacao('Erro ao carregar fases do quadro. Tente novamente.', 'error');
+        // Fallback para colunas padrão
+        criarColunasPadrao();
+    }
 };
 
 // Função para gerar colunas do Kanban (escopo global)
@@ -367,20 +312,28 @@ window.gerarColunasKanban = async function() {
     try {
         console.log(`🏗️ Gerando colunas Kanban...`);
 
-        // Buscar todas as fases disponíveis
+        // Verificar se temos um board ID
+        const boardId = window.__quadroId;
+        if (!boardId || boardId <= 0) {
+            console.error('❌ Board ID inválido:', boardId);
+            throw new Error('Board ID inválido. Verifique se você está acessando um quadro válido.');
+        }
+
+        // Buscar apenas as fases do quadro específico
+        console.log(`🔍 Buscando fases do quadro ${boardId}...`);
         const response = await window.authManager.fetchWithAuth(
-            window.API_CONFIG.BASE_URL + `/phases`
+            window.API_CONFIG.BASE_URL + `/phases/board/${boardId}`
         );
           
         if (!response.ok) {
-            throw new Error(`Erro ao buscar fases: ${response.status} ${response.statusText}`);
+            throw new Error(`Erro ao buscar fases do quadro: ${response.status} ${response.statusText}`);
         }
 
         const fases = await response.json();
-        console.log("📊 Fases recebidas:", fases);
+        console.log(`✅ Fases do quadro ${boardId} recebidas:`, fases);
 
         if (!fases || fases.length === 0) {
-            console.warn("⚠️ Nenhuma fase encontrada. Criando colunas padrão...");
+            console.warn("⚠️ Nenhuma fase encontrada para este quadro. Criando colunas padrão...");
             criarColunasPadrao();
         } else {
             renderizarFases(fases);
@@ -391,7 +344,7 @@ window.gerarColunasKanban = async function() {
 
     } catch (error) {
         console.error('❌ Erro ao gerar colunas Kanban:', error);
-        window.mostrarNotificacao('Erro ao carregar fases. Tente novamente.', 'error');
+        window.mostrarNotificacao('Erro ao carregar fases do quadro. Tente novamente.', 'error');
         // Fallback para colunas padrão
         criarColunasPadrao();
     }
@@ -682,48 +635,30 @@ async function excluirTarefa(taskId) {
 // Função para carregar tarefas do quadro
 async function carregarTarefas() {
     try {
-        console.log(`📋 Carregando todas as tarefas...`);
+        const boardId = window.__quadroId;
+        console.log(`📋 Carregando tarefas do quadro ${boardId}...`);
         
-        const response = await window.authManager.fetchWithAuth(
-            window.API_CONFIG.BASE_URL + `/tasks`
-        );
-        
+        if (!boardId) {
+            console.warn("⚠️ ID do quadro não encontrado, não é possível carregar tarefas.");
+            return []; // Retorna array vazio se não houver boardId
+        }
+
+        const url = `${window.API_CONFIG.BASE_URL}/tasks/boards/${boardId}`;
+        console.log(`📡 URL da requisição de tarefas: ${url}`);
+
+        const response = await window.authManager.fetchWithAuth(url);
         if (!response.ok) {
-            if (response.status === 401) {
-                console.warn("⚠️ Sessão expirada. Continuando na tela para criação manual.");
-                window.mostrarNotificacao("Sua sessão expirou. Algumas funcionalidades podem estar limitadas.", "warning");
-                return;
-            }
-        
-            if (response.status === 403) {
-                console.warn("⚠️ Acesso negado. Continuando na tela.");
-                window.mostrarNotificacao("Você não tem permissão para acessar as tarefas.", "error");
-                return;
-            }
-        
-            throw new Error('Erro ao carregar tarefas');
-        }        
-        
+            throw new Error(`Erro ao carregar tarefas: ${response.status}`);
+        }
+
         const tarefas = await response.json();
-        console.log(`📊 Tarefas recebidas do backend:`, tarefas);
-        console.log(`🔍 DEBUG - Estrutura da primeira tarefa:`, tarefas[0]);
-        console.log(`🔍 DEBUG - Chaves da primeira tarefa:`, tarefas[0] ? Object.keys(tarefas[0]) : 'Nenhuma tarefa');
-        
-        // Renderizar tarefas nas colunas apropriadas
-        tarefas.forEach(tarefa => {
-            console.log(`🔍 DEBUG - Tarefa ${tarefa.id_task || tarefa.id}:`, tarefa);
-            console.log(`🔍 DEBUG - Fase da tarefa:`, tarefa.id_phase || tarefa.idPhase || tarefa.phaseId);
-            adicionarTarefaAoQuadro(tarefa);
-        });
-        
-        // Atualizar contadores
-        atualizarContadoresColunas();
-        
-        console.log('✅ Tarefas carregadas com sucesso');
-        
+        console.log(`✅ Tarefas carregadas:`, tarefas);
+        return tarefas;
+
     } catch (error) {
         console.error('❌ Erro ao carregar tarefas:', error);
-        window.mostrarNotificacao('Erro ao carregar tarefas. Tente novamente.', 'error');
+        window.mostrarNotificacao('Não foi possível carregar as tarefas.', 'error');
+        return []; // Garante que um array seja sempre retornado, mesmo em caso de erro
     }
 }
 
@@ -975,141 +910,57 @@ function getPrioridadeClass(priority) {
 
 // Função principal de inicialização
 async function inicializarSistema() {
+    console.log("🚀 Inicializando sistema...");
+
     try {
-        console.log("🚀 Inicializando sistema...");
-        console.log("📍 URL atual:", window.location.href);
-        console.log("📍 Parâmetros da URL:", window.location.search);
-        
-        // Aguardar a configuração da API estar disponível
-        await verificarConfigAPI();
-        
-        if (!window.authManager) {
-            console.error('AuthManager não está disponível');
-            window.mostrarNotificacao("Problema na autenticação. Algumas funções podem não funcionar corretamente.", "warning");
-            // Continua sem redirecionar
-        }        
-
-        // Verificar token
-        const token = window.authManager ? window.authManager.getToken() : localStorage.getItem('accessToken');
-        if (!token) {
-            console.warn("⚠️ Token ausente, mas continuando para permitir preenchimento manual.");
-            window.mostrarNotificacao("Você ainda não está autenticado. Algumas ações podem não funcionar.", "warning");
-        }
-               
-
-        
-        console.log("✅ Usuário autenticado com sucesso");
-
-        // Verificar quadroId
         const urlParams = new URLSearchParams(window.location.search);
-        const quadroId = urlParams.get("id");
-
-        console.log("🔍 Parâmetro 'id' encontrado na URL:", quadroId);
-
-        if (!quadroId || isNaN(quadroId)) {
-            console.warn("❌ QuadroId inválido. Permanece na tela para criação manual.");
-            Swal.fire("Quadro não encontrado", "Nenhum quadro válido foi detectado. Você poderá criar tarefas e fases manualmente.", "info");
-            window.__quadroId = null;
-            criarColunasPadrao();
+        const boardId = urlParams.get('id');
+        
+        if (!window.authManager.isAuthenticated()) {
+            window.location.href = '../login/loginSystem.html';
             return;
         }
 
-        window.__quadroId = parseInt(quadroId);
-        console.log("✅ Quadro ID encontrado:", window.__quadroId);
+        if (boardId) {
+            window.__quadroId = boardId;
+            console.log(`✅ ID do Quadro definido como: ${window.__quadroId}`);
 
-        // Verificar disponibilidade do backend
-        console.log("🔍 Verificando disponibilidade do backend...");
-        const backendDisponivel = await verificarBackendDisponivel();
-        console.log("🔍 Backend disponível:", backendDisponivel);
-        
-        if (!backendDisponivel) {
-            console.warn("⚠️ Backend não disponível inicialmente, mas continuando...");
-            window.mostrarNotificacao("O servidor pode estar lento. Tentando carregar dados...", "warning");
-        }
-        
-        if (!backendDisponivel) {
-            console.warn("Backend não disponível");
-            window.mostrarNotificacao("O servidor não está respondendo. Algumas funcionalidades podem não funcionar.", "warning");
-            // Permite continuar para que o usuário possa criar fases manualmente
-        }        
+            const backendDisponivel = await verificarBackendDisponivel();
+            if (backendDisponivel) {
+                // Carrega tudo em paralelo
+                const [allSystemPhases, boardTasks] = await Promise.all([
+                    window.authManager.fetchWithAuth(`${window.API_CONFIG.BASE_URL}/phases`).then(res => res.json()),
+                    carregarTarefas()
+                ]);
 
-        // Carregar dados do quadro
-        try {
-            const response = await window.authManager.fetchWithAuth(
-                window.API_CONFIG.BASE_URL + window.API_CONFIG.ENDPOINTS.BOARD_PHASES(quadroId)
-            );
-            
+                // Filtra as fases que estão em uso no quadro
+                const usedPhaseIds = [...new Set(boardTasks.map(task => task.phase?.idPhase || task.idPhase).filter(id => id))];
+                const boardPhases = allSystemPhases.filter(phase => usedPhaseIds.includes(phase.idPhase));
 
-console.log(" RESPONSE STATUS:", response.status);
+                console.log("✅ Fases do quadro (baseado em tarefas):", boardPhases);
 
-const text = await response.text();
-console.log("🧪 RAW RESPONSE TEXT:", text);
+                renderizarFases(boardPhases);
+                boardTasks.forEach(adicionarTarefaAoQuadro);
+                atualizarContadoresColunas();
 
-if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
-        console.warn("⚠️ Token inválido ou acesso negado. Continuando para permitir edição manual.");
-        window.mostrarNotificacao("Você não tem acesso a este conteúdo, mas pode continuar configurando manualmente.", "warning");
-        return;
-    }
-    throw new Error('Erro ao carregar fases do quadro');
-}
-
-
-            
-            const fases = await response.json();
-console.log("✅ Fases do quadro carregadas com sucesso:", fases);
-
-if (!fases || fases.length === 0) {
-    console.warn("⚠️ Nenhuma fase encontrada. Criando colunas padrão...");
-    criarColunasPadrao();
-} else {
-    renderizarFases(fases);
-}
-
-// Carregar tarefas mesmo assim (mesmo que ainda não haja tarefas)
-await carregarTarefas();
-
-            
-} catch (error) {
-    console.error("❌ Erro ao carregar dados do quadro:", error);
-
-    Swal.fire({
-        title: "Erro",
-        text: "Não foi possível carregar as fases do quadro. Você poderá criá-las manualmente.",
-        icon: "warning",
-        confirmButtonColor: "#3085d6"
-    });
-
-    // Cria colunas básicas para que o usuário possa começar
-    criarColunasPadrao();
-
-    // Mesmo que dê erro, continua a carregar tarefas
-    await carregarTarefas();
-}
-
-
-        // Configurar event listeners
-        console.log("🔧 Configurando event listeners...");
-        configurarEventListeners();
-        
-        console.log("✅ Sistema inicializado com sucesso!");
-        
-    } catch (error) {
-        console.error("❌ Erro na inicialização:", error);
-        Swal.fire({
-            title: "Erro ao carregar dados",
-            text: "Algo deu errado ao carregar o sistema. Deseja tentar novamente?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Recarregar",
-            cancelButtonText: "Continuar assim",
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#aaa"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                location.reload(); // ⚠️ Agora tenta novamente, sem redirecionar
+            } else {
+                mostrarMensagemBackendIndisponivel();
             }
-        });        
+        } else {
+            console.error("❌ ID do quadro não encontrado na URL.");
+            document.getElementById('kanbanBoard').innerHTML = 
+                '<p class="error-message">ID do quadro não especificado na URL.</p>';
+        }
+
+        configurarEventListeners();
+        console.log("✅ Sistema inicializado com sucesso!");
+
+    } catch (error) {
+        console.error("❌ Erro fatal na inicialização:", error);
+        const kanbanBoard = document.getElementById('kanbanBoard');
+        if (kanbanBoard) {
+            kanbanBoard.innerHTML = `<p class="error-message">Ocorreu um erro ao carregar o quadro. Tente recarregar a página.</p>`;
+        }
     }
 }
 
@@ -1275,20 +1126,36 @@ document.addEventListener("DOMContentLoaded", () => {
     // Event listener para abrir modal de card
     if (newCardBtn) {
         newCardBtn.addEventListener('click', async () => {
-            console.log("🧩 Botão Novo Card clicado");
+            console.log('Botão "Gerenciar Fases" clicado.');
+            
+            if (!window.hasAdminPermission()) {
+                Swal.fire('Acesso Negado', 'Apenas usuários SUPERIOR podem gerenciar fases.', 'error');
+                return;
+            }
+
+            // Limpa o formulário
+            const form = document.getElementById('formNovaFase');
+            if(form) {
+                form.reset();
+                const submitBtn = form.querySelector('.btn-save');
+                submitBtn.textContent = 'Salvar Fase';
+                delete submitBtn.dataset.editingPhaseId;
+            }
+            
+            // Exibe o modal
             const modal = document.getElementById('cardModal');
-            console.log("🔍 Modal encontrado:", modal);
             if (modal) {
-                console.log("📋 Estado atual do modal:", modal.style.display, modal.classList.toString());
                 modal.style.display = 'flex';
                 modal.classList.add('show');
-                console.log("✅ Modal aberto. Novo estado:", modal.style.display, modal.classList.toString());
-                
-                // Carregar fases na tabela
-                await window.carregarFasesNaTabela();
-            } else {
-                console.error("❌ Modal não encontrado!");
             }
+            
+            // Carrega as duas tabelas em paralelo
+            console.log("🔄 Carregando dados das fases para o modal...");
+            await Promise.all([
+                carregarFasesNaTabela(), // Carrega fases disponíveis
+                carregarFasesDoQuadroNoModal() // Carrega fases do quadro
+            ]);
+            console.log("✅ Dados das fases do modal carregados.");
         });
     }
     
@@ -1780,58 +1647,55 @@ async function carregarClientes() {
     } catch (error) {
         console.error('❌ Erro ao carregar clientes:', error);
     }
+
 }
 
 // Função para carregar fases no select (apenas fases do board atual)
 async function carregarFases() {
     try {
-        console.log('📋 Carregando fases do board...');
-        
-        // Verificar se temos um board ID
         const boardId = window.__quadroId;
-        if (!boardId || boardId <= 0) {
-            console.error('❌ Board ID inválido:', boardId);
-            alert('Board ID inválido. Verifique se você está acessando um quadro válido.');
-            return;
+        console.log(`🔍 Buscando fases do quadro ${boardId}...`);
+        
+        if (!boardId) {
+            throw new Error("ID do quadro é inválido");
         }
         
-        // Buscar fases específicas do board
-        console.log(`🔍 Buscando fases do board ${boardId}...`);
-        const response = await window.authManager.fetchWithAuth(
-            window.API_CONFIG.BASE_URL + `/boards/${boardId}/phases`
-        );
+        const url = `${window.API_CONFIG.BASE_URL}/boards/${boardId}/phases`;
+        console.log(`📡 URL da requisição: ${url}`);
         
+        const response = await window.authManager.fetchWithAuth(url);
+
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error(`Erro ao carregar fases: ${response.status}`);
         }
-        
+
         const fases = await response.json();
-        console.log(`✅ Fases do board ${boardId} carregadas:`, fases);
-        
-        const selectFase = document.getElementById('fase');
-        if (selectFase) {
-            selectFase.innerHTML = '<option value="">Selecione uma fase</option>';
-            
-            if (fases.length === 0) {
-                console.warn('⚠️ Nenhuma fase encontrada para este quadro');
-                selectFase.innerHTML = '<option value="">Nenhuma fase disponível</option>';
-                alert('Este quadro não possui fases. Adicione fases primeiro via "Novo Card".');
-                return;
-            }
-            
-            fases.forEach(fase => {
-                const option = document.createElement('option');
-                option.value = fase.idPhase || fase.id_phase || fase.id;
-                option.textContent = fase.name || fase.nome;
-                selectFase.appendChild(option);
+        console.log("✅ Fases carregadas:", fases);
+
+        if (!fases || fases.length === 0) {
+            console.warn("⚠️ Nenhuma fase encontrada para este quadro. Criando colunas padrão...");
+            criarColunasPadrao();
+        } else {
+            renderizarFases(fases);
+        }
+        return fases;
+
+    } catch (error) {
+        console.error("❌ Erro ao carregar fases:", error.message);
+
+        // Exibir modal de erro apenas se o erro for 403
+        if (error.message.includes('403')) {
+            Swal.fire({
+                title: 'Informação',
+                text: 'Você não tem acesso a este conteúdo, mas pode continuar configurando manualmente.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
             });
-            
-            console.log(`✅ ${fases.length} fases carregadas no select`);
         }
         
-    } catch (error) {
-        console.error('❌ Erro ao carregar fases:', error);
-        alert('Erro ao carregar fases: ' + error.message);
+        // Retorna um array vazio e renderiza colunas padrão para não quebrar a interface
+        criarColunasPadrao();
+        return [];
     }
 }
   
@@ -1930,4 +1794,116 @@ window.hasAdminPermission = function() {
     return hasPermission;
 };
 
+// *** Funções para o Modal de Gerenciamento de Fases ***
+
+// Renderiza a tabela de fases QUE ESTÃO no quadro
+function renderizarFasesDoQuadro(fases) {
+    const tbody = document.getElementById('boardPhasesTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (!fases || fases.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhuma fase vinculada a este quadro.</td></tr>';
+        return;
+    }
+    fases.sort((a, b) => (a.sequence || 0) - (b.sequence || 0)).forEach(fase => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${fase.name}</td>
+            <td>${fase.sequence || 'N/A'}</td>
+            <td class="phase-actions">
+                <button class="btn-remove-from-kanban" onclick="removerFaseDoQuadro(${fase.idPhase})">Remover</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Carrega as fases QUE ESTÃO no quadro e as renderiza
+async function carregarFasesDoQuadroNoModal() {
+    try {
+        const boardId = window.__quadroId;
+        console.log(`🔄 Carregando fases do quadro ${boardId}...`);
+        if (!boardId) {
+            renderizarFasesDoQuadro([]);
+            return;
+        }
+        const response = await window.authManager.fetchWithAuth(`${window.API_CONFIG.BASE_URL}/boards/${boardId}/phases`);
+        const fasesDoQuadro = response.ok ? await response.json() : [];
+        console.log("✅ Fases do quadro recebidas:", fasesDoQuadro);
+        renderizarFasesDoQuadro(fasesDoQuadro);
+    } catch (error) {
+        console.error("❌ Erro ao carregar fases do quadro:", error);
+        renderizarFasesDoQuadro([]);
+    }
+}
+
+// Renderiza a tabela de fases DISPONÍVEIS para adicionar
+function renderizarFasesDisponiveis(fases) {
+    const tbody = document.getElementById('phasesTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (!fases || fases.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Todas as fases do sistema já estão neste quadro.</td></tr>';
+        return;
+    }
+    
+    fases.sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
+
+    fases.forEach(phase => {
+        const row = document.createElement('tr');
+        const safeName = phase.name.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+        const safeDescription = (phase.description || '').replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+
+        row.innerHTML = `
+            <td>${phase.name}</td>
+            <td>${phase.description || ''}</td>
+            <td>${phase.sequence || 'N/A'}</td>
+            <td class="phase-actions">
+                <button class="btn-add-to-kanban" onclick="adicionarFaseAoKanban(${phase.idPhase})" title="Adicionar ao Quadro">Adicionar</button>
+                <button class="btn-edit-phase" onclick="editarFase(${phase.idPhase}, '${safeName}', '${safeDescription}')" title="Editar Fase">Editar</button>
+                <button class="btn-delete-phase" onclick="excluirFase(${phase.idPhase})" title="Excluir Fase do Sistema">Excluir</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Carrega as fases DISPONÍVEIS (todas as do sistema - as do quadro) e as renderiza
+async function carregarFasesNaTabela() {
+    try {
+        console.log("🔄 Carregando fases disponíveis...");
+        const quadroId = window.__quadroId;
+        if (!quadroId) {
+            renderizarFasesDisponiveis([]);
+            return;
+        }
+
+        const [allPhasesRes, boardPhasesRes] = await Promise.all([
+            window.authManager.fetchWithAuth(`${window.API_CONFIG.BASE_URL}/phases`),
+            window.authManager.fetchWithAuth(`${window.API_CONFIG.BASE_URL}/boards/${quadroId}/phases`)
+        ]);
+
+        const allPhases = allPhasesRes.ok ? await allPhasesRes.json() : [];
+        const boardPhases = boardPhasesRes.ok ? await boardPhasesRes.json() : [];
+
+        const boardPhaseIds = boardPhases.map(p => p.idPhase);
+        const availablePhases = allPhases.filter(p => !boardPhaseIds.includes(p.idPhase));
+        
+        console.log("✅ Fases disponíveis para adicionar:", availablePhases);
+        renderizarFasesDisponiveis(availablePhases);
+        
+    } catch (error) {
+        console.error("❌ Erro ao carregar fases disponíveis:", error);
+        renderizarFasesDisponiveis([]);
+    }
+}
+
+// *** Fim das Funções do Modal ***
+
+document.addEventListener('DOMContentLoaded', () => {
+    // A inicialização principal agora é feita via inicializarSistema
+    inicializarSistema();
+});
   
+

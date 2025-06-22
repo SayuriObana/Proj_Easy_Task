@@ -40,23 +40,6 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Configuração do tema
-    const body = document.body;
-    const storedTheme = StorageUtils ? 
-        StorageUtils.getLocalItem('theme') : 
-        localStorage.getItem('theme');
-    if (storedTheme === 'light') {
-        body.classList.add('light-theme');
-    } else {
-        body.classList.remove('light-theme');
-    }
-
-    // Evento de alternância de tema
-    document.querySelector('.theme-toggle')?.addEventListener('click', () => {
-        body.classList.toggle('light-theme');
-        localStorage.setItem('theme', body.classList.contains('light-theme') ? 'light' : 'dark');
-    });
-
     // Controle da sidebar (menu lateral)
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');

@@ -25,82 +25,173 @@ if (!StorageUtils ? !localStorage.getItem("refresh_token") : !StorageUtils.getRe
 
 /* Fim do trecho adicionado */
 
+// Sistema de Temas para EasyTask
+
 // Padronização do tema para todo o sistema EasyTask
 // Usa body.light-theme para tema claro, body padrão para escuro
 // O tema é salvo em localStorage na chave 'theme' ('dark' ou 'light')
 // O ícone do botão é atualizado automaticamente
 
-function applyTheme(theme) {
-    if (theme === 'light') {
-        document.body.classList.add('light-theme');
-    } else {
-        document.body.classList.remove('light-theme');
+// Sistema de Temas Melhorado
+class ThemeManager {
+    constructor() {
+        this.currentTheme = this.getSavedTheme();
+        this.init();
     }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Sempre leia o tema do localStorage, padrão 'dark'
-    const savedTheme = StorageUtils ? 
-        StorageUtils.getLocalItem('theme', 'dark') : 
-        localStorage.getItem('theme') || 'dark';
-    applyTheme(savedTheme);
+    getSavedTheme() {
+        return StorageUtils ? 
+            StorageUtils.getLocalItem('theme', 'dark') : 
+            localStorage.getItem('theme') || 'dark';
+    }
 
-    // Procura por botões de tema com diferentes seletores
-    const themeToggle = document.querySelector('.theme-toggle') || document.getElementById('themeToggle');
-    
-    if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
-            const isLight = document.body.classList.contains('light-theme');
-            const newTheme = isLight ? 'dark' : 'light';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
+    applyTheme(theme) {
+        if (theme === 'light') {
+            document.body.classList.add('light-theme');
+        } else {
+            document.body.classList.remove('light-theme');
+        }
+        
+        // Salva o tema no localStorage
+        if (StorageUtils) {
+            StorageUtils.setLocalItem('theme', theme);
+        } else {
+            localStorage.setItem('theme', theme);
+        }
+
+        // Atualiza o ícone do botão
+        this.updateThemeIcon();
+        
+        // Atualiza a logo se existir
+        this.updateLogo();
+        
+        // Dispara evento para outras partes do sistema
+        document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
+    }
+
+    updateThemeIcon() {
+        const themeToggles = document.querySelectorAll('.theme-toggle');
+        themeToggles.forEach(toggle => {
+            const sunIcon = toggle.querySelector('.fa-sun');
+            const moonIcon = toggle.querySelector('.fa-moon');
+            
+            if (sunIcon && moonIcon) {
+                if (document.body.classList.contains('light-theme')) {
+                    sunIcon.style.display = 'inline';
+                    moonIcon.style.display = 'none';
+                } else {
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'inline';
+                }
+            }
         });
     }
-});
 
-// Sincronização automática do tema entre abas/janelas
-window.addEventListener('storage', function(event) {
-    if (event.key === 'theme') {
-        const newTheme = localStorage.getItem('theme') || 'dark';
-        applyTheme(newTheme);
-    }
-});
-
-function updateLogo() {
-    const logo = document.querySelector(".modal-logo"); // Seletor correto para a logo
-
-    if (!logo) {
-        console.warn("");
-        return;
+    updateLogo() {
+        const logos = document.querySelectorAll('.modal-logo, .logo, .logo2-icon, .logo-easytask');
+        logos.forEach(logo => {
+            if (document.body.classList.contains('light-theme')) {
+                if (logo.src.includes('LOGO_BRANCA') || logo.src.includes('IMAGEM_LOGO_EASYTASK')) {
+                    logo.src = logo.src.replace('IMAGEM_LOGO_EASYTASK', 'LOGO_PRETA');
+                }
+            } else {
+                if (logo.src.includes('LOGO_PRETA')) {
+                    logo.src = logo.src.replace('LOGO_PRETA', 'IMAGEM_LOGO_EASYTASK');
+                }
+            }
+        });
     }
 
-    if (document.body.classList.contains("light-theme")) {
-        logo.src = "../../imagens/LOGO_PRETA.PNG";  // Logo preta no tema claro
-    } else {
-        logo.src = "../../imagens/LOGO_BRANCA.PNG"; // Logo branca no tema escuro
+    toggleTheme() {
+        const isLight = document.body.classList.contains('light-theme');
+        const newTheme = isLight ? 'dark' : 'light';
+        this.applyTheme(newTheme);
+        
+        // Sincroniza com outras abas
+        this.syncThemeAcrossTabs(newTheme);
+    }
+
+    syncThemeAcrossTabs(theme) {
+        // Dispara evento para sincronizar com outras abas
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'theme',
+            newValue: theme,
+            oldValue: this.currentTheme
+        }));
+    }
+
+    init() {
+        // Aplica o tema salvo
+        this.applyTheme(this.currentTheme);
+
+        // Adiciona listeners para botões de tema
+        this.addThemeToggleListeners();
+
+        // Listener para mudanças em outras abas
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'theme') {
+                const newTheme = event.newValue || 'dark';
+                this.applyTheme(newTheme);
+            }
+        });
+
+        // Listener para mudanças de tema via evento customizado
+        document.addEventListener('themeChanged', (event) => {
+            this.currentTheme = event.detail.theme;
+        });
+    }
+
+    addThemeToggleListeners() {
+        // Função para adicionar listeners aos botões de tema
+        const addListeners = () => {
+            const themeToggles = document.querySelectorAll('.theme-toggle');
+            themeToggles.forEach(toggle => {
+                // Remove listeners existentes para evitar duplicação
+                toggle.removeEventListener('click', this.toggleTheme.bind(this));
+                // Adiciona novo listener
+                toggle.addEventListener('click', this.toggleTheme.bind(this));
+            });
+        };
+
+        // Adiciona listeners imediatamente
+        addListeners();
+
+        // Adiciona listeners quando o DOM mudar (para páginas dinâmicas)
+        const observer = new MutationObserver(() => {
+            addListeners();
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
     }
 }
 
+// Inicializa o sistema de temas quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+    window.themeManager = new ThemeManager();
+});
+
+// Função global para compatibilidade com código existente
 function toggleTheme() {
-    console.log("Alternando tema...");
+    if (window.themeManager) {
+        window.themeManager.toggleTheme();
+    }
+}
 
-    document.body.classList.toggle("light-theme");
+// Função para aplicar tema diretamente
+function applyTheme(theme) {
+    if (window.themeManager) {
+        window.themeManager.applyTheme(theme);
+    }
+}
 
-    // Verifica e salva o tema no localStorage
-    const isLight = document.body.classList.contains("light-theme");
-    localStorage.setItem("theme", isLight ? "light" : "dark");
-
-    // ✅ Aplica o tema salvo a todas as abas abertas
-    document.querySelectorAll("iframe").forEach(iframe => {
-        iframe.contentWindow.localStorage.setItem("theme", isLight ? "light" : "dark");
-    });
-
-    console.log("Tema atual salvo:", StorageUtils ? 
-        StorageUtils.getLocalItem("theme") : 
-        localStorage.getItem("theme"));
-
-    // ✅ Atualiza a logo sempre que o tema for alterado
-    updateLogo();
+// Função para atualizar logo
+function updateLogo() {
+    if (window.themeManager) {
+        window.themeManager.updateLogo();
+    }
 }
 
 

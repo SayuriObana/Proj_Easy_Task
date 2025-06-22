@@ -1,0 +1,160 @@
+/* Estilos para o modal de tarefas */
+.tarefas-modal-container {
+    padding: 20px;
+}
+
+.tarefas-modal-popup {
+    background-color: #000000;
+    border-radius: 20px;
+    border: 1px solid #333;
+}
+
+.tarefas-modal-content {
+    padding: 20px;
+}
+
+.sem-tarefas {
+    text-align: center;
+    color: #adb5bd;
+    font-size: 1.1rem;
+    margin: 20px 0;
+}
+
+.tarefas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.tarefa-card {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 15px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.tarefa-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-color: #FFD700;
+}
+
+.tarefa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.tarefa-card h3 {
+    color: #ffffff;
+    font-size: 1.2rem;
+    margin: 0;
+    flex: 1;
+}
+
+.importancia {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #000000;
+    margin-left: 10px;
+}
+
+.cliente {
+    color: #FFD700;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+}
+
+.cliente i {
+    margin-right: 5px;
+}
+
+.tarefa-card .descricao {
+    color: #adb5bd;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.tarefa-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.info-grupo {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.fase {
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.fase i {
+    margin-right: 5px;
+    color: #FFD700;
+}
+
+.status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status.pendente {
+    background-color: #ffd700;
+    color: #000000;
+}
+
+.status.em_andamento {
+    background-color: #0066ff;
+    color: #ffffff;
+}
+
+.status.concluida {
+    background-color: #00cc66;
+    color: #ffffff;
+}
+
+.prazo {
+    color: #adb5bd;
+    font-size: 0.9rem;
+}
+
+.prazo i {
+    margin-right: 5px;
+    color: #FFD700;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .tarefas-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tarefa-card {
+        padding: 15px;
+    }
+    
+    .tarefa-info {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .info-grupo {
+        width: 100%;
+        justify-content: space-between;
+    }
+} 

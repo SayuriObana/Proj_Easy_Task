@@ -186,6 +186,18 @@ function renderizarQuadros(boards) {
 }
 
 async function excluirQuadro(id) {
+    // Verificar permissão de SUPERIOR
+    const isUsuarioSuperior = localStorage.getItem("isUsuarioSuperior") === "true";
+    if (!isUsuarioSuperior) {
+        Swal.fire({
+            title: "Acesso Restrito",
+            text: "Apenas usuários superiores podem excluir quadros.",
+            icon: "warning",
+            confirmButtonColor: "#3085d6"
+        });
+        return;
+    }
+
     const result = await Swal.fire({
         title: 'Excluir Quadro?',
         text: 'Essa ação não pode ser desfeita!',
@@ -488,7 +500,7 @@ document.addEventListener('DOMContentLoaded', carregarQuadros);
 async function carregarFasesDoQuadro(quadroId) {
     try {
         const response = await window.authManager.fetchWithAuth(
-            `${API_CONFIG.BASE_URL}/boards/${quadroId}/phases`
+            `${API_CONFIG.BASE_URL}/phases/board/${quadroId}`
         );
 
         if (!response.ok) throw new Error("Erro ao buscar fases do quadro");

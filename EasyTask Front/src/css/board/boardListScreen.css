@@ -1,0 +1,198 @@
+/* Estilos específicos para a página de boards */
+
+.boards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+}
+
+.board-card {
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.dark-theme .board-card {
+    background-color: var(--bg-dark);
+}
+
+.board-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.board-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: var(--primary-color);
+}
+
+.board-card-header {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.dark-theme .board-card-header {
+    border-bottom-color: var(--border-dark);
+}
+
+.board-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin: 0;
+    margin-bottom: var(--spacing-xs);
+}
+
+.dark-theme .board-card-title {
+    color: var(--text-dark);
+}
+
+.board-card-description {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    opacity: 0.8;
+    margin: 0;
+}
+
+.dark-theme .board-card-description {
+    color: var(--text-dark);
+}
+
+.board-card-body {
+    padding: var(--spacing-md);
+}
+
+.board-card-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.board-stat {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.875rem;
+    color: var(--text-light);
+    opacity: 0.8;
+}
+
+.dark-theme .board-stat {
+    color: var(--text-dark);
+}
+
+.board-stat i {
+    font-size: 1rem;
+    color: var(--primary-color);
+}
+
+.board-card-actions {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    display: flex;
+    gap: var(--spacing-xs);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.board-card:hover .board-card-actions {
+    opacity: 1;
+}
+
+.board-action-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    opacity: 0.6;
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.dark-theme .board-action-btn {
+    color: var(--text-dark);
+}
+
+.board-action-btn:hover {
+    opacity: 1;
+    background-color: var(--hover-light);
+}
+
+.dark-theme .board-action-btn:hover {
+    background-color: var(--hover-dark);
+}
+
+/* Modal de Board */
+#boardModal .modal-content {
+    max-width: 500px;
+}
+
+#boardModal .form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+#boardModal label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.dark-theme #boardModal label {
+    color: var(--text-dark);
+}
+
+#boardModal input[type="color"] {
+    width: 100%;
+    height: 40px;
+    padding: var(--spacing-xs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--bg-light);
+}
+
+.dark-theme #boardModal input[type="color"] {
+    border-color: var(--border-dark);
+    background-color: var(--bg-dark);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .boards-grid {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-md);
+    }
+
+    .board-card-actions {
+        opacity: 1;
+    }
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.board-card {
+    animation: fadeIn 0.3s ease-out;
+} 

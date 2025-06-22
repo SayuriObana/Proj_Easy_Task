@@ -43,7 +43,7 @@ async function fetchComToken(url, options = {}) {
             }
 
             try {
-                const refreshResponse = await fetch("http://localhost:8080/collaborators/refresh", {
+                const refreshResponse = await fetch("http://localhost:8080/collaborators/refresh-token", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -57,7 +57,6 @@ async function fetchComToken(url, options = {}) {
 
                 const newTokens = await refreshResponse.json();
                 localStorage.setItem("accessToken", newTokens.accessToken);
-                localStorage.setItem("refreshToken", newTokens.refreshToken);
                 
                 // Tenta a requisição original novamente com o novo token
                 options.headers["Authorization"] = `Bearer ${newTokens.accessToken}`;

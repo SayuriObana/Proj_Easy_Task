@@ -91,72 +91,111 @@ body {
 .popup {
     display: none;
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    /* 🔹 Centraliza na tela */
-    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1001;
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    justify-content: center;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
     align-items: center;
-    z-index: 1000;
+    justify-content: center;
 }
 
-/* 🔹 Conteúdo do Pop-up */
+.popup.show {
+    display: flex;
+}
+
 .popup-content {
-    background-color: #000;
-    /* Fundo preto */
-    color: #fff;
-    /* Texto branco */
-    padding: 20px;
-    border-radius: 10px;
-    width: 400px;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
-    /* Sombra branca sutil */
+    background: var(--background-color);
+    color: var(--text-color);
+    margin: auto;
+    padding: 30px;
+    border: none;
+    width: 90%;
+    max-width: 650px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    animation: fadeIn 0.3s ease-in-out;
     position: relative;
 }
 
-/* 🔹 Botão de Fechar (X) */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 .popup-close {
-    color: #fff;
-    font-size: 20px;
-    font-weight: bold;
+    color: var(--secondary-text-color);
     position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-}
-
-.popup-content .popup-close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    color: #444;
+    top: 15px;
+    right: 20px;
     font-size: 28px;
-    /* ← aumente aqui o tamanho */
     font-weight: bold;
+    transition: color 0.2s;
+}
+
+.popup-close:hover,
+.popup-close:focus {
+    color: var(--primary-color);
+    text-decoration: none;
     cursor: pointer;
-    transition: color 0.3s ease, transform 0.2s ease;
-    z-index: 10;
 }
 
-.popup-content .popup-close:hover {
-    color: #FF0000;
-    transform: scale(1.2);
-    /* ← efeito de destaque ao passar o mouse */
+#popupTitulo {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
 }
 
-.popup-close:hover {
-    color: #FFD700;
-    /* Dourado ao passar o mouse */
+.popup-content p {
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin-bottom: 12px;
 }
 
-/* 🔹 Ajustando os textos em negrito */
 .popup-content p strong {
-    color: #FFD700;
-    /* Dourado para destacar */
+    color: var(--primary-color);
+    margin-right: 8px;
+}
+
+.popup-footer {
+    margin-top: 30px;
+    text-align: right;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.popup-footer .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.popup-footer .btn-edit {
+    background-color: var(--primary-color);
+    color: white;
+}
+.popup-footer .btn-edit:hover {
+    background-color: var(--primary-hover-color);
+    transform: translateY(-2px);
+}
+
+.popup-footer .btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+.popup-footer .btn-delete:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
 }
 
 /* 🔹 Botões do pop-up de detalhes da tarefa */
@@ -1052,126 +1091,152 @@ body.modal-open::before {
 }
 
 #comentarios-section {
-    margin-top: 20px;
-    border-top: 1px solid #444;
-    padding-top: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
 }
 
 #comentarios-section h3 {
-    color: #FFD700;
-    margin-bottom: 15px;
-    font-size: 1.2rem;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    color: var(--primary-color);
 }
 
-#comentarios-lista {
-    max-height: 200px;
+.comentarios-lista {
+    max-height: 300px;
     overflow-y: auto;
-    margin-bottom: 15px;
-    padding-right: 10px;
+    padding-right: 10px; /* Espaço para a barra de rolagem */
+    margin-bottom: 20px;
 }
 
-.comentario-item {
-    background-color: #222;
+/* Estilização da barra de rolagem */
+.comentarios-lista::-webkit-scrollbar {
+    width: 8px;
+}
+.comentarios-lista::-webkit-scrollbar-track {
+    background: var(--background-color-light);
+    border-radius: 4px;
+}
+.comentarios-lista::-webkit-scrollbar-thumb {
+    background-color: var(--border-color-hover);
+    border-radius: 4px;
+}
+.comentarios-lista::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-color);
+}
+
+.comentario {
+    background: var(--background-color-light);
+    padding: 15px;
     border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 10px;
-    border: 1px solid #444;
-    position: relative;
+    margin-bottom: 15px;
+    border-left: 4px solid var(--primary-color);
 }
 
 .comentario-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
-.comentario-author {
+.comentario-autor {
     font-weight: bold;
-    color: #FFD700;
-    font-size: 0.9rem;
+    color: var(--text-color);
 }
 
-.comentario-date {
-    color: #888;
-    font-size: 0.8rem;
+.comentario-data {
+    font-size: 0.85em;
+    color: var(--secondary-text-color);
 }
 
-.comentario-content {
-    color: #fff;
-    line-height: 1.4;
-    margin-bottom: 8px;
+.comentario-conteudo {
+    line-height: 1.5;
+    color: var(--text-color);
 }
 
-.btn-delete-comment {
-    position: absolute;
-    top: 8px;
-    right: 8px;
+.comentario-conteudo textarea {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 1em;
+    margin-top: 5px;
+}
+
+.comentario-acoes {
+    text-align: right;
+    margin-top: 10px;
+}
+
+.comentario-acoes button {
     background: none;
     border: none;
-    color: #ff4444;
+    color: var(--secondary-text-color);
     cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
+    margin-left: 10px;
+    font-size: 0.9em;
+    transition: color 0.2s;
 }
 
-.btn-delete-comment:hover {
-    background-color: #ff4444;
-    color: white;
+.comentario-acoes button:hover {
+    color: var(--primary-color);
 }
 
-.no-comments {
-    color: #888;
-    text-align: center;
-    font-style: italic;
-    padding: 20px;
+.comentario-acoes .btn-salvar {
+    color: #28a745;
+}
+.comentario-acoes .btn-salvar:hover {
+    color: #218838;
 }
 
-.error {
-    color: #ff4444;
-    text-align: center;
-    padding: 20px;
+.comentario-acoes .btn-cancelar {
+    color: #dc3545;
 }
+.comentario-acoes .btn-cancelar:hover {
+    color: #c82333;
+}
+
 
 #comentario-form {
     display: flex;
     gap: 10px;
-    align-items: flex-end;
 }
 
-#comentario-form textarea {
-    flex: 1;
-    background-color: #222;
-    border: 1px solid #444;
+#comentario-input {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
-    padding: 10px;
-    color: #fff;
-    resize: vertical;
-    min-height: 60px;
+    background-color: var(--background-color-light);
+    color: var(--text-color);
     font-family: inherit;
+    resize: vertical;
+    min-height: 50px;
 }
-
-#comentario-form textarea:focus {
+#comentario-input:focus {
     outline: none;
-    border-color: #FFD700;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-color-translucent);
 }
 
 #comentario-form button {
-    background-color: #FFD700;
-    color: #000;
-    border: none;
     padding: 10px 20px;
+    border: none;
     border-radius: 6px;
+    background-color: var(--primary-color);
+    color: white;
     cursor: pointer;
+    transition: background-color 0.2s;
     font-weight: bold;
-    transition: all 0.3s ease;
-    white-space: nowrap;
+    align-self: flex-start; /* Alinha o botão com o início do textarea */
 }
 
 #comentario-form button:hover {
-    background-color: #ffed4e;
-    transform: translateY(-1px);
+    background-color: var(--primary-hover-color);
 }
 
 @media (max-width: 480px) {
@@ -2208,5 +2273,498 @@ body.dark-theme .empty-board-message p {
         padding: 4px 6px;
         font-size: 11px;
     }
+}
+
+/* Wrapper do Kanban com lixeira */
+.kanban-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+    margin-left: 80px;
+    min-height: calc(100vh - 40px);
+}
+
+#kanbanContainer {
+    flex: 1;
+    display: flex;
+    overflow-x: auto;
+    gap: 20px;
+    padding: 10px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#kanbanContainer::-webkit-scrollbar {
+    height: 8px;
+}
+
+/* Lixeira moderna */
+.trash-bin {
+    flex: 0 0 200px;
+    height: 300px;
+    background: linear-gradient(135deg, #ff4757, #ff3742);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(255, 71, 87, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.trash-bin::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.trash-bin:hover::before {
+    opacity: 1;
+}
+
+.trash-bin.drag-over {
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(255, 71, 87, 0.5);
+    background: linear-gradient(135deg, #ff3742, #ff2f3a);
+}
+
+.trash-icon {
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.trash-bin:hover .trash-icon {
+    transform: scale(1.1);
+    color: #fff;
+}
+
+.trash-bin.drag-over .trash-icon {
+    transform: scale(1.2) rotate(10deg);
+    color: #fff;
+}
+
+.trash-text {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.trash-text h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+.trash-text p {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    opacity: 0.8;
+}
+
+.trash-text small {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    display: block;
+    margin-top: 5px;
+}
+
+/* Melhorias na lixeira */
+.trash-bin {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 8px 32px rgba(255, 71, 87, 0.3);
+    }
+    50% {
+        box-shadow: 0 8px 32px rgba(255, 71, 87, 0.5);
+    }
+    100% {
+        box-shadow: 0 8px 32px rgba(255, 71, 87, 0.3);
+    }
+}
+
+.trash-bin.drag-over {
+    animation: none;
+}
+
+/* Responsividade da lixeira */
+@media (max-width: 768px) {
+    .kanban-wrapper {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .trash-bin {
+        flex: none;
+        width: 100%;
+        height: 150px;
+        flex-direction: row;
+        gap: 15px;
+    }
+    
+    .trash-icon {
+        font-size: 2rem;
+        margin-bottom: 0;
+    }
+    
+    .trash-text h3 {
+        font-size: 1.2rem;
+    }
+    
+    .trash-text p {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .trash-bin {
+        height: 120px;
+        padding: 15px;
+    }
+    
+    .trash-icon {
+        font-size: 1.5rem;
+    }
+    
+    .trash-text h3 {
+        font-size: 1rem;
+    }
+    
+    .trash-text p {
+        font-size: 0.7rem;
+    }
+}
+
+/* =================================================================
+   DRAG AND DROP STYLES
+   ================================================================= */
+
+/* Card sendo arrastado */
+.kanban-card.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    z-index: 1000;
+    cursor: grabbing;
+}
+
+/* Zona de drop (colunas do Kanban) */
+.kanban-tasks.drag-over {
+    background-color: rgba(255, 215, 0, 0.1);
+    border: 2px dashed #FFD700;
+    border-radius: 8px;
+    min-height: 100px;
+    transition: all 0.3s ease;
+}
+
+/* Lixeira - estados de drag */
+.trash-bin.drag-over {
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 3px dashed #ff4444;
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);
+}
+
+.trash-bin.drag-over .trash-icon {
+    color: #ff4444;
+    transform: scale(1.2);
+}
+
+.trash-bin.drag-over .trash-text h3 {
+    color: #ff4444;
+}
+
+/* Cursor para elementos arrastáveis */
+.kanban-card {
+    cursor: grab;
+}
+
+.kanban-card:active {
+    cursor: grabbing;
+}
+
+/* Animação de entrada para novos cards */
+.kanban-card {
+    animation: slideInCard 0.3s ease-out;
+}
+
+@keyframes slideInCard {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Feedback visual para drag over nas colunas */
+.kanban-column.drag-over {
+    background-color: rgba(255, 215, 0, 0.05);
+    border: 2px dashed #FFD700;
+}
+
+/* Estilo para indicar que uma tarefa pode ser movida */
+.kanban-card::before {
+    content: "⋮⋮";
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    font-size: 12px;
+    color: #666;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.kanban-card:hover::before {
+    opacity: 1;
+}
+
+/* Melhorar a aparência da lixeira durante drag */
+.trash-bin {
+    transition: all 0.3s ease;
+}
+
+.trash-bin:hover {
+    transform: scale(1.02);
+}
+
+/* Indicador visual para zonas de drop válidas */
+.drop-zone-valid {
+    position: relative;
+}
+
+.drop-zone-valid::after {
+    content: "Solte aqui";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 215, 0, 0.9);
+    color: #000;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.kanban-tasks.drag-over::after {
+    opacity: 1;
+}
+
+/* Estilo para cards que estão sendo arrastados para a lixeira */
+.kanban-card.dragging-to-trash {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-color: #ff4444;
+}
+
+/* Feedback visual para o usuário durante o drag */
+.drag-feedback {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.drag-feedback.show {
+    opacity: 1;
+}
+
+/* Coluna sendo arrastada */
+.kanban-column.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+    z-index: 1000;
+    cursor: grabbing;
+}
+
+/* Cursor para colunas arrastáveis */
+.kanban-column {
+    cursor: grab;
+}
+
+.kanban-column:active {
+    cursor: grabbing;
+}
+
+/* Indicador visual para colunas que podem ser arrastadas */
+.kanban-column::before {
+    content: "⋮⋮";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 12px;
+    color: #666;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.kanban-column:hover::before {
+    opacity: 0.1;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-cancel:hover {
+    background-color: #5a6268;
+}
+
+/* =================================================================
+//                 DESIGN RESPONSIVO
+// ================================================================= */
+
+/* Para tablets e telas menores (até 768px) */
+@media (max-width: 768px) {
+    .kanban-wrapper {
+        /* Adiciona padding para não colar nas bordas */
+        padding: 10px;
+    }
+
+    .kanban-container {
+        /* Garante que o container de rolagem ocupe o espaço */
+        padding-left: 10px;
+    }
+
+    .kanban-column {
+        /* Diminui a largura das colunas para caber mais na tela */
+        flex: 0 0 280px;
+        max-width: 280px;
+    }
+
+    .floating-buttons {
+        /* Ajusta a posição dos botões flutuantes */
+        right: 20px;
+        bottom: 20px;
+    }
+
+    .trash-bin {
+        /* Redesenha a lixeira para ser mais compacta */
+        flex-direction: row;
+        align-items: center;
+        padding: 5px 10px;
+        gap: 10px;
+        width: auto;
+        height: auto;
+        bottom: 10px;
+        left: 10px;
+    }
+
+    .trash-text h3 {
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .trash-text p, .trash-text small {
+        display: none; /* Esconde textos desnecessários no mobile */
+    }
+
+    .modal-content, .popup-content {
+        /* Faz os modais ocuparem mais a tela e permite rolagem interna */
+        width: 90vw;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+}
+
+/* Para celulares (até 480px) */
+@media (max-width: 480px) {
+    .kanban-column {
+        /* Colunas um pouco menores para telas bem pequenas */
+        flex: 0 0 260px;
+        max-width: 260px;
+    }
+
+    .card-title {
+        font-size: 1rem; /* Diminui o título dos cards */
+    }
+
+    .floating-buttons {
+        /* Junta os botões flutuantes */
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-floating {
+        width: 120px; /* Ajusta o tamanho dos botões */
+    }
+
+    /* Ajustes finos no formulário do modal de tarefas */
+    .taskForm-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+/* Classes auxiliares para comentários */
+.no-comments {
+    color: var(--secondary-text-color);
+    text-align: center;
+    font-style: italic;
+    padding: 20px;
+}
+
+.error {
+    color: #dc3545;
+    text-align: center;
+    padding: 20px;
+}
+
+.edit-textarea {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 1em;
+    resize: vertical;
+    min-height: 60px;
 }
   

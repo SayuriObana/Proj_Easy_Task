@@ -1,0 +1,38 @@
+/* Estilizando a tabela de logs */
+.logs-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background-color: #333;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.logs-table th,
+.logs-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #444;
+}
+
+.logs-table th {
+    background-color: #444;
+    color: #fff;
+    font-weight: bold;
+}
+
+.logs-table tr:hover {
+    background-color: #3a3a3a;
+}
+
+.logs-table td {
+    color: #ddd;
+}
+
+/* Responsividade para a tabela de logs */
+@media screen and (max-width: 768px) {
+    .logs-table {
+        display: block;
+        overflow-x: auto;
+    }
+} 

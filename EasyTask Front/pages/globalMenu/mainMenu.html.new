@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyTask - Início</title>
+    <link rel="stylesheet" href="../../src/css/globalMenu/mainMenu.css">
+    <link rel="stylesheet" href="../../src/css/global/sidebar.css">
+    <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+    <div class="logo-container">
+        <div class="logo-wrapper">
+            <img src="../../src/imagens/IMAGEM_LOGO_EASYTASK.PNG" alt="Logo EasyTask" class="logo2-icon logo-light">
+            <img src="../../src/imagens/LOGO_PRETA.PNG" alt="Logo EasyTask" class="logo2-icon logo-dark">
+        </div>
+    </div>
+
+    <div class="welcome-message">
+        <h1>Bem-vindo ao EasyTask, <span id="userName"></span>!</h1>
+        <p class="subtitle">Gerencie seus projetos e equipes de forma eficiente</p>
+    </div>
+
+    <div class="main-content-icon">
+        <div class="card">
+            <div class="icon">
+                <i class="fas fa-columns"></i>
+            </div>
+            <h3>Quadros</h3>
+            <p>Organize suas tarefas em quadros e fases</p>
+            <a href="../board/boardScreen.html" class="btn">Acessar</a>
+        </div>
+
+        <div class="card">
+            <div class="icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>Colaboradores</h3>
+            <p>Cadastre e gerencie sua equipe</p>
+            <a href="../collaborator/collaboratorListScreen.html" class="btn">Acessar</a>
+        </div>
+
+        <div class="card">
+            <div class="icon">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <h3>Clientes</h3>
+            <p>Cadastre e gerencie seus clientes</p>
+            <a href="../client/clientListScreen.html" class="btn">Acessar</a>
+        </div>
+
+        <div class="card">
+            <div class="icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <h3>Relatórios</h3>
+            <p>Acompanhe o progresso dos projetos</p>
+            <a href="../report/reportMenu.html" class="btn">Acessar</a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../src/js/utils/httpUtils.js"></script>
+    <script src="../../src/js/utils/authUtils.js"></script>
+    <script src="../../src/js/globalMenu/mainMenu.js"></script>
+    <script src="../../src/js/tema/temaSystem.js"></script>
+    <script src="../../src/js/shared/loadSidebar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html> 

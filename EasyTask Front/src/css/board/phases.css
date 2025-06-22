@@ -1,0 +1,157 @@
+/* Estilos para o Gerenciador de Fases */
+.fases-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.fases-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-dark);
+}
+
+.btn-nova-fase {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-nova-fase:hover {
+    background-color: var(--primary-color-dark);
+    transform: translateY(-1px);
+}
+
+.fases-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.fases-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.fases-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.fases-list::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+.fase-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.fase-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fase-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.fase-nome {
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.fase-ordem {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.fase-acoes {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-editar,
+.btn-excluir {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.btn-editar {
+    color: var(--primary-color);
+}
+
+.btn-excluir {
+    color: var(--danger-color);
+}
+
+.btn-editar:hover,
+.btn-excluir:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+}
+
+.no-fases {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem;
+    font-style: italic;
+}
+
+/* Tema Claro */
+body.light-theme .fase-item {
+    background-color: white;
+}
+
+body.light-theme .fase-nome {
+    color: var(--text-light);
+}
+
+body.light-theme .btn-editar:hover,
+body.light-theme .btn-excluir:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .fases-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .fase-item {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .fase-acoes {
+        width: 100%;
+        justify-content: center;
+    }
+} 

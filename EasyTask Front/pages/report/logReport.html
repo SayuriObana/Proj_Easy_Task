@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Logs do Sistema</title>
+    <link rel="stylesheet" href="../../src/css/report/reports.css">
+    <link rel="stylesheet" href="../../src/css/report/logReport.css">
+    <link rel="stylesheet" href="../../src/css/global/sidebar.css">
+    <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="../../src/js/report/logReport.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+
+<!-- Botão de tema -->
+<button class="theme-toggle">
+    <i class="fa-solid fa-sun"></i>
+    <i class="fa-solid fa-moon"></i>
+</button>
+
+<!-- Botão da Sidebar -->
+<div class="menu-icon" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</div>
+
+    <!-- Container principal -->
+    <div class="container">
+        <h2>Relatório de Logs do Sistema</h2>
+        <button class="btn-relatorio" onclick="gerarRelatorioPDF()">Gerar PDF</button>
+        <div id="listaLogs">
+            <!-- Lista de logs será carregada via JS -->
+        </div>
+    </div>
+
+    <script src="../../src/js/utils/authUtils.js"></script>
+    <script src="../../src/js/utils/httpUtils.js"></script>
+    <script src="../../src/js/tema/temaSystem.js"></script>
+    <script src="../../src/js/shared/loadSidebar.js"></script>
+</body>
+
+</html> 

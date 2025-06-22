@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyTask - Boards</title>
+    <script src="../../src/js/shared/applyBaseLayout.js"></script>
+</head>
+<body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            applyBaseLayout({
+                title: 'EasyTask - Boards',
+                header: 'Meus Boards',
+                subtitle: 'Gerencie seus quadros de tarefas',
+                actions: `
+                    <button class="btn btn-primary" onclick="criarNovoBoard()">
+                        <i class="fas fa-plus"></i> Novo Board
+                    </button>
+                `,
+                content: `
+                    <div class="boards-grid">
+                        <!-- Os boards serão carregados dinamicamente aqui -->
+                    </div>
+                `,
+                modals: `
+                    <!-- Modal de Criação/Edição de Board -->
+                    <div class="modal" id="boardModal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2 id="boardModalTitle">Novo Board</h2>
+                                <button class="btn-close" onclick="fecharModalBoard()">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="boardForm" onsubmit="salvarBoard(event)">
+                                    <div class="form-group">
+                                        <label for="boardName">Nome do Board</label>
+                                        <input type="text" id="boardName" name="boardName" required 
+                                               class="form-control" placeholder="Digite o nome do board">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="boardDescription">Descrição</label>
+                                        <textarea id="boardDescription" name="boardDescription" 
+                                                  class="form-control" rows="3" 
+                                                  placeholder="Digite uma descrição para o board"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="boardColor">Cor do Board</label>
+                                        <input type="color" id="boardColor" name="boardColor" 
+                                               class="form-control" value="#4A90E2">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" onclick="fecharModalBoard()">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                styles: [
+                    '../../src/css/global/base.css',
+                    '../../src/css/board/boardListScreen.css'
+                ],
+                scripts: [
+                    '../../src/js/board/boardListScreen.js'
+                ]
+            });
+        });
+    </script>
+</body>
+</html> 

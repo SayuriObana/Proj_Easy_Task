@@ -6,12 +6,18 @@
     <title>EasyTask</title>
     <link rel="stylesheet" href="../../src/css/login/loginSystem.css">
     <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Scripts essenciais primeiro -->
     <script src="../../src/js/config/storageUtils.js"></script>
     <script src="../../src/js/auth/authManager.js"></script>
+    
+    <!-- Sistema de temas - deve ser carregado ANTES do loginSystem.js -->
+    <script src="../../src/js/tema/temaSystem.js"></script>
+    
+    <!-- Scripts da página de login -->
     <script src="../../src/js/login/loginSystem.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
 </head>
 <body class="home">
 
@@ -20,70 +26,115 @@
       
         <div class="top-right-buttons">
           <button class="cadastrar-topo" onclick="abrirModalCadastro()">Cadastrar</button>
-          <button class="theme-toggle">
+          <button class="theme-toggle" id="themeToggle">
             <i class="fa-solid fa-sun"></i>
             <i class="fa-solid fa-moon"></i>
           </button>
         </div>
     </header>
       
-
-<div class="main-container-home">
-    <div class="logo-container">
-        <img src="../../src/imagens/IMAGEM_LOGO_EASYTASK.PNG" alt="Logo Hexagonal" class="logo-easytask">
-        <img src="../../src/imagens/IMAGEM_EASYTASK_BRANCO.PNG" alt="Texto EasyTask" class="logo-text">
+    <div class="main-container-home">
+        <div class="logo-container">
+            <img src="../../src/imagens/IMAGEM_LOGO_EASYTASK.PNG" alt="Logo Hexagonal" class="logo-easytask">
+            <img src="../../src/imagens/IMAGEM_EASYTASK_BRANCO.PNG" alt="Texto EasyTask" class="logo-text">
+        </div>
+        <div class="text-container">
+            <p>"Conectando talentos para resultados reais!<br>Organização eficaz para sua equipe!"</p>
+        </div>
+        <div class="buttons">
+            <a href="javascript:void(0)" class="button" onclick="abrirModal()">ENTRAR</a>
+        </div>
     </div>
-    <div class="text-container">
-        <p>"Conectando talentos para resultados reais!<br>Organização eficaz para sua equipe!"</p>
-    </div>
-    <div class="buttons">
-        <a href="javascript:void(0)" class="button" onclick="abrirModal()">ENTRAR</a>
-    </div>
-</div>
 
-
-<!-- Pop-up de Login -->
-<div id="loginModal" class="modal">
-  <div class="modal-content">
-    <span class="close-button" onclick="fecharModal()">&times;</span>
-    <h1 class="modal-title">EASYTASK</h1>
-    <form onsubmit="return validarLogin(event)">
-        <label for="email">EMAIL:</label>
-        <input type="email" id="email" name="email" required>
-        <label for="password">SENHA:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit" class="login-button">ENTRAR</button>
-    </form>
-    <div id="mensagem-erro" class="mensagem-erro"></div>
-  </div>
-</div>
-
-<!-- Pop-up de Cadastro -->
-<div id="cadastroModal" class="modal">
-    <div class="modal-content">
-      <span class="close-button" onclick="fecharModalCadastro()">&times;</span>
-      <h1 class="modal-title">CADASTRAR</h1>
-      <form onsubmit="return criarUsuario(event)">
-          <label for="nome">NOME:</label>
-          <input type="text" id="nome" name="nome" required>
-  
-          <label for="emailCadastro">EMAIL:</label>
-          <input type="email" id="emailCadastro" name="emailCadastro" required>
-  
-          <label for="passwordCadastro">SENHA:</label>
-          <input type="password" id="passwordCadastro" name="passwordCadastro" required>
-  
-          <label for="phone">TELEFONE:</label>
-          <input type="text" id="phone" name="phone">
-  
-          <label for="position">CARGO:</label>
-          <input type="text" id="position" name="position">
-  
-          <button type="submit" class="login-button">CRIAR CONTA</button>
-      </form>
+    <!-- Pop-up de Login -->
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" onclick="fecharModal()">&times;</span>
+        <h1 class="modal-title">EASYTASK</h1>
+        <form onsubmit="return validarLogin(event)">
+            <label for="email">EMAIL:</label>
+            <input type="email" id="email" name="email" required>
+            <label for="password">SENHA:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit" class="login-button">ENTRAR</button>
+        </form>
+        <div id="mensagem-erro" class="mensagem-erro"></div>
+      </div>
     </div>
-  </div>
-  
-<script src="../../src/js/tema/temaSystem.js"></script>
+
+    <!-- Pop-up de Cadastro -->
+    <div id="cadastroModal" class="modal">
+        <div class="modal-content">
+          <span class="close-button" onclick="fecharModalCadastro()">&times;</span>
+          <h1 class="modal-title">CADASTRAR</h1>
+          <form onsubmit="return criarUsuario(event)">
+              <label for="nome">NOME:</label>
+              <input type="text" id="nome" name="nome" required>
+      
+              <label for="emailCadastro">EMAIL:</label>
+              <input type="email" id="emailCadastro" name="emailCadastro" required>
+      
+              <label for="passwordCadastro">SENHA:</label>
+              <input type="password" id="passwordCadastro" name="passwordCadastro" required>
+      
+              <label for="phone">TELEFONE:</label>
+              <input type="text" id="phone" name="phone">
+      
+              <label for="position">CARGO:</label>
+              <input type="text" id="position" name="position">
+      
+              <button type="submit" class="login-button">CRIAR CONTA</button>
+          </form>
+        </div>
+    </div>
+
+    <script>
+        // Script simplificado - apenas verifica se o sistema está funcionando
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Página de login carregada');
+            
+            // Aguarda um pouco para o ThemeManager inicializar
+            setTimeout(() => {
+                if (window.themeManager) {
+                    console.log('✅ ThemeManager disponível');
+                    console.log('🎨 Tema atual:', window.themeManager.currentTheme);
+                    console.log('💾 Tema salvo:', localStorage.getItem('theme'));
+                    
+                    // Verificar se o botão está funcionando
+                    const themeToggle = document.querySelector('.theme-toggle');
+                    if (themeToggle) {
+                        console.log('✅ Botão de tema encontrado');
+                        
+                        // Testar se o listener está funcionando
+                        themeToggle.addEventListener('click', function() {
+                            console.log('🔘 Botão clicado - alternando tema...');
+                            
+                            // Verificar estado antes
+                            const antes = document.body.classList.contains('light-theme');
+                            console.log('Estado antes:', antes ? 'claro' : 'escuro');
+                            
+                            // Aguardar um pouco e verificar estado depois
+                            setTimeout(() => {
+                                const depois = document.body.classList.contains('light-theme');
+                                console.log('Estado depois:', depois ? 'claro' : 'escuro');
+                                console.log('Mudança:', antes !== depois ? '✅ SUCESSO' : '❌ FALHOU');
+                            }, 100);
+                        });
+                        
+                    } else {
+                        console.log('❌ Botão de tema não encontrado');
+                    }
+                    
+                } else {
+                    console.log('❌ ThemeManager não encontrado');
+                }
+            }, 200);
+        });
+        
+        // Listener para mudanças de tema (apenas para debug)
+        document.addEventListener('themeChanged', (event) => {
+            console.log('🎨 Tema mudou para:', event.detail.theme);
+        });
+    </script>
 </body>
 </html>

@@ -1,0 +1,46 @@
+/* Botões */
+.buttons-container {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.view-btn, .edit-btn, .delete-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.view-btn { 
+    background-color: #17a2b8; 
+    color: white;
+}
+
+.edit-btn { 
+    background-color: black; 
+    color: white;
+}
+
+.delete-btn { 
+    background-color: #dc3545; 
+    color: white;
+}
+
+.view-btn:hover { 
+    background-color: #138496;
+}
+
+.edit-btn:hover { 
+    background-color: var(--accent-color);
+    color: black;
+}
+
+.delete-btn:hover { 
+    background-color: #c82333;
+} 

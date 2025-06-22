@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyTask - Detalhes do Quadro</title>
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../../src/css/board/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <!-- Botão de tema -->
+<button class="theme-toggle">
+    <i class="fa-solid fa-sun"></i>
+    <i class="fa-solid fa-moon"></i>
+</button>
+
+<!-- Botão da Sidebar -->
+<div class="menu-icon" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</div>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        <div class="board-header">
+            <h1 id="board-title">Carregando...</h1>
+            <div class="board-actions">
+                <button onclick="abrirModalNovaFase()" class="btn-nova-fase">
+                    <i class="fas fa-plus"></i>
+                    Nova Fase
+                </button>
+                <button onclick="editarQuadro()" class="btn-editar">
+                    <i class="fas fa-edit"></i>
+                    Editar Quadro
+                </button>
+            </div>
+        </div>
+
+        <div class="columns-container" id="columnsContainer">
+            <!-- As fases serão carregadas dinamicamente aqui -->
+        </div>
+    </main>
+
+    <!-- Modal Nova Fase -->
+    <div id="modalNovaFase" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nova Fase</h2>
+                <button onclick="fecharModalNovaFase()" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="nomeFase">Nome da Fase</label>
+                    <input type="text" id="nomeFase" placeholder="Digite o nome da fase">
+                </div>
+                <div class="modal-footer">
+                    <button onclick="fecharModalNovaFase()" class="btn-cancelar">Cancelar</button>
+                    <button onclick="criarFase()" class="btn-criar">Criar Fase</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nova Tarefa -->
+    <div id="modalNovaTarefa" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nova Tarefa</h2>
+                <button onclick="fecharModalNovaTarefa()" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="tituloTarefa">Título</label>
+                    <input type="text" id="tituloTarefa" placeholder="Digite o título da tarefa">
+                </div>
+                <div class="input-group">
+                    <label for="descricaoTarefa">Descrição</label>
+                    <textarea id="descricaoTarefa" rows="4" placeholder="Digite a descrição da tarefa"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="prioridadeTarefa">Prioridade</label>
+                    <select id="prioridadeTarefa">
+                        <option value="BAIXA">Baixa</option>
+                        <option value="MEDIA">Média</option>
+                        <option value="ALTA">Alta</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="responsavelTarefa">Responsável</label>
+                    <select id="responsavelTarefa">
+                        <!-- Colaboradores serão carregados dinamicamente -->
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="fecharModalNovaTarefa()" class="btn-cancelar">Cancelar</button>
+                    <button onclick="criarTarefa()" class="btn-criar">Criar Tarefa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../src/js/utils/authUtils.js"></script>
+    <script src="../../src/js/utils/httpUtils.js"></script>
+    <script src="../../src/js/tema/temaSystem.js"></script>
+    <script src="../../src/js/shared/loadSidebar.js"></script>
+</body>
+</html> 

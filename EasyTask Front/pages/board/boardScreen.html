@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyTask - Quadro</title>
+    <script src="../../src/js/shared/applyBaseLayout.js"></script>
+</head>
+<body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const boardId = urlParams.get('id');
+
+            if (!boardId) {
+                window.location.href = 'boardListScreen.html';
+                return;
+            }
+
+            applyBaseLayout({
+                title: 'EasyTask - Quadro',
+                header: 'Quadro de Tarefas',
+                subtitle: 'Organize suas tarefas em colunas',
+                actions: `
+                    <button class="btn btn-primary" onclick="criarNovaFase()">
+                        <i class="fas fa-plus"></i> Nova Fase
+                    </button>
+                    <button class="btn btn-secondary" onclick="criarNovaTarefa()">
+                        <i class="fas fa-tasks"></i> Nova Tarefa
+                    </button>
+                `,
+                content: `
+                    <div class="board-container">
+                        <div class="board-header">
+                            <h2 id="boardTitle">Carregando...</h2>
+                            <p id="boardDescription"></p>
+                        </div>
+                        <div class="board-content">
+                            <div class="kanban-wrapper">
+                                <div class="columns-container" id="columnsContainer">
+                                    <!-- As colunas serão carregadas dinamicamente aqui -->
+                                </div>
+                                
+                                <!-- Lixeira moderna para fases -->
+                                <div class="trash-zone" id="trashZone">
+                                    <div class="trash-icon">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </div>
+                                    <div class="trash-label">
+                                        <span>Arraste uma fase aqui para removê-la do quadro</span>
+                                    </div>
+                                    <div class="trash-hint">
+                                        <small>Esta ação remove apenas o vínculo da fase com este quadro</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                modals: `
+                    <!-- Modal de Coluna -->
+                    <div class="modal" id="columnModal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2 id="columnModalTitle">Nova Coluna</h2>
+                                <button class="btn-close" onclick="fecharModalColuna()">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="columnForm" onsubmit="salvarFase(event)">
+                                    <div class="form-group">
+                                        <label for="columnName">Nome da Fase</label>
+                                        <input type="text" id="columnName" name="columnName" required 
+                                               class="form-control" placeholder="Digite o nome da fase">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="columnDescription">Descrição da Fase</label>
+                                        <textarea id="columnDescription" name="columnDescription" 
+                                                  class="form-control" rows="3" 
+                                                  placeholder="Digite a descrição da fase"></textarea>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" onclick="fecharModalColuna()">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal de Tarefa -->
+                    <div class="modal" id="taskModal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2 id="taskModalTitle">Nova Tarefa</h2>
+                                <button class="btn-close" onclick="fecharModalTarefa()">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="taskForm" onsubmit="salvarTarefa(event)">
+                                    <div class="form-group">
+                                        <label for="taskTitle">Título</label>
+                                        <input type="text" id="taskTitle" name="taskTitle" required 
+                                               class="form-control" placeholder="Digite o título da tarefa">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="taskDescription">Descrição</label>
+                                        <textarea id="taskDescription" name="taskDescription" 
+                                                  class="form-control" rows="3" 
+                                                  placeholder="Digite a descrição da tarefa"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="taskColumn">Coluna</label>
+                                        <select id="taskColumn" name="taskColumn" required class="form-control">
+                                            <!-- As colunas serão carregadas dinamicamente aqui -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="taskPriority">Prioridade</label>
+                                        <select id="taskPriority" name="taskPriority" required class="form-control">
+                                            <option value="baixa">Baixa</option>
+                                            <option value="media">Média</option>
+                                            <option value="alta">Alta</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="taskDueDate">Data de Entrega</label>
+                                        <input type="date" id="taskDueDate" name="taskDueDate" 
+                                               class="form-control">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" onclick="fecharModalTarefa()">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                styles: [
+                    '../../src/css/global/base.css',
+                    '../../src/css/board/boardScreen.css'
+                ],
+                scripts: [
+                    '../../src/js/board/boardScreen.js'
+                ]
+            });
+
+            // Inicializa o board com o ID da URL
+            window.boardId = boardId;
+        });
+    </script>
+</body>
+</html>

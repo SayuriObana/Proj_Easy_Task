@@ -1,0 +1,240 @@
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: var(--bg-dark);
+    position: fixed;
+    top: 0;
+    left: -250px; /* Começa escondida */
+    z-index: 1000;
+    transition: all 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    color: var(--text-dark);
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+/* Menu Toggle Button */
+.menu-icon {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--bg-dark);
+    border: none;
+    color: var(--text-dark);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.menu-icon:hover {
+    background: var(--primary-color);
+    color: var(--button-text);
+    transform: scale(1.1);
+}
+
+.menu-toggle.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+    max-width: 150px;
+    height: auto;
+}
+
+/* User Info */
+.user-info {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.user-avatar {
+    font-size: 2rem;
+    color: var(--text-dark);
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-details span {
+    display: block;
+    color: var(--text-dark);
+}
+
+.user-level {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    gap: 10px;
+}
+
+.sidebar-menu a:hover {
+    background-color: var(--primary-color);
+    color: var(--button-text);
+}
+
+.sidebar-menu li.active a {
+    background-color: var(--primary-color);
+    color: var(--button-text);
+}
+
+.sidebar-menu i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--bg-dark);
+}
+
+.logout-btn {
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: var(--primary-color);
+    color: var(--button-text);
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background-color: var(--primary-color);
+    color: var(--button-text);
+    transform: rotate(180deg);
+}
+
+/* Tema Claro */
+body.light-theme .sidebar {
+    background-color: var(--bg-dark);
+    border-right: 1px solid var(--border-color);
+}
+
+body.light-theme .menu-toggle {
+    color: var(--text-dark);
+    background: var(--bg-dark);
+}
+
+body.light-theme .menu-toggle:hover {
+    background: var(--primary-color);
+    color: var(--button-text);
+}
+
+body.light-theme .sidebar-menu a,
+body.light-theme .user-details span,
+body.light-theme .user-avatar,
+body.light-theme .logout-btn,
+body.light-theme .theme-toggle {
+    color: var(--text-dark);
+}
+
+body.light-theme .sidebar-menu a:hover,
+body.light-theme .logout-btn:hover,
+body.light-theme .theme-toggle:hover {
+    background-color: var(--primary-color);
+    color: var(--button-text);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .menu-toggle {
+        display: flex;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+/* Overlay para fechar a sidebar */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}

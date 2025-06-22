@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Verificar permissão de SUPERIOR para editar colaboradores
+    const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+    if (!isUsuarioSuperior) {
+        Swal.fire('Acesso Negado', 'Apenas usuários com nível SUPERIOR podem editar colaboradores.', 'error');
+        window.location.href = '../collaborator/collaboratorListScreen.html';
+        return;
+    }
+
     // Controle de tema - Padronizado para todo o sistema
     const themeToggle = document.querySelector('.theme-toggle');
     if (themeToggle) {
@@ -122,15 +130,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         try {
             const token = localStorage.getItem('accessToken');
-            const response = await fetch(`http://localhost:8080/collaborators/${id}/password`, {
+            const response = await fetch(`http://localhost:8080/collaborators/${id}/change-password`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    oldPassword,
-                    newPassword
+                    currentPassword: oldPassword,
+                    newPassword: newPassword
                 })
             });
             if (response.ok) {

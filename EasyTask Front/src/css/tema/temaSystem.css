@@ -9,9 +9,22 @@ body {
     --text-color: #ffffff;
     --button-bg: #1e1e1e;
     --button-border: #ffffff;
-    --icon-filter: invert(1); /* Ícones ficam brancos */
-    --input-bg: #1e1e1e;     /* NOVO */
-    --input-text: #ffffff;   /* NOVO */
+    --icon-filter: brightness(0) invert(1); /* Ícones brancos no tema escuro */
+    --input-bg: #1e1e1e;
+    --input-text: #ffffff;
+    --card-bg: #1f1f1f;
+    --border-color: #404040;
+    --accent-color: #FFD700;
+    --header-bg: #2a2a2a;
+    --hover-bg: rgba(255, 255, 255, 0.1);
+    --text-color-light: #cccccc;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --modal-bg: #1e1e1e;
+    --modal-border: #444;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --error-color: #dc3545;
+    --info-color: #17a2b8;
 }
 
 /* Tema Claro */
@@ -20,11 +33,25 @@ body {
     --text-color: #222222;
     --button-bg: #ffffff;
     --button-border: #222222;
-    --icon-filter: invert(0); /* Agora os ícones pretos aparecem corretamente no fundo claro */
-    --input-bg: #ffffff;     /* NOVO */
-    --input-text: #222222;   /* NOVO */
+    --icon-filter: brightness(0); /* Ícones pretos no tema claro */
+    --input-bg: #ffffff;
+    --input-text: #222222;
+    --card-bg: #ffffff;
+    --border-color: #e0e0e0;
+    --accent-color: #FFD700;
+    --header-bg: #ffffff;
+    --hover-bg: rgba(0, 0, 0, 0.05);
+    --text-color-light: #666666;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --modal-bg: #ffffff;
+    --modal-border: #ccc;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --error-color: #dc3545;
+    --info-color: #17a2b8;
 }
 
+/* Aplicação global dos temas */
 .light-theme h1,
 .light-theme h2,
 .light-theme h3,
@@ -32,13 +59,15 @@ body {
 .light-theme h5,
 .light-theme h6,
 .light-theme p,
-.light-theme span {
+.light-theme span,
+.light-theme label,
+.light-theme div {
     color: var(--text-color) !important;
 }
 
 /* Ajustando os ícones */
 .light-theme img {
-    filter: invert(1); /* Isso vai inverter a cor dos ícones/imagens brancas */
+    filter: var(--icon-filter);
 }
 
 /* ======= ESTILOS GERAIS ======= */
@@ -61,6 +90,7 @@ body {
     transition: filter 0.3s ease;
 }
 
+/* ======= BOTÃO DE TEMA ======= */
 .theme-toggle {
     position: fixed;
     top: 15px;
@@ -76,12 +106,24 @@ body {
     align-items: center;
     gap: 10px;
     transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-
-    z-index: 1002; /* 👈 Adicione isso */
+    z-index: 1002;
 }
-  
-  /* ======= BOTÕES DE AÇÃO ======= */
-  .button {
+
+.theme-toggle:hover {
+    background: var(--accent-color);
+    color: var(--bg-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+/* Ícones do botão de tema */
+.theme-toggle .fa-sun,
+.theme-toggle .fa-moon {
+    transition: all 0.3s ease;
+}
+
+/* ======= BOTÕES DE AÇÃO ======= */
+.button {
     background: var(--button-bg);
     border: 2px solid var(--button-border);
     color: var(--text-color);
@@ -91,360 +133,291 @@ body {
     text-transform: uppercase;
     cursor: pointer;
     transition: background 0.3s ease, color 0.3s ease;
-  }
-  
-  .button:hover {
+}
+
+.button:hover {
     background: var(--text-color);
     color: var(--bg-color);
-  }
-  
-  /* ======= GRID DE ÍCONES ======= */
-  .icon-grid {
+}
+
+/* ======= GRID DE ÍCONES ======= */
+.icon-grid {
     display: flex;
     justify-content: center;
     gap: 40px;
     margin-top: 40px;
-  }
-  
-  .icon-item {
+}
+
+.icon-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-  }
-  
-  /* ======= RESPONSIVIDADE ======= */
-  @media (max-width: 768px) {
-    .icon-grid {
-      flex-direction: column;
-      gap: 20px;
-    }
-  }
+}
 
-  /* Caixa de login no tema escuro */
+/* ======= RESPONSIVIDADE ======= */
+@media (max-width: 768px) {
+    .icon-grid {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .theme-toggle {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 16px;
+    }
+}
+
+/* ======= MODAIS ======= */
+/* Caixa de login no tema escuro */
 body:not(.light-theme) .modal-content {
-    background-color: #1e1e1e !important; /* Cor escura */
-    color: #ffffff !important; /* Texto branco */
-    border: 1px solid #444; /* Borda mais escura */
+    background-color: var(--modal-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--modal-border);
 }
 
 /* Caixa de login no tema claro */
 body.light-theme .modal-content {
-    background-color: #ffffff !important; /* Branco */
-    color: #222222 !important; /* Texto preto */
-    border: 1px solid #ccc; /* Borda clara */
+    background-color: var(--modal-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--modal-border);
 }
 
 .modal-title {
-    font-family: 'Montserrat', sans-serif; /* Fonte bonita */
-    font-size: 2.5rem; /* Tamanho ajustado */
-    font-weight: bold; /* Negrito */
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5rem;
+    font-weight: bold;
     text-align: center;
     margin-bottom: 20px;
+    color: var(--text-color);
 }
 
-/* Tema Escuro */
-body:not(.light-theme) .modal-title {
-    color: white;
-}
-
-/* Tema Claro */
-body.light-theme .modal-title {
-    color: black;
-}
-
-/* Sol no tema claro, Lua no tema escuro */
-body.light-theme .fa-sun {
-    display: inline;
-}
-body.light-theme .fa-moon {
-    display: none;
-}
-body:not(.light-theme) .fa-sun {
-    display: none;
-}
-body:not(.light-theme) .fa-moon {
-    display: inline;
-}
-
-/* 🔹 Garante que o texto dos botões fique preto no tema claro */
-body.light-theme .button {
-    color: #222222 !important;  /* Texto preto */
-    border-color: #222222 !important; /* Borda preta */
-}
-
-/* 🔹 Garante que o texto fique visível ao passar o mouse */
-body.light-theme .button:hover {
-    background: #222222 !important;
-    color: #ffffff !important;
-}
-
-/* 🔹 Garante que o texto abaixo dos ícones também fique preto */
-body.light-theme .icon-item p {
-    color: #222222 !important;
-}
-
-/* 🔹 Garante que o texto dos links na sidebar fique branco no tema claro */
-body.light-theme .sidebar a {
-    color: #ffffff !important; /* Branco no tema claro */
-}
-
-body.light-theme .sidebar a,
-body.light-theme .sidebar .dropdown-btn,
-body.light-theme .dropdown-content li a {
-    color: #222222 !important;  /* Preto no tema claro */
-}
-
-
-/* 🔹 Ajusta o campo de pesquisa no tema claro */
-body.light-theme input[type="text"] {
-    background-color: #ffffff !important; /* Fundo branco */
-    color: #222222 !important; /* Texto preto */
-    border: 2px solid #ccc !important; /* Borda mais visível */
-}
-
-/* 🔹 Ajusta os cards no tema claro */
-body.light-theme .profile-card {
-    background-color: #f5f5f5 !important; /* Fundo cinza claro */
-    color: #222222 !important; /* Texto preto */
-    border: 2px solid #ddd !important; /* Borda leve */
-}
-
-/* 🔹 Corrige os botões dentro dos cards */
-body.light-theme .profile-card .btn {
-    border: none !important;
-}
-
-/* 🔹 Ajusta os textos dentro dos cards para ficarem visíveis no tema claro */
-body.light-theme .task-card {
-    color: #222222 !important; /* Texto preto */
-}
-
-/* 🔹 Altera a cor dos botões de status para preto no tema claro */
-body.light-theme .task-status {
-    background-color: #000000 !important; /* Fundo preto */
-    color: #ffffff !important; /* Texto branco */
-}
-
-/* 🔹 Ajusta os cards no tema claro para manter contraste */
-body.light-theme .task-card {
-    background-color: #ffffff !important; /* Fundo branco */
-    border: 2px solid #ddd !important; /* Borda leve */
-}
-
-/* 🔹 Ajusta a cor do texto dentro dos botões dos status */
-body.light-theme .task-status span {
-    color: #ffffff !important; /* Texto branco */
-}
-
-/* 🔹 Corrige o fundo dos quadros de tarefas no modo claro */
-body.light-theme .kanban-column {
-    background-color: #ffffff !important; /* Fundo branco */
-    border: 1px solid #ccc; /* Opcional: borda leve para separação */
-}
-
-body.light-theme .kanban-column {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-/* 🔹 Corrige o campo de e-mail no tema claro */
-body.light-theme input[type="email"] {
-    background-color: #ffffff !important; /* Fundo branco */
-    color: #222222 !important;            /* Texto escuro */
-    border: 1px solid #ccc !important;
-}
-
-/* 🔹 Corrige campos escuros no modo claro */
-body.light-theme input[type="text"],
-body.light-theme input[type="email"],
-body.light-theme input[type="password"],
-body.light-theme input[type="tel"] {
-    background-color: #ffffff !important;
-    color: #222222 !important;
-    border: 1px solid #ccc !important;
-}
-
-/* 🔹 Corrige os labels que estão invisíveis */
-body.light-theme label {
-    color: #222222 !important;
-    font-weight: 500;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.menu-button img,
-.menu-icon img {
-    filter: var(--icon-filter);
-    transition: filter 0.3s ease;
-}
-
-body.light-theme .container {
-    background: #ffffff !important;  /* Fundo branco */
-    color: #222222 !important;       /* Texto preto */
-    border: 1px solid #ccc !important;
-}
-
-body.light-theme h2,
-body.light-theme label,
-body.light-theme li {
-    color: #222222 !important; /* Preto no modo claro */
-}
-
-body.light-theme input {
-    background: #ffffff !important;  /* Fundo branco */
-    color: #222222 !important;       /* Texto preto */
-    border: 1px solid #ccc !important;
-}
-
-body.light-theme .edit-btn {
-    background-color: #ffcc00 !important; /* Amarelo */
-    color: #000 !important;               /* Texto preto */
-}
-
-body.light-theme .delete-btn {
-    background-color: #ff3b3b !important; /* Vermelho */
-    color: #fff !important;               /* Texto branco */
-}
-
-body.light-theme .close-btn {
-    color: #ff3b3b !important; /* Vermelho */
-}
-
-/* 🔹 Ajusta os itens da lista de fases no modo claro */
-body.light-theme .phase-list li {
-    background: #ffffff !important; /* Fundo branco */
-    color: #222222 !important; /* Texto preto */
-    border-left: 5px solid #4CAF50; /* Mantém a borda verde */
-}
-
-/* 🔹 Ajusta os botões dentro da lista para manter o contraste */
-body.light-theme .edit-btn {
-    background-color: #ffcc00 !important; /* Mantém amarelo */
-    color: #000 !important; /* Texto preto */
-}
-
-body.light-theme .delete-btn {
-    background-color: #ff3b3b !important; /* Mantém vermelho */
-    color: #fff !important; /* Texto branco */
-}
-
-/* 🔹 No tema claro, o ícone do menu deve ficar preto */
-body.light-theme .menu-icon img {
-    filter: invert(1) !important; /* Inverte para preto */
-}
-
-/* 🔹 No tema escuro, o ícone do menu deve ficar branco */
-body:not(.light-theme) .menu-icon img {
-    filter: invert(0) !important; /* Mantém a cor original (branca) */
-}
-
-.menu-button img {
-    filter: var(--icon-filter);
-    transition: filter 0.3s ease;
-}
-
-:root {
-    --icon-filter: invert(0%);
-}
-
-.light-theme {
-    --icon-filter: invert(100%);
-}
-
-/* Corrige os cards da tela de relatórios no tema claro */
-body.light-theme .report-card {
-    background-color: #ffffff !important; /* fundo branco */
-    color: #222222 !important;            /* texto preto */
-    border: 1px solid #ddd;               /* borda leve */
-}
-
-/* Ajusta o botão PDF se precisar */
-body.light-theme .report-card .btn-pdf {
-    background-color: #28a745 !important; /* verde */
-    color: #fff !important;               /* texto branco */
-}
-
-/* Modo claro para relatório de colaboradores */
-body.light-theme .container {
-    background-color: #ffffff !important; /* fundo branco */
-    color: #222222 !important; /* texto preto */
-}
-
-/* Corrige os itens da lista no tema claro */
-body.light-theme li {
-    background-color: #f5f5f5 !important;
-    color: #222222 !important;
-    border: 1px solid #ddd !important;
-}
-
-body.light-theme li:hover {
-    background-color: #eaeaea !important;
-}
-
-/* ===== Sidebar no Tema Claro ===== */
+/* ======= SIDEBAR ======= */
 body.light-theme .sidebar {
-    background-color: #f5f5f5 !important;
-    color: #222222 !important;
+    background-color: var(--card-bg);
+    border-right: 1px solid var(--border-color);
 }
 
 body.light-theme .sidebar-header {
-    color: #222222 !important;
+    color: var(--text-color);
 }
 
 body.light-theme .sidebar-links li a,
-body.light-theme .dropdown-btn,
-body.light-theme .dropdown-content li a {
-    color: #222222 !important;
-}
-
 body.light-theme .sidebar-links li a:hover,
-body.light-theme .dropdown-btn:hover,
-body.light-theme .dropdown-content li a:hover {
-    color: #000000 !important; /* Preto no hover */
-}
-
-/* 🔹 Corrige a cor do botão "RELATÓRIOS" (que é um <span>) no tema claro */
 body.light-theme .dropdown-btn {
-    color: #222222 !important;         /* Texto preto */
-    background-color: #ffffff !important; /* Fundo branco */
-    border-bottom: 1px solid #ccc;     /* Linha de separação opcional */
-    display: block;
-    padding: 8px 0;
-    font-weight: bold;
-    text-align: center;
+    color: var(--text-color) !important;
 }
 
-/* Corrige o fundo do botão "RELATÓRIOS" no tema claro */
 body.light-theme .sidebar .dropdown {
-    background-color: #ffffff !important;
-    border: 1px solid #ddd !important;
+    background-color: var(--card-bg);
 }
 
-/* Corrige a cor da seta ▼ no botão "RELATÓRIOS" no tema claro */
 body.light-theme .dropdown-btn::after {
-    color: #222222 !important;
+    border-top-color: var(--text-color);
 }
 
-/* Garante que o botão RELATÓRIOS apareça no tema claro */
-body.light-theme .dropdown {
-    background-color: #ffffff !important;
-    color: #222222 !important;
-    border: 1px solid #ddd !important;
-}
-
+/* ======= CARTÕES E CONTAINERS ======= */
 body.light-theme .container {
-    border: none !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra sutil */
-    border-radius: 12px; /* Bordas arredondadas, se quiser */
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
 }
 
-body.light-theme .kanban-column {
-    border: none !important;
+body.light-theme .card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
 }
 
-body.light-theme .kanban-column {
-    border: none !important;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Suaviza */
-    border-radius: 12px; /* Bordas mais modernas */
+body.light-theme .report-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
 }
+
+/* ======= TABELAS ======= */
+body.light-theme table {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+body.light-theme th {
+    background-color: var(--header-bg);
+    color: var(--text-color);
+    border-bottom: 2px solid var(--border-color);
+}
+
+body.light-theme td {
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.light-theme tr:hover {
+    background-color: var(--hover-bg);
+}
+
+/* ======= FORMULÁRIOS ======= */
+body.light-theme input[type="text"],
+body.light-theme input[type="email"],
+body.light-theme input[type="password"],
+body.light-theme input[type="date"],
+body.light-theme input[type="number"],
+body.light-theme textarea,
+body.light-theme select {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 1px solid var(--border-color);
+}
+
+body.light-theme input:focus,
+body.light-theme textarea:focus,
+body.light-theme select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+}
+
+body.light-theme label {
+    color: var(--text-color);
+}
+
+/* ======= BOTÕES ======= */
+body.light-theme .btn {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    border: 1px solid var(--button-border);
+}
+
+body.light-theme .btn:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+body.light-theme .btn-primary {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border-color: var(--accent-color);
+}
+
+body.light-theme .btn-secondary {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+/* ======= KANBAN ======= */
+body.light-theme .kanban-column {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+body.light-theme .kanban-column-header {
+    background-color: var(--header-bg);
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* ======= STATUS BADGES ======= */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-create {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.status-update {
+    background-color: var(--warning-color);
+    color: #212529;
+}
+
+.status-delete {
+    background-color: var(--error-color);
+    color: white;
+}
+
+/* ======= LOADING E MENSAGENS ======= */
+body.light-theme .loading {
+    color: var(--text-color);
+}
+
+body.light-theme .error-message {
+    color: var(--error-color);
+}
+
+body.light-theme .success-message {
+    color: var(--success-color);
+}
+
+/* ======= PAGINAÇÃO ======= */
+body.light-theme .pagination {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+body.light-theme .pagination-btn {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+body.light-theme .pagination-btn:hover:not(:disabled) {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+body.light-theme .pagination-btn:disabled {
+    background-color: var(--border-color);
+    color: var(--text-color-light);
+}
+
+/* ======= FILTROS ======= */
+body.light-theme .filter-select,
+body.light-theme .filter-input {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 1px solid var(--border-color);
+}
+
+body.light-theme .filter-btn {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+body.light-theme .filter-btn.clear {
+    background-color: var(--error-color);
+    color: white;
+}
+
+/* ======= ANIMAÇÕES ======= */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* ======= UTILITÁRIOS ======= */
+.text-success { color: var(--success-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
+.text-error { color: var(--error-color) !important; }
+.text-info { color: var(--info-color) !important; }
+
+.bg-success { background-color: var(--success-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-error { background-color: var(--error-color) !important; }
+.bg-info { background-color: var(--info-color) !important; }
 

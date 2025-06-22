@@ -83,6 +83,7 @@ window.validarLogin = async function(event) {
                 localStorage.setItem('usuarioLogado', me.nome);
                 localStorage.setItem('usuarioEmail', me.email);
                 localStorage.setItem('isUsuarioSuperior', isSuperior.toString());
+                localStorage.setItem('idCollaborator', me.idCollaborator);
 
                 console.log('Redirecionando para o menu principal...');
                 window.location.href = "../../pages/globalMenu/mainMenu.html";
@@ -98,8 +99,7 @@ window.validarLogin = async function(event) {
         console.error("Erro no login:", err);
         Swal.fire("Erro", "Não foi possível conectar ao servidor.", "error");
     }
-} // <- ESSA CHAVE AQUI É FUNDAMENTAL!
-
+}
 
 // Função para verificar se é o primeiro usuário
 async function verificarPrimeiroUsuario() {
@@ -181,30 +181,6 @@ window.criarUsuario = async function(event) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    // Controle de tema - Padronizado para todo o sistema
-    const themeToggle = document.querySelector('.theme-toggle');
-    if (themeToggle) {
-        // Verifica se há um tema salvo e aplica
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        if (savedTheme === 'light') {
-            document.body.classList.add('light-theme');
-        } else {
-            document.body.classList.remove('light-theme');
-        }
-
-        // Alterna entre temas
-        themeToggle.addEventListener('click', () => {
-            const isLight = document.body.classList.contains('light-theme');
-            const newTheme = isLight ? 'dark' : 'light';
-            
-            if (newTheme === 'light') {
-                document.body.classList.add('light-theme');
-            } else {
-                document.body.classList.remove('light-theme');
-            }
-            localStorage.setItem('theme', newTheme);
-        });
-    }
-});
+// O sistema de temas é gerenciado pelo temaSystem.js
+// Removida a implementação duplicada para evitar conflitos
 

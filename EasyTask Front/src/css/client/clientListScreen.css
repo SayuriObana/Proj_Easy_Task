@@ -482,7 +482,7 @@ body {
 }
 
 #modalCadastroCliente.mostrar {
-    display: flex;
+    display: flex !important;
     opacity: 1;
     pointer-events: auto;
 }

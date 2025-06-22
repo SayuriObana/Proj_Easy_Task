@@ -59,7 +59,7 @@ async function renovarToken() {
     }
 
     try {
-        const refreshResp = await fetch('http://localhost:8080/collaborators/refresh', {
+        const refreshResp = await fetch('http://localhost:8080/collaborators/refresh-token', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -77,12 +77,28 @@ async function renovarToken() {
         }
 
         const data = await refreshResp.json();
-        if (!data.accessToken || !data.refreshToken) {
+        if (!data.accessToken) {
             throw new Error('Resposta inválida do servidor');
         }
 
         localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
+
+        // Força a atualização dos dados do usuário para garantir que a permissão de SUPERIOR está correta
+        try {
+            const meResp = await fetch('http://localhost:8080/collaborators/me', {
+                headers: { 'Authorization': `Bearer ${data.accessToken}` }
+            });
+            if (meResp.ok) {
+                const me = await meResp.json();
+                const isSuperior = me.accessLevel === 'SUPERIOR';
+                localStorage.setItem('isUsuarioSuperior', isSuperior.toString());
+                console.log('Permissões de usuário atualizadas após refresh token.');
+            }
+        } catch (meError) {
+            console.error('Falha ao buscar dados do usuário após refresh.', meError);
+        }
+
+        // Não atualiza o refreshToken, mantém o mesmo
         return data.accessToken;
     } catch (error) {
         console.error('Erro ao renovar token:', error);
@@ -120,7 +136,7 @@ const fetchComToken = async (url, options = {}) => {
                 token = await renovarToken();
             }
 
-            const response = await fetch(url, {
+            const fetchOptions = {
                 ...options,
                 headers: {
                     ...(options.headers || {}),
@@ -128,7 +144,15 @@ const fetchComToken = async (url, options = {}) => {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
+            };
+            
+            console.log('Enviando requisição:', {
+                url: url,
+                method: fetchOptions.method || 'GET',
+                headers: fetchOptions.headers
             });
+
+            const response = await fetch(url, fetchOptions);
 
             if (response.ok) {
                 return response;
@@ -160,25 +184,44 @@ const fetchComToken = async (url, options = {}) => {
 
 // Funções de manipulação do DOM
 const renderizarColaborador = (colaborador) => {
+    console.log('🔍 Dados do colaborador:', colaborador); // Debug
+    
+    // Verificar se o usuário tem permissão de SUPERIOR
+    const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+    
     const card = document.createElement("div");
     card.className = "profile-card";
     card.innerHTML = `
         <p>${colaborador.name}</p>
         <div class="buttons-container">
-            <button class="view-btn" data-id="${colaborador.id_collaborator}">Visualizar</button>
-            <button class="edit-btn" data-id="${colaborador.id_collaborator}">Editar</button>
-            <button class="delete-btn" data-id="${colaborador.id_collaborator}">Excluir</button>
+            <button class="view-btn" data-id="${colaborador.idCollaborator}">Visualizar</button>
+            ${isUsuarioSuperior ? `<button class="edit-btn" data-id="${colaborador.idCollaborator}">Editar</button>` : ''}
+            ${isUsuarioSuperior ? `<button class="delete-btn" data-id="${colaborador.idCollaborator}">Excluir</button>` : ''}
         </div>
     `;
 
+    const collaboratorId = colaborador.idCollaborator;
+    console.log('🔍 ID do colaborador:', collaboratorId); // Debug
+
     // Event listeners para os botões
-    card.querySelector('.view-btn').addEventListener('click', () => visualizarColaborador(colaborador.id_collaborator));
-    card.querySelector('.edit-btn').addEventListener('click', () => editarColaborador(colaborador.id_collaborator));
-    card.querySelector('.delete-btn').addEventListener('click', () => excluirColaborador(colaborador.id_collaborator));
+    card.querySelector('.view-btn').addEventListener('click', () => visualizarColaborador(collaboratorId));
+    
+    // Só adiciona event listeners para editar e excluir se o usuário tiver permissão
+    if (isUsuarioSuperior) {
+        const editBtn = card.querySelector('.edit-btn');
+        const deleteBtn = card.querySelector('.delete-btn');
+        
+        if (editBtn) {
+            editBtn.addEventListener('click', () => editarColaborador(collaboratorId));
+        }
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => excluirColaborador(collaboratorId));
+        }
+    }
     
     // Duplo clique para ver tarefas
     card.addEventListener("dblclick", () => {
-        window.location.href = `../task/taskListScreen.html?colaboradorId=${colaborador.id_collaborator}`;
+        window.location.href = `../task/taskListScreen.html?colaboradorId=${collaboratorId}`;
     });
 
     return card;
@@ -209,6 +252,8 @@ const carregarColaboradores = async () => {
         if (!response.ok) throw new Error('Erro ao carregar colaboradores');
         
         colaboradores = await response.json();
+        console.log('🔍 Colaboradores carregados:', colaboradores); // Debug
+        
         renderizarColaboradores();
     } catch (error) {
         console.error('Erro ao carregar colaboradores:', error);
@@ -221,30 +266,102 @@ const carregarColaboradores = async () => {
     }
 };
 
+// Função para fechar o modal de visualização
+const fecharModalVisualizacao = () => {
+    modalVisualizar.classList.remove("show");
+    // Aguardar a animação terminar antes de esconder
+    setTimeout(() => {
+        modalVisualizar.style.display = "none";
+    }, 300);
+};
+
+// Event listener para o botão de fechar visualização
+fecharVisualizar.addEventListener("click", fecharModalVisualizacao);
+
+// Event listener para fechar ao clicar fora do modal
+modalVisualizar.addEventListener("click", (e) => {
+    if (e.target === modalVisualizar) {
+        fecharModalVisualizacao();
+    }
+});
+
+// Event listener para fechar com a tecla ESC
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalVisualizar.style.display === "block") {
+        fecharModalVisualizacao();
+    }
+});
+
 const visualizarColaborador = async (id) => {
-    try {
-        const colaborador = colaboradores.find(c => c.id_collaborator === id);
-        if (!colaborador) throw new Error('Colaborador não encontrado');
-
-        document.getElementById("detalheNome").textContent = `Nome: ${colaborador.name}`;
-        document.getElementById("detalheEmail").textContent = `Email: ${colaborador.email}`;
-        document.getElementById("detalheTelefone").textContent = `Telefone: ${colaborador.phone}`;
-        document.getElementById("detalheCargo").textContent = `Cargo: ${colaborador.position}`;
-
-        modalVisualizar.style.display = "flex";
-    } catch (error) {
+    console.log('🔍 Visualizando colaborador com ID:', id); // Debug
+    
+    if (!id || id === 'undefined') {
+        console.error('❌ ID do colaborador é undefined ou inválido');
         Swal.fire({
-            title: "Erro!",
-            text: error.message,
+            title: "Erro",
+            text: "ID do colaborador inválido",
             icon: "error",
-            confirmButtonColor: "#d33"
+            confirmButtonText: "OK"
+        });
+        return;
+    }
+    
+    try {
+        const response = await fetchComToken(`http://localhost:8080/collaborators/${id}`);
+        if (!response.ok) throw new Error('Erro ao carregar dados do colaborador');
+        
+        const colaborador = await response.json();
+        
+        // Atualizar os campos do modal
+        document.getElementById("detalheNome").innerHTML = `<strong>Nome:</strong> ${colaborador.name}`;
+        document.getElementById("detalheEmail").innerHTML = `<strong>Email:</strong> ${colaborador.email}`;
+        document.getElementById("detalheTelefone").innerHTML = `<strong>Telefone:</strong> ${colaborador.phone || 'Não informado'}`;
+        document.getElementById("detalheCargo").innerHTML = `<strong>Cargo:</strong> ${colaborador.position || 'Não informado'}`;
+        
+        // Exibir o modal com animação
+        modalVisualizar.style.display = "block";
+        modalVisualizar.classList.add("show");
+        
+    } catch (error) {
+        console.error('Erro ao visualizar colaborador:', error);
+        Swal.fire({
+            title: "Erro",
+            text: "Não foi possível carregar os dados do colaborador",
+            icon: "error",
+            confirmButtonText: "OK"
         });
     }
 };
 
 const editarColaborador = async (id) => {
+    console.log('🔍 Editando colaborador com ID:', id); // Debug
+    
+    // Verificar se o usuário tem permissão de SUPERIOR
+    const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+    
+    if (!isUsuarioSuperior) {
+        Swal.fire({
+            title: "Acesso Negado",
+            text: "Você não tem permissão para editar colaboradores. Apenas usuários com nível SUPERIOR podem realizar esta ação.",
+            icon: "warning",
+            confirmButtonColor: "#3085d6"
+        });
+        return;
+    }
+    
+    if (!id || id === 'undefined') {
+        console.error('❌ ID do colaborador é undefined ou inválido');
+        Swal.fire({
+            title: "Erro",
+            text: "ID do colaborador inválido",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+        return;
+    }
+    
     try {
-        const colaborador = colaboradores.find(c => c.id_collaborator === id);
+        const colaborador = colaboradores.find(c => c.idCollaborator === id);
         if (!colaborador) throw new Error('Colaborador não encontrado');
 
         colaboradorSelecionadoId = id;
@@ -252,7 +369,7 @@ const editarColaborador = async (id) => {
         document.getElementById("email").value = colaborador.email;
         document.getElementById("telefone").value = colaborador.phone;
         document.getElementById("cargo").value = colaborador.position;
-        document.getElementById("accessLevel").value = colaborador.access_level;
+        document.getElementById("accessLevel").value = colaborador.accessLevel;
         document.getElementById("senha").value = ""; // Não preenchemos a senha por segurança
 
         modalColaborador.querySelector("h2").textContent = "Editar Colaborador";
@@ -268,6 +385,32 @@ const editarColaborador = async (id) => {
 };
 
 const excluirColaborador = async (id) => {
+    console.log('🔍 Excluindo colaborador com ID:', id); // Debug
+    
+    // Verificar se o usuário tem permissão de SUPERIOR
+    const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+    
+    if (!isUsuarioSuperior) {
+        Swal.fire({
+            title: "Acesso Negado",
+            text: "Você não tem permissão para excluir colaboradores. Apenas usuários com nível SUPERIOR podem realizar esta ação.",
+            icon: "warning",
+            confirmButtonColor: "#3085d6"
+        });
+        return;
+    }
+    
+    if (!id || id === 'undefined') {
+        console.error('❌ ID do colaborador é undefined ou inválido');
+        Swal.fire({
+            title: "Erro",
+            text: "ID do colaborador inválido",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+        return;
+    }
+    
     try {
         const result = await Swal.fire({
             title: "Tem certeza?",
@@ -307,8 +450,46 @@ const excluirColaborador = async (id) => {
     }
 };
 
+// Função para verificar e atualizar permissões do usuário
+const verificarPermissoesUsuario = async () => {
+    try {
+        console.log('🔍 Verificando permissões do usuário...');
+        
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            console.warn('⚠️ Token não encontrado');
+            return;
+        }
+        
+        const response = await fetch('http://localhost:8080/collaborators/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            const me = await response.json();
+            const isSuperior = me.accessLevel === 'SUPERIOR';
+            
+            localStorage.setItem('isUsuarioSuperior', isSuperior.toString());
+            localStorage.setItem('accessLevel', me.accessLevel || 'BASICO');
+            
+            console.log('✅ Permissões atualizadas:', {
+                usuario: me.nome || me.name,
+                accessLevel: me.accessLevel,
+                isSuperior: isSuperior
+            });
+        } else {
+            console.warn('⚠️ Não foi possível verificar permissões:', response.status);
+        }
+    } catch (error) {
+        console.error('❌ Erro ao verificar permissões:', error);
+    }
+};
+
 // Event Listeners
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    // Verificar permissões do usuário
+    await verificarPermissoesUsuario();
+    
     // Controle de tema - Padronizado para todo o sistema
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle) {
@@ -361,9 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (fecharVisualizar) {
-        fecharVisualizar.addEventListener("click", () => {
-            modalVisualizar.style.display = "none";
-        });
+        fecharVisualizar.addEventListener("click", fecharModalVisualizacao);
     }
 
     // Form de cadastro/edição
@@ -410,7 +589,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     email: email,
                     phone: telefone,
                     position: cargo,
-                    access_level: accessLevel
+                    accessLevel: accessLevel
                 };
 
                 // Só inclui a senha se estiver preenchida (edição) ou for novo colaborador
@@ -425,14 +604,31 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify(body)
                 });
 
-                if (!response.ok) {
+                if (!response || !response.ok) {
                     let errorMsg = 'Erro ao salvar colaborador';
-                    try {
-                        const errorData = await response.json();
-                        errorMsg = errorData.error || errorData.message || errorMsg;
-                    } catch (e) {
-                        const errorText = await response.text();
-                        if (errorText) errorMsg = errorText;
+                    
+                    // Verificar se é erro de permissão
+                    if (response && response.status === 403) {
+                        const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+                        const usuarioLogado = localStorage.getItem('usuarioLogado');
+                        
+                        console.log('❌ Erro 403 - Verificando permissões:', {
+                            usuarioLogado,
+                            isUsuarioSuperior,
+                            'isUsuarioSuperior (localStorage)': localStorage.getItem('isUsuarioSuperior')
+                        });
+                        
+                        errorMsg = 'Você não tem permissão para criar/editar colaboradores. Apenas usuários com nível SUPERIOR podem realizar esta ação.';
+                    } else if (response) {
+                        try {
+                            const errorData = await response.json();
+                            errorMsg = errorData.error || errorData.message || errorMsg;
+                        } catch (e) {
+                            const errorText = await response.text();
+                            if (errorText) errorMsg = errorText;
+                        }
+                    } else {
+                        errorMsg = 'Falha na comunicação com o servidor. Verifique suas permissões ou se o servidor está online.';
                     }
                     throw new Error(errorMsg);
                 }
@@ -471,6 +667,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const fabAddColaborador = document.getElementById("fabAddColaborador");
     if (fabAddColaborador) {
         fabAddColaborador.addEventListener("click", () => {
+            // Verificar se o usuário tem permissão de SUPERIOR
+            const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+            const usuarioLogado = localStorage.getItem('usuarioLogado');
+            const accessLevel = localStorage.getItem('accessLevel');
+            
+            console.log('🔍 Verificando permissões do usuário:', {
+                usuarioLogado,
+                isUsuarioSuperior,
+                accessLevel,
+                'isUsuarioSuperior (localStorage)': localStorage.getItem('isUsuarioSuperior')
+            });
+            
+            if (!isUsuarioSuperior) {
+                Swal.fire({
+                    title: "Acesso Negado",
+                    text: "Você não tem permissão para criar colaboradores. Apenas usuários com nível SUPERIOR podem realizar esta ação.",
+                    icon: "warning",
+                    confirmButtonColor: "#3085d6"
+                });
+                return;
+            }
+            
             modalColaborador.style.display = "flex";
             formCadastro.reset();
             colaboradorSelecionadoId = null;

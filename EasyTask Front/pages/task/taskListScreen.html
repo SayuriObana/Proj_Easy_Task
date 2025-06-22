@@ -24,7 +24,7 @@
   <!-- Scripts da aplicação -->
   <script src="../../src/components/js/sidebar.js"></script>
   <script src="../../src/js/tema/temaSystem.js"></script>
-  <script type="module" src="../../src/js/task/taskListScreen.js"></script>
+  <script src="../../js/task/taskListScreen.js"></script>
 </head>
 
 <body>
@@ -48,6 +48,18 @@
         <!-- As colunas serão geradas dinamicamente aqui -->
         <div class="kanban-board">
             <!-- As colunas do Kanban serão inseridas aqui -->
+        </div>
+    </div>
+
+    <!-- Lixeira moderna para fases -->
+    <div id="trashBin" class="trash-bin" title="Arraste uma fase aqui para desvinculá-la do quadro">
+        <div class="trash-icon">
+            <i class="fas fa-unlink"></i>
+        </div>
+        <div class="trash-text">
+            <h3>Desvincular Fase</h3>
+            <p>Arraste uma fase aqui para desvinculá-la do quadro</p>
+            <small>A fase continuará disponível no sistema</small>
         </div>
     </div>
 
@@ -80,22 +92,22 @@
         </form>
       </div>       
 
-      <div class="popup-buttons">
-        <button id="btnEditar" class="btn-editar" onclick="abrirEdicaoTarefa()">Editar</button>
-        <button class="btn-excluir" onclick="excluirTarefa()">Excluir</button>
+      <div class="popup-footer">
+        <button id="btnEditarTarefa" class="btn btn-edit">EDITAR</button>
+        <button id="btnExcluirTarefa" class="btn btn-delete">EXCLUIR</button>
       </div>
     </div>
   </div>
 
   <!-- Modal de Tarefa -->
-  <div id="taskModal" class="modal" style="display: none;">
+  <div id="taskModal" class="modal">
     <div class="modal-content">
       <span class="close" id="closeTaskModalBtn">&times;</span>
       <div class="taskForm-form">
         <div class="taskForm-header">
           <h2 id="taskModalTitle">Nova Tarefa</h2>
         </div>
-        <form id="tarefaForm">
+        <form id="tarefaForm" onsubmit="salvarTarefa(event); return false;">
           <div class="taskForm-input-group">
             <label for="tituloTarefa">Título da Tarefa</label>
             <input type="text" id="tituloTarefa" class="taskForm-input" required placeholder="Digite o título da tarefa">
@@ -139,7 +151,7 @@
   </div>
 
   <!-- Modal de Fases -->
-  <div id="cardModal" class="modal" style="display: none;">
+  <div id="cardModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h2>Gerenciar Fases</h2>
@@ -162,8 +174,32 @@
                 </div>
             </form>
             
+            <hr>
+
+            <!-- Seção para Fases no Quadro Atual -->
             <div class="phases-section">
-                <h3>Fases Disponíveis</h3>
+                <h3>Fases no Quadro Atual</h3>
+                <div class="phases-table-container">
+                    <table id="boardPhasesTable" class="phases-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Sequência</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="boardPhasesTableBody">
+                            <!-- Fases do board serão carregadas aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Seção para Fases Disponíveis (para adicionar ao board) -->
+            <div class="phases-section">
+                <h3>Fases Disponíveis (Adicionar ao Quadro)</h3>
                 <div class="phases-table-container">
                     <table id="phasesTable" class="phases-table">
                         <thead>

@@ -19,7 +19,7 @@ html, body {
     --text-color: #ffffff;
     --card-bg: #1f1f1f;
     --card-hover: #2a2a2a;
-    --icon-filter: brightness(0) invert(1);
+    --icon-filter: brightness(0) invert(1); /* Ícones brancos no tema escuro */
 }
 
 /* Tema Claro */
@@ -28,13 +28,13 @@ body.light-theme {
     --text-color: #222222;
     --card-bg: #ffffff;
     --card-hover: #f0f0f0;
-    --icon-filter: none;
+    --icon-filter: brightness(0); /* Ícones pretos no tema claro */
 }
 
 body.light-theme .icon,
 body.light-theme .main-content-icon img,
 body.light-theme .logo2-icon {
-  filter: invert(1) brightness(0.8) !important;
+  filter: brightness(0) !important; /* Força ícones pretos no tema claro */
 }
 body.light-theme i,
 body.light-theme .fa,
@@ -96,6 +96,7 @@ body.light-theme .fa-sun {
     width: 130px;
     height: auto;
     transition: transform 0.3s ease;
+    filter: var(--icon-filter);
     /* Adiciona uma animação ao ícone */
 }
 
@@ -104,13 +105,14 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
-    background-color: #000000;
+    background-color: var(--bg-color);
     font-family: 'Montserrat', sans-serif;
-    color: #fff;
+    color: var(--text-color);
     padding: 10px 5px 20px;
     width: 100%;
     max-width: 100%;
     padding: 20px 10px 40px;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Estilo para a mensagem de boas-vindas */
@@ -144,6 +146,11 @@ body.light-theme .welcome-message #colaborador-nome {
     /* Ajuste a posição da logo para cima */
     margin-bottom: 10px;
     /* Espaçamento abaixo da logo */
+}
+
+.logo-container .logo2-icon {
+    filter: var(--icon-filter);
+    transition: filter 0.3s ease;
 }
 
 @media (max-width: 414px) {

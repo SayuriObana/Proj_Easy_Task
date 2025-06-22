@@ -285,6 +285,7 @@ window.authManager = {
             return StorageUtils.getCurrentUser();
         }
         return {
+            idCollaborator: localStorage.getItem('idCollaborator'),
             nome: localStorage.getItem('usuarioLogado'),
             email: localStorage.getItem('usuarioEmail'),
             isSuperior: this.isSuperiorUser()

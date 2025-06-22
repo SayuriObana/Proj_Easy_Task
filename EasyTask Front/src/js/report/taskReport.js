@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const refreshResp = await fetch('http://localhost:8080/collaborators/refresh', {
+            const refreshResp = await fetch('http://localhost:8080/collaborators/refresh-token', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -72,12 +72,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const data = await refreshResp.json();
-            if (!data.accessToken || !data.refreshToken) {
+            if (!data.accessToken) {
                 throw new Error('Resposta inválida do servidor');
             }
 
             localStorage.setItem('token', data.accessToken);
-            localStorage.setItem('refreshToken', data.refreshToken);
+            // Não atualiza o refreshToken, mantém o mesmo
             return data.accessToken;
         } catch (error) {
             console.error('Erro ao renovar token:', error);

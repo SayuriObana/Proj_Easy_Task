@@ -4,15 +4,84 @@
 /* Fundo da página principal */
 /* Reset Geral */
 
-
 body.home {
     overflow-x: hidden;
-    background-size: cover; /* Ajusta a imagem para cobrir todo o fundo */
-    background-position: center; /* Centraliza a imagem */
-    background-repeat: no-repeat; /* Evita repetição da imagem */
     font-family: 'Montserrat', sans-serif;
     margin: 0;
     padding: 0;
+    transition: background-color 0.3s ease;
+}
+
+/* Tema escuro (padrão) - Fundo preto */
+body.home {
+    background-color: #000000 !important;
+}
+
+/* Tema claro - Fundo branco (com !important para garantir prioridade) */
+body.home.light-theme {
+    background-color: #ffffff !important;
+}
+
+/* Ajustes para o texto no tema claro */
+body.home.light-theme .text-container p {
+    color: #000000 !important;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.3) !important;
+}
+
+/* Ajustes para os botões no tema claro */
+body.home.light-theme .buttons .button {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: 5px solid #000000 !important;
+}
+
+body.home.light-theme .buttons .button:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 5px solid #FFD700 !important;
+}
+
+/* Ajustes para o header no tema claro */
+body.home.light-theme .header {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Ajustes para o botão cadastrar no tema claro */
+body.home.light-theme .cadastrar-topo {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
+
+body.home.light-theme .cadastrar-topo:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* Ajustes para as imagens no tema claro */
+body.home.light-theme .logo {
+    filter: brightness(0) !important; /* Torna a logo preta */
+}
+
+body.home.light-theme .logo-easytask {
+    filter: brightness(0) !important; /* Torna a logo preta */
+}
+
+body.home.light-theme .logo-text {
+    filter: brightness(0) !important; /* Torna o texto preto */
+}
+
+/* Ajustes para as imagens no tema escuro */
+body.home .logo {
+    filter: brightness(0) invert(1) !important; /* Torna a logo branca */
+}
+
+body.home .logo-easytask {
+    filter: brightness(0) invert(1) !important; /* Torna a logo branca */
+}
+
+body.home .logo-text {
+    filter: brightness(0) invert(1) !important; /* Torna o texto branco */
 }
 
   /* Header */
@@ -21,23 +90,26 @@ body.home {
     justify-content: space-between;
     align-items: center;
     padding: 20px;
+    background-color: rgba(0, 0, 0, 0.9);
+    transition: background-color 0.3s ease;
   }
   
   .logo {
     width: 100px; 
     height: auto;
     margin-left: 0px;
+    transition: filter 0.3s ease;
   }
   
   .buttons .button {
     display: inline-block; /* Torna o botão um bloco inline */
-    background-color: #000000; /* Cor de fundo verde */
-    color: rgb(255, 255, 255); /* Cor do texto branco */
+    background-color: #ffffff; /* Cor de fundo branca */
+    color: #000000; /* Cor do texto preto */
     text-decoration: none; /* Remove o sublinhado */
     font-size: 1rem; /* Ajusta o tamanho da fonte */
     font-weight: bold; /* Negrito no texto */
     padding: 10px 40px; /* Adiciona espaçamento interno */
-    border: 5px solid #ffffff; /* Remove qualquer borda */
+    border: 5px solid #ffffff; /* Borda branca */
     border-radius: 20px; /* Bordas arredondadas */
     cursor: pointer; /* Adiciona o ícone de mão ao passar o mouse */
     margin-top: -10px; /* Espaço acima do botão */
@@ -45,9 +117,9 @@ body.home {
   }
   
   .buttons .button:hover {
-    background-color: #ffffff;
-    color: #000000;
-    border: 5px solid #e8ff3e; /* Borda branca com 2px de espessura */
+    background-color: #000000;
+    color: #ffffff;
+    border: 5px solid #e8ff3e; /* Borda amarela */
   }
 
   .mensagem-erro {
@@ -82,79 +154,69 @@ body.home {
     width: 400px; /* Ajuste o tamanho da primeira imagem (hexágono) conforme necessário */
     height: auto;
     margin-bottom: -170px; /* Espaço entre as duas imagens */
+    transition: filter 0.3s ease;
   }
   
   .logo-text {
     width: 500px; /* Ajuste o tamanho da segunda imagem (texto "EasyTask") conforme necessário */
     height: auto;
+    transition: filter 0.3s ease;
   }
   
   .text-container p {
     font-size: 1.1rem;
-    color: #fff;
+    color: #ffffff;
     margin: -100px;;
     text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+    transition: color 0.3s ease, text-shadow 0.3s ease;
   }
   
   /* ====== Estilo do Modal de Login ====== */
   
   /* Fundo escuro */
   .modal {
-    display:flex; 
-    position:fixed; 
-    z-index: 1; 
+    display: none;
+    position: fixed;
+    z-index: 1;
     left: 0;
     top: 0;
-    width: 95%; 
-    height: 85%; 
-    overflow:hidden; 
-    background-color: rgb(0,0,0); 
-    background-color: rgba(0,0,0,0.4); 
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
   }
   
-.modal {
-  display: none; /* Oculta inicialmente */
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100vw; /* Ocupa toda a largura da janela */
-  height: 100vh; /* Ocupa toda a altura da janela */
-  background-color: rgba(0, 0, 0, 0.4); /* Fundo escuro */
-  justify-content: center;
-  align-items: center;
-  overflow: hidden; /* Remove qualquer rolagem no modal */
-}
-
 .modal-content {
   background-color: #fefefe;
   padding: 40px;
   border: 1px solid #888;
-  width: 90%; /* Ajusta largura */
-  max-width: 500px; /* Limita a largura */
+  width: 90%;
+  max-width: 500px;
   border-radius: 20px;
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  overflow-y: auto; /* Permite rolagem vertical caso necessário */
-  max-height: 90vh; /* Garante que não ultrapasse a altura da janela */
+  overflow-y: auto;
+  max-height: 90vh;
   position: relative;
 }
 
 .modal-logo {
-  max-width: 80%; /* Ajusta tamanho da logo */
+  max-width: 80%;
   height: auto;
   margin: 20px auto;
-  display: block; /* Centraliza a imagem */
+  display: block;
 }
 
 body.modal-open {
-  overflow: hidden; /* Remove a rolagem da página quando o modal está aberto */
+  overflow: hidden;
 }
 
 input[type=email], input[type=password] {
-  width: calc(100% - 40px); /* Ajusta a largura do input */
-  max-width: 400px; /* Define largura máxima */
-  margin: 10px auto; /* Adiciona espaçamento */
+  width: calc(100% - 40px);
+  max-width: 400px;
+  margin: 10px auto;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 30px;
@@ -194,24 +256,27 @@ input[type=email], input[type=password] {
   color: red;
   font-size: 0.9rem;
   margin-top: 10px;
-  display: none; /* Inicialmente oculto */
+  display: none;
 }
 
 .light-theme .modal-content {
-  background-color: #ffffff; /* Claro no tema claro */
-  color: #000000; /* Texto preto */
+  background-color: #ffffff;
+  color: #222222;
+  border: 1px solid #ccc;
 }
 
 .dark-theme .modal-content {
-  background-color: #222222; /* Escuro no tema escuro */
-  color: #ffffff; /* Texto branco */
+  background-color: #1e1e1e;
+  color: #ffffff;
+  border: 1px solid #444;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
+  padding: 20px;
+  position: relative;
 }
 
 .logo {
@@ -224,7 +289,7 @@ input[type=email], input[type=password] {
 .top-right-buttons {
   position: fixed;
   top: 15px;
-  right: 70px; /* ← aumentei só mais um pouco */
+  right: 70px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -232,9 +297,9 @@ input[type=email], input[type=password] {
 }
 
 .cadastrar-topo {
-  background-color: var(--button-bg);
-  color: var(--text-color);
-  border: 2px solid var(--button-border);
+  background-color: #ffffff;
+  color: #000000;
+  border: 2px solid #ffffff;
   border-radius: 8px;
   padding: 10px 15px;
   font-size: 16px;
@@ -243,11 +308,11 @@ input[type=email], input[type=password] {
 }
 
 .cadastrar-topo:hover {
-  background: var(--text-color);
-  color: var(--bg-color);
+  background: #000000;
+  color: #ffffff;
 }
 
-
+/* Botão de tema */
 .theme-toggle {
   background-color: transparent;
   border: 2px solid white;
@@ -256,13 +321,37 @@ input[type=email], input[type=password] {
   color: white;
   font-size: 16px;
   cursor: pointer;
-  height: 40px; /* 🔥 Mesma altura */
+  height: 40px;
+  width: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1004;
 }
 
-/* Cadastro Modal usa o mesmo estilo base do login */
+.theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle .fa-sun,
+.theme-toggle .fa-moon {
+  transition: all 0.3s ease;
+}
+
+/* Tema claro - ajustes específicos */
+body.light-theme .theme-toggle {
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+body.light-theme .theme-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Cadastro Modal */
 #cadastroModal .modal-content {
   background-color: var(--bg-color);
   color: var(--text-color);
@@ -342,6 +431,15 @@ input[type=email], input[type=password] {
     padding: 8px 20px;
     font-size: 1rem;
   }
+  .top-right-buttons {
+    right: 20px;
+    top: 10px;
+  }
+  .theme-toggle {
+    height: 35px;
+    width: 35px;
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -412,6 +510,16 @@ input[type=email], input[type=password] {
   .modal-title {
     font-size: 1.35rem;
     margin-bottom: 16px;
+  }
+  .top-right-buttons {
+    right: 10px;
+    top: 10px;
+    gap: 8px;
+  }
+  .theme-toggle {
+    height: 32px;
+    width: 32px;
+    font-size: 12px;
   }
 }
 
