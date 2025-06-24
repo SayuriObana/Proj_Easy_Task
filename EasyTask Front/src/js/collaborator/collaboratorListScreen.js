@@ -31,6 +31,18 @@ const formCadastro = document.getElementById("formCadastroColaborador");
 const fecharModal = document.getElementById("fecharModal");
 const fecharVisualizar = document.getElementById("fecharVisualizacao");
 
+// Logs para debug dos elementos do DOM
+console.log('🔍 Elementos do DOM encontrados:');
+console.log('  - profileGrid:', !!profileGrid);
+console.log('  - sidebar:', !!sidebar);
+console.log('  - menuToggle:', !!menuToggle);
+console.log('  - searchBar:', !!searchBar);
+console.log('  - modalColaborador:', !!modalColaborador);
+console.log('  - modalVisualizar:', !!modalVisualizar);
+console.log('  - formCadastro:', !!formCadastro);
+console.log('  - fecharModal:', !!fecharModal);
+console.log('  - fecharVisualizar:', !!fecharVisualizar);
+
 // Função para atualizar o ícone do tema
 function updateThemeIcon(theme) {
     const themeIcon = document.querySelector('#themeToggle i');
@@ -44,7 +56,10 @@ function isTokenExpired(token) {
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const expirationTime = payload.exp * 1000; // Converter para milissegundos
-        return Date.now() >= expirationTime;
+        const currentTime = Date.now();
+        const isExpired = currentTime >= expirationTime;
+        
+        return isExpired;
     } catch (error) {
         console.error('Erro ao verificar expiração do token:', error);
         return true; // Se não conseguir verificar, considera como expirado
@@ -82,23 +97,8 @@ async function renovarToken() {
         }
 
         localStorage.setItem('accessToken', data.accessToken);
-
-        // Força a atualização dos dados do usuário para garantir que a permissão de SUPERIOR está correta
-        try {
-            const meResp = await fetch('http://localhost:8080/collaborators/me', {
-                headers: { 'Authorization': `Bearer ${data.accessToken}` }
-            });
-            if (meResp.ok) {
-                const me = await meResp.json();
-                const isSuperior = me.accessLevel === 'SUPERIOR';
-                localStorage.setItem('isUsuarioSuperior', isSuperior.toString());
-                console.log('Permissões de usuário atualizadas após refresh token.');
-            }
-        } catch (meError) {
-            console.error('Falha ao buscar dados do usuário após refresh.', meError);
-        }
-
-        // Não atualiza o refreshToken, mantém o mesmo
+        
+        // Retorna o novo token sem fazer chamadas adicionais
         return data.accessToken;
     } catch (error) {
         console.error('Erro ao renovar token:', error);
@@ -112,13 +112,13 @@ async function renovarToken() {
 const fetchComToken = async (url, options = {}) => {
     let token = localStorage.getItem('accessToken');
     let tentativas = 0;
-    const MAX_TENTATIVAS = 3;
+    const MAX_TENTATIVAS = 2; // Reduzido para evitar loops infinitos
     
     if (!token) {
         try {
             token = await renovarToken();
         } catch (error) {
-            console.error('Não foi possível renovar o token:', error);
+            console.error('❌ Não foi possível renovar o token:', error);
             localStorage.clear();
             Swal.fire({
                 title: "Sessão expirada",
@@ -145,12 +145,6 @@ const fetchComToken = async (url, options = {}) => {
                     'Accept': 'application/json'
                 }
             };
-            
-            console.log('Enviando requisição:', {
-                url: url,
-                method: fetchOptions.method || 'GET',
-                headers: fetchOptions.headers
-            });
 
             const response = await fetch(url, fetchOptions);
 
@@ -158,7 +152,14 @@ const fetchComToken = async (url, options = {}) => {
                 return response;
             }
 
-            if (response.status === 401 || response.status === 403) {
+            // Se for erro 403, não tentar renovar token (problema de permissão)
+            if (response.status === 403) {
+                console.warn('⚠️ Erro 403 - Problema de permissão, não renovando token');
+                throw new Error(`Erro de permissão: ${response.status}`);
+            }
+
+            // Só renovar token para erros 401
+            if (response.status === 401) {
                 token = await renovarToken();
                 tentativas++;
                 continue;
@@ -167,15 +168,23 @@ const fetchComToken = async (url, options = {}) => {
             throw new Error(`Erro na requisição: ${response.status}`);
         } catch (error) {
             console.error('Erro na requisição:', error);
-            if (error.message === 'Refresh token inválido ou expirado' || tentativas >= MAX_TENTATIVAS - 1) {
-                localStorage.clear();
-                Swal.fire({
-                    title: "Sessão expirada",
-                    text: "Sua sessão expirou ou você não tem permissão. Faça login novamente.",
-                    icon: "warning",
-                    confirmButtonText: "OK"
-                });
-                throw new Error('Sessão expirada ou sem permissão');
+            
+            // Se for erro de permissão ou refresh token inválido, não tentar novamente
+            if (error.message.includes('Erro de permissão') || 
+                error.message === 'Refresh token inválido ou expirado' || 
+                tentativas >= MAX_TENTATIVAS - 1) {
+                
+                if (error.message.includes('Refresh token inválido')) {
+                    localStorage.clear();
+                    Swal.fire({
+                        title: "Sessão expirada",
+                        text: "Sua sessão expirou ou você não tem permissão. Faça login novamente.",
+                        icon: "warning",
+                        confirmButtonText: "OK"
+                    });
+                }
+                
+                throw error;
             }
             tentativas++;
         }
@@ -188,6 +197,7 @@ const renderizarColaborador = (colaborador) => {
     
     // Verificar se o usuário tem permissão de SUPERIOR
     const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+    console.log('🔍 Usuário é SUPERIOR:', isUsuarioSuperior); // Debug
     
     const card = document.createElement("div");
     card.className = "profile-card";
@@ -202,23 +212,10 @@ const renderizarColaborador = (colaborador) => {
 
     const collaboratorId = colaborador.idCollaborator;
     console.log('🔍 ID do colaborador:', collaboratorId); // Debug
+    console.log('🔍 Tipo do ID:', typeof collaboratorId); // Debug
+    console.log('🔍 Colaborador tem idCollaborator?', 'idCollaborator' in colaborador); // Debug
+    console.log('🔍 Todas as chaves do colaborador:', Object.keys(colaborador)); // Debug
 
-    // Event listeners para os botões
-    card.querySelector('.view-btn').addEventListener('click', () => visualizarColaborador(collaboratorId));
-    
-    // Só adiciona event listeners para editar e excluir se o usuário tiver permissão
-    if (isUsuarioSuperior) {
-        const editBtn = card.querySelector('.edit-btn');
-        const deleteBtn = card.querySelector('.delete-btn');
-        
-        if (editBtn) {
-            editBtn.addEventListener('click', () => editarColaborador(collaboratorId));
-        }
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => excluirColaborador(collaboratorId));
-        }
-    }
-    
     // Duplo clique para ver tarefas
     card.addEventListener("dblclick", () => {
         window.location.href = `../task/taskListScreen.html?colaboradorId=${collaboratorId}`;
@@ -228,9 +225,19 @@ const renderizarColaborador = (colaborador) => {
 };
 
 const renderizarColaboradores = (listaColaboradores = colaboradores) => {
+    console.log('🔍 Iniciando renderização de colaboradores...'); // Debug
+    console.log('🔍 Lista de colaboradores:', listaColaboradores); // Debug
+    console.log('🔍 ProfileGrid encontrado:', !!profileGrid); // Debug
+    
+    if (!profileGrid) {
+        console.error('❌ ProfileGrid não encontrado!');
+        return;
+    }
+    
     profileGrid.innerHTML = "";
 
     if (listaColaboradores.length === 0) {
+        console.log('🔍 Nenhum colaborador encontrado, mostrando mensagem vazia'); // Debug
         profileGrid.innerHTML = `
             <div class="mensagem-vazia">
                 <i class="fas fa-user-times"></i>
@@ -240,23 +247,40 @@ const renderizarColaboradores = (listaColaboradores = colaboradores) => {
         return;
     }
 
-    listaColaboradores.forEach(colaborador => {
-        profileGrid.appendChild(renderizarColaborador(colaborador));
+    console.log('🔍 Renderizando', listaColaboradores.length, 'colaboradores...'); // Debug
+    listaColaboradores.forEach((colaborador, index) => {
+        console.log(`🔍 Renderizando colaborador ${index + 1}:`, colaborador.name); // Debug
+        const card = renderizarColaborador(colaborador);
+        profileGrid.appendChild(card);
     });
+    
+    console.log('🔍 Renderização concluída!'); // Debug
 };
 
 // Funções de manipulação de dados
 const carregarColaboradores = async () => {
     try {
+        console.log('🔍 Iniciando carregamento de colaboradores...'); // Debug
+        
         const response = await fetchComToken('http://localhost:8080/collaborators');
+        console.log('🔍 Response status:', response.status); // Debug
+        
         if (!response.ok) throw new Error('Erro ao carregar colaboradores');
         
         colaboradores = await response.json();
         console.log('🔍 Colaboradores carregados:', colaboradores); // Debug
+        console.log('🔍 Quantidade de colaboradores:', colaboradores.length); // Debug
         
         renderizarColaboradores();
+        console.log('🔍 Colaboradores renderizados com sucesso!'); // Debug
+        
+        // Reaplicar event listeners após renderizar
+        setTimeout(() => {
+            reaplicarEventListeners();
+        }, 100);
+        
     } catch (error) {
-        console.error('Erro ao carregar colaboradores:', error);
+        console.error('❌ Erro ao carregar colaboradores:', error);
         Swal.fire({
             title: "Erro!",
             text: "Não foi possível carregar os colaboradores.",
@@ -268,10 +292,13 @@ const carregarColaboradores = async () => {
 
 // Função para fechar o modal de visualização
 const fecharModalVisualizacao = () => {
+    console.log('🔍 Fechando modal de visualização...'); // Debug
     modalVisualizar.classList.remove("show");
     // Aguardar a animação terminar antes de esconder
     setTimeout(() => {
         modalVisualizar.style.display = "none";
+        modalVisualizar.style.zIndex = "-1"; // Garantir que não interfira com cliques
+        console.log('🔍 Modal de visualização fechado completamente'); // Debug
     }, 300);
 };
 
@@ -307,18 +334,27 @@ const visualizarColaborador = async (id) => {
     }
     
     try {
-        const response = await fetchComToken(`http://localhost:8080/collaborators/${id}`);
-        if (!response.ok) throw new Error('Erro ao carregar dados do colaborador');
+        // Primeiro, tentar encontrar o colaborador no array local (mais rápido)
+        let colaborador = colaboradores.find(c => c.idCollaborator == id || c.id == id);
         
-        const colaborador = await response.json();
+        // Se não encontrar no array local, buscar na API
+        if (!colaborador) {
+            console.log('🔍 Colaborador não encontrado no array local, buscando na API...');
+            const response = await fetchComToken(`http://localhost:8080/collaborators/${id}`);
+            if (!response.ok) throw new Error('Erro ao carregar dados do colaborador');
+            colaborador = await response.json();
+        } else {
+            console.log('🔍 Colaborador encontrado no array local:', colaborador);
+        }
         
         // Atualizar os campos do modal
-        document.getElementById("detalheNome").innerHTML = `<strong>Nome:</strong> ${colaborador.name}`;
+        document.getElementById("detalheNome").innerHTML = `<strong>Nome:</strong> ${colaborador.name || colaborador.nome}`;
         document.getElementById("detalheEmail").innerHTML = `<strong>Email:</strong> ${colaborador.email}`;
-        document.getElementById("detalheTelefone").innerHTML = `<strong>Telefone:</strong> ${colaborador.phone || 'Não informado'}`;
-        document.getElementById("detalheCargo").innerHTML = `<strong>Cargo:</strong> ${colaborador.position || 'Não informado'}`;
+        document.getElementById("detalheTelefone").innerHTML = `<strong>Telefone:</strong> ${colaborador.phone || colaborador.telefone || 'Não informado'}`;
+        document.getElementById("detalheCargo").innerHTML = `<strong>Cargo:</strong> ${colaborador.position || colaborador.cargo || 'Não informado'}`;
         
         // Exibir o modal com animação
+        modalVisualizar.style.zIndex = "1000"; // Garantir z-index correto
         modalVisualizar.style.display = "block";
         modalVisualizar.classList.add("show");
         
@@ -361,23 +397,54 @@ const editarColaborador = async (id) => {
     }
     
     try {
-        const colaborador = colaboradores.find(c => c.idCollaborator === id);
-        if (!colaborador) throw new Error('Colaborador não encontrado');
+        // Primeiro, tentar encontrar o colaborador no array local (mais rápido)
+        let colaborador = colaboradores.find(c => c.idCollaborator == id || c.id == id);
+        
+        // Se não encontrar no array local, buscar na API
+        if (!colaborador) {
+            console.log('🔍 Colaborador não encontrado no array local, buscando na API...');
+            const response = await fetchComToken(`http://localhost:8080/collaborators/${id}`);
+            
+            if (!response.ok) {
+                throw new Error(`Erro ao buscar colaborador: ${response.status}`);
+            }
+            
+            colaborador = await response.json();
+            console.log('🔍 Colaborador encontrado na API:', colaborador);
+        } else {
+            console.log('🔍 Colaborador encontrado no array local:', colaborador);
+        }
 
         colaboradorSelecionadoId = id;
-        document.getElementById("nome").value = colaborador.name;
-        document.getElementById("email").value = colaborador.email;
-        document.getElementById("telefone").value = colaborador.phone;
-        document.getElementById("cargo").value = colaborador.position;
-        document.getElementById("accessLevel").value = colaborador.accessLevel;
-        document.getElementById("senha").value = ""; // Não preenchemos a senha por segurança
+        
+        // Preencher campos do formulário
+        document.getElementById('nome').value = colaborador.name || colaborador.nome;
+        document.getElementById('email').value = colaborador.email;
+        document.getElementById('telefone').value = colaborador.phone || colaborador.telefone;
+        document.getElementById('cargo').value = colaborador.position || colaborador.cargo;
+        document.getElementById('accessLevel').value = colaborador.accessLevel;
+        var campoSenha = document.getElementById('senha');
+        if (campoSenha) campoSenha.value = ""; // Só limpa se existir
+        
+        // Mostrar botão de alterar senha apenas para edição
+        document.getElementById('btnAlterarSenha').style.display = 'block';
 
+        // Mostrar/ocultar campo de senha baseado no modo
+        const campoSenhaCadastro = document.getElementById('campoSenhaCadastro');
+        if (campoSenhaCadastro) {
+            campoSenhaCadastro.style.display = 'none'; // Ocultar na edição
+        }
+
+        modalColaborador.style.zIndex = "1000"; // Garantir z-index correto
         modalColaborador.querySelector("h2").textContent = "Editar Colaborador";
         modalColaborador.style.display = "flex";
+        
+        console.log('🔍 Modal de edição aberto com sucesso!');
     } catch (error) {
+        console.error('❌ Erro ao editar colaborador:', error);
         Swal.fire({
             title: "Erro!",
-            text: error.message,
+            text: error.message || "Não foi possível carregar os dados do colaborador",
             icon: "error",
             confirmButtonColor: "#d33"
         });
@@ -389,6 +456,16 @@ const excluirColaborador = async (id) => {
     
     // Verificar se o usuário tem permissão de SUPERIOR
     const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+    const token = localStorage.getItem('accessToken');
+    const usuarioLogado = localStorage.getItem('usuarioLogado');
+    const accessLevel = localStorage.getItem('accessLevel');
+    console.log('🔍 Permissões e token:', {
+        isUsuarioSuperior,
+        usuarioLogado,
+        accessLevel,
+        tokenPresente: !!token,
+        tokenInicio: token ? token.substring(0, 20) + '...' : 'null'
+    });
     
     if (!isUsuarioSuperior) {
         Swal.fire({
@@ -425,11 +502,25 @@ const excluirColaborador = async (id) => {
 
         if (!result.isConfirmed) return;
 
-        const response = await fetchComToken(`http://localhost:8080/collaborators/${id}`, {
+        const url = `http://localhost:8080/collaborators/${id}`;
+        console.log('🔍 Enviando DELETE para:', url);
+        const response = await fetchComToken(url, {
             method: 'DELETE'
         });
+        console.log('🔍 Status da resposta:', response.status);
+        let responseBody = null;
+        try {
+            responseBody = await response.clone().json();
+        } catch (e) {
+            try {
+                responseBody = await response.clone().text();
+            } catch (e2) {
+                responseBody = null;
+            }
+        }
+        console.log('🔍 Corpo da resposta:', responseBody);
 
-        if (!response.ok) throw new Error('Erro ao excluir colaborador');
+        if (!response.ok) throw new Error('Erro ao excluir colaborador: ' + (responseBody && responseBody.message ? responseBody.message : response.status));
 
         await Swal.fire({
             title: "Excluído!",
@@ -441,6 +532,7 @@ const excluirColaborador = async (id) => {
 
         await carregarColaboradores();
     } catch (error) {
+        console.error('❌ Erro ao excluir colaborador:', error);
         Swal.fire({
             title: "Erro!",
             text: error.message || "Não foi possível excluir o colaborador.",
@@ -450,14 +542,28 @@ const excluirColaborador = async (id) => {
     }
 };
 
-// Função para verificar e atualizar permissões do usuário
+// Flag para evitar verificações múltiplas de permissões
+let permissoesVerificadas = false;
+
 const verificarPermissoesUsuario = async () => {
+    // Evitar verificações múltiplas
+    if (permissoesVerificadas) {
+        return;
+    }
+    
     try {
-        console.log('🔍 Verificando permissões do usuário...');
-        
         const token = localStorage.getItem('accessToken');
         if (!token) {
             console.warn('⚠️ Token não encontrado');
+            return;
+        }
+        
+        // Verificar se já temos as permissões salvas e se o token não expirou
+        const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior');
+        const accessLevel = localStorage.getItem('accessLevel');
+        
+        if (isUsuarioSuperior && accessLevel && !isTokenExpired(token)) {
+            permissoesVerificadas = true;
             return;
         }
         
@@ -472,22 +578,281 @@ const verificarPermissoesUsuario = async () => {
             localStorage.setItem('isUsuarioSuperior', isSuperior.toString());
             localStorage.setItem('accessLevel', me.accessLevel || 'BASICO');
             
-            console.log('✅ Permissões atualizadas:', {
-                usuario: me.nome || me.name,
-                accessLevel: me.accessLevel,
-                isSuperior: isSuperior
-            });
+            permissoesVerificadas = true;
+        } else if (response.status === 401 || response.status === 403) {
+            console.warn('⚠️ Token inválido ou sem permissão para verificar permissões');
+            // Não limpar o localStorage aqui, deixar para a função fetchComToken tratar
         } else {
             console.warn('⚠️ Não foi possível verificar permissões:', response.status);
         }
     } catch (error) {
         console.error('❌ Erro ao verificar permissões:', error);
+        // Não propagar o erro para evitar loops
     }
+};
+
+// 🔹 Função para abrir modal de alteração de senha
+const abrirModalAlterarSenha = (colaboradorId, colaboradorNome) => {
+    console.log('🔐 Abrindo modal de alteração de senha para:', colaboradorNome, 'ID:', colaboradorId);
+    
+    // Armazenar o ID do colaborador que está alterando a senha
+    window.colaboradorAlterandoSenhaId = colaboradorId;
+    
+    // Atualizar título do modal
+    const modalTitle = document.querySelector('#modalAlterarSenha h2');
+    if (modalTitle) {
+        modalTitle.textContent = `Alterar Senha - ${colaboradorNome}`;
+    }
+    
+    // Limpar formulário
+    const formAlterarSenha = document.getElementById('formAlterarSenha');
+    if (formAlterarSenha) {
+        formAlterarSenha.reset();
+    }
+    
+    // Mostrar modal com z-index adequado
+    const modalAlterarSenha = document.getElementById('modalAlterarSenha');
+    if (modalAlterarSenha) {
+        // Garantir que o modal de edição não interfira
+        const modalColaborador = document.getElementById('modalColaborador');
+        if (modalColaborador) {
+            modalColaborador.style.zIndex = '9998'; // Abaixo do modal de alterar senha
+        }
+        
+        modalAlterarSenha.style.display = 'flex';
+        modalAlterarSenha.classList.add('show');
+        modalAlterarSenha.style.zIndex = '9999'; // Garantir que fique acima de outros elementos
+        
+        // Debug: verificar se o modal está visível
+        console.log('🔐 Modal de alterar senha - display:', modalAlterarSenha.style.display);
+        console.log('🔐 Modal de alterar senha - z-index:', modalAlterarSenha.style.zIndex);
+        console.log('🔐 Modal de alterar senha - classList:', modalAlterarSenha.classList.toString());
+        console.log('🔐 Modal de alterar senha exibido com sucesso');
+    } else {
+        console.error('❌ Modal de alterar senha não encontrado');
+    }
+};
+
+// 🔹 Função para fechar modal de alteração de senha
+const fecharModalAlterarSenha = () => {
+    console.log('🔐 Fechando modal de alteração de senha...'); // Debug
+    
+    const modalAlterarSenha = document.getElementById('modalAlterarSenha');
+    if (modalAlterarSenha) {
+        modalAlterarSenha.style.display = 'none';
+        modalAlterarSenha.classList.remove('show');
+        modalAlterarSenha.style.zIndex = '-1'; // Garantir que não interfira com cliques
+    }
+    
+    const formAlterarSenha = document.getElementById('formAlterarSenha');
+    if (formAlterarSenha) {
+        formAlterarSenha.reset();
+    }
+    
+    window.colaboradorAlterandoSenhaId = null;
+    console.log('🔐 Modal de alteração de senha fechado completamente'); // Debug
+};
+
+// 🔹 Função para fechar modal de edição
+const fecharModalEdicao = () => {
+    console.log('🔍 Fechando modal de edição...'); // Debug
+    modalColaborador.style.display = "none";
+    modalColaborador.style.zIndex = "-1"; // Garantir que não interfira com cliques
+    modalColaborador.setAttribute('aria-hidden', 'true');
+    document.getElementById('formCadastroColaborador').reset();
+    colaboradorSelecionadoId = null;
+    document.getElementById('btnAlterarSenha').style.display = 'none';
+    modalColaborador.querySelector('h2').textContent = 'Cadastrar Novo Colaborador';
+    console.log('🔍 Modal de edição fechado completamente'); // Debug
+};
+
+// 🔹 Função para alterar senha do colaborador
+const alterarSenhaColaborador = async (colaboradorId, senhaAtual, novaSenha) => {
+    try {
+        console.log('🔐 Alterando senha do colaborador ID:', colaboradorId);
+        console.log('🔐 Senha atual:', senhaAtual ? '***' : 'vazia');
+        console.log('🔐 Nova senha:', novaSenha ? '***' : 'vazia');
+        
+        // Verificar token antes da requisição
+        const token = localStorage.getItem('accessToken');
+        console.log('🔐 Token disponível:', !!token);
+        console.log('🔐 Token (primeiros 20 chars):', token ? token.substring(0, 20) + '...' : 'null');
+        
+        const requestBody = {
+            currentPassword: senhaAtual,
+            newPassword: novaSenha
+        };
+        
+        console.log('🔐 Request body:', JSON.stringify(requestBody, null, 2));
+        
+        const response = await fetchComToken(`http://localhost:8080/collaborators/${colaboradorId}/change-password`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        console.log('🔐 Response status:', response.status);
+        console.log('🔐 Response headers:', response.headers);
+        
+        if (!response.ok) {
+            let errorMessage = 'Erro ao alterar senha';
+            let errorDetails = '';
+            
+            if (response.status === 400) {
+                throw new Error('Senha atual incorreta. Tente novamente.');
+            }
+            
+            try {
+                const errorData = await response.json();
+                console.log('🔐 Error data:', errorData);
+                errorMessage = errorData.error || errorData.message || errorData.details || errorMessage;
+                errorDetails = errorData.details || errorData.error || '';
+            } catch (e) {
+                console.log('🔐 Erro ao parsear JSON de erro:', e);
+                const errorText = await response.text();
+                console.log('🔐 Error text:', errorText);
+                if (errorText) {
+                    errorMessage = errorText;
+                    errorDetails = errorText;
+                }
+            }
+            
+            console.log('🔐 Error message:', errorMessage);
+            console.log('🔐 Error details:', errorDetails);
+            
+            throw new Error(errorMessage);
+        }
+        
+        const result = await response.text();
+        console.log('✅ Senha alterada com sucesso:', result);
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Erro ao alterar senha:', error);
+        console.error('❌ Error stack:', error.stack);
+        throw error;
+    }
+};
+
+// Função para reaplicar event listeners nos botões dos cards
+const reaplicarEventListeners = () => {
+    console.log('🔍 Reaplicando event listeners...'); // Debug
+    
+    // Limpar todos os modais primeiro
+    limparTodosModais();
+    
+    // Usar event delegation para os botões dos cards
+    const profileGrid = document.getElementById("profileGrid");
+    if (!profileGrid) {
+        console.error('❌ ProfileGrid não encontrado para reaplicar event listeners');
+        return;
+    }
+    
+    // Event delegation para todos os botões
+    profileGrid.addEventListener('click', (e) => {
+        console.log('🔍 Clique detectado no profileGrid:', e.target.className); // Debug
+        
+        if (e.target.classList.contains('view-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            const collaboratorId = e.target.getAttribute('data-id');
+            console.log('🔍 Clique no botão Visualizar detectado via delegation!', collaboratorId);
+            visualizarColaborador(collaboratorId);
+        } else if (e.target.classList.contains('edit-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            const collaboratorId = e.target.getAttribute('data-id');
+            console.log('🔍 Clique no botão Editar detectado via delegation!', collaboratorId);
+            editarColaborador(collaboratorId);
+        } else if (e.target.classList.contains('delete-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            const collaboratorId = e.target.getAttribute('data-id');
+            console.log('🔍 Clique no botão Excluir detectado via delegation!', collaboratorId);
+            excluirColaborador(collaboratorId);
+        }
+    });
+    
+    // Reaplicar event listener do botão alterar senha
+    const btnAlterarSenha = document.getElementById('btnAlterarSenha');
+    if (btnAlterarSenha) {
+        // Remover event listeners antigos
+        btnAlterarSenha.replaceWith(btnAlterarSenha.cloneNode(true));
+        
+        // Adicionar novo event listener
+        document.getElementById('btnAlterarSenha').addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔐 Botão alterar senha clicado!'); // Debug
+            const colaboradorId = colaboradorSelecionadoId;
+            const colaboradorNome = document.getElementById('nome').value;
+            
+            if (!colaboradorId) {
+                console.error('❌ ID do colaborador não encontrado');
+                return;
+            }
+            
+            console.log('🔐 Abrindo modal de alterar senha para:', colaboradorNome, 'ID:', colaboradorId);
+            
+            // Não fechar o modal de edição imediatamente, apenas abrir o modal de alterar senha
+            abrirModalAlterarSenha(colaboradorId, colaboradorNome);
+        });
+    }
+    
+    // Ajustar z-index dos modais para ficarem abaixo dos alerts
+    if (modalColaborador) {
+        modalColaborador.style.zIndex = '9999';
+    }
+    if (modalVisualizar) {
+        modalVisualizar.style.zIndex = '9999';
+    }
+    const modalAlterarSenha = document.getElementById('modalAlterarSenha');
+    if (modalAlterarSenha) {
+        modalAlterarSenha.style.zIndex = '9999';
+    }
+    
+    console.log('�� Event listeners reaplicados com sucesso!'); // Debug
+};
+
+// Função para limpar todos os modais
+const limparTodosModais = () => {
+    console.log('🔍 Limpando todos os modais...'); // Debug
+    
+    // Limpar modal de visualização
+    if (modalVisualizar) {
+        modalVisualizar.classList.remove("show");
+        modalVisualizar.style.display = "none";
+        modalVisualizar.style.zIndex = "-1";
+    }
+    
+    // Limpar modal de edição
+    if (modalColaborador) {
+        modalColaborador.style.display = "none";
+        modalColaborador.style.zIndex = "-1";
+    }
+    
+    // Limpar modal de alterar senha
+    const modalAlterarSenha = document.getElementById('modalAlterarSenha');
+    if (modalAlterarSenha) {
+        modalAlterarSenha.style.display = "none";
+        modalAlterarSenha.style.zIndex = "-1";
+    }
+    
+    console.log('🔍 Todos os modais foram limpos'); // Debug
 };
 
 // Event Listeners
 document.addEventListener("DOMContentLoaded", async () => {
+    console.log('🔍 DOMContentLoaded iniciado!'); // Debug
+    
+    // Limpar todos os modais no início
+    limparTodosModais();
+    
     // Verificar permissões do usuário
+    console.log('🔍 Verificando permissões do usuário...'); // Debug
     await verificarPermissoesUsuario();
     
     // Controle de tema - Padronizado para todo o sistema
@@ -518,6 +883,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Carregar colaboradores
+    console.log('🔍 Iniciando carregamento de colaboradores...'); // Debug
     carregarColaboradores();
 
     // Pesquisa
@@ -547,18 +913,50 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Form de cadastro/edição
     if (formCadastro) {
+        let formularioSubmetendo = false; // Flag para evitar submissões múltiplas
+        
         formCadastro.addEventListener('submit', async (event) => {
             event.preventDefault();
+            
+            // Evitar submissões múltiplas
+            if (formularioSubmetendo) {
+                console.log('🔍 Formulário já está sendo submetido, ignorando...');
+                return;
+            }
+            
+            formularioSubmetendo = true;
+            console.log('🔍 Iniciando submissão do formulário...');
 
             const nome = document.getElementById("nome").value.trim();
             const email = document.getElementById("email").value.trim();
             const telefone = document.getElementById("telefone").value.trim();
             const cargo = document.getElementById("cargo").value.trim();
-            const senha = document.getElementById("senha").value;
             const accessLevel = document.getElementById("accessLevel").value;
+            
+            // Verificar se o campo de senha existe (apenas para cadastro)
+            const campoSenha = document.getElementById("senha");
+            const senha = campoSenha ? campoSenha.value : "";
+
+            // Logs para debug dos valores dos campos
+            console.log('🔍 Valores dos campos do formulário:');
+            console.log('🔍 Nome:', nome);
+            console.log('🔍 Email:', email);
+            console.log('🔍 Telefone:', telefone);
+            console.log('🔍 Cargo:', cargo);
+            console.log('🔍 Senha (length):', senha ? senha.length : 0);
+            console.log('🔍 Access Level:', accessLevel);
+            console.log('🔍 Modo:', colaboradorSelecionadoId ? 'Edição' : 'Cadastro');
 
             // Validações
             if (!nome || !email || !telefone || !cargo || !accessLevel) {
+                console.log('🔍 Validação falhou - campos vazios:', {
+                    nome: !!nome,
+                    email: !!email,
+                    telefone: !!telefone,
+                    cargo: !!cargo,
+                    accessLevel: !!accessLevel
+                });
+                formularioSubmetendo = false;
                 Swal.fire({
                     title: "Campos Obrigatórios",
                     text: "Por favor, preencha todos os campos.",
@@ -568,7 +966,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
+            // Só validar senha para cadastro de novo colaborador
             if (!colaboradorSelecionadoId && !senha) {
+                console.log('🔍 Validação falhou - senha obrigatória para novo colaborador');
+                formularioSubmetendo = false;
                 Swal.fire({
                     title: "Senha Obrigatória",
                     text: "Por favor, digite uma senha para o novo colaborador.",
@@ -576,6 +977,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                     confirmButtonColor: "#3085d6"
                 });
                 return;
+            }
+
+            // Validar senha se for cadastro (novo colaborador)
+            if (!colaboradorSelecionadoId) {
+                if (!senha || senha.length < 6) {
+                    console.log('🔍 Validação falhou - senha inválida para novo colaborador');
+                    formularioSubmetendo = false;
+                    Swal.fire({
+                        title: "Senha Inválida",
+                        text: "A senha deve ter pelo menos 6 caracteres.",
+                        icon: "warning",
+                        confirmButtonColor: "#3085d6"
+                    });
+                    return;
+                }
             }
 
             try {
@@ -597,11 +1013,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                     body.password = senha;
                 }
 
-                console.log('🔍 Dados enviados para o backend:', body);
+                console.log('🔍 Enviando requisição:', {
+                    url: url,
+                    method: method,
+                    body: body,
+                    colaboradorSelecionadoId: colaboradorSelecionadoId
+                });
 
                 const response = await fetchComToken(url, {
                     method: method,
                     body: JSON.stringify(body)
+                });
+
+                console.log('🔍 Resposta recebida:', {
+                    status: response.status,
+                    ok: response.ok
                 });
 
                 if (!response || !response.ok) {
@@ -611,12 +1037,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     if (response && response.status === 403) {
                         const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
                         const usuarioLogado = localStorage.getItem('usuarioLogado');
-                        
-                        console.log('❌ Erro 403 - Verificando permissões:', {
-                            usuarioLogado,
-                            isUsuarioSuperior,
-                            'isUsuarioSuperior (localStorage)': localStorage.getItem('isUsuarioSuperior')
-                        });
                         
                         errorMsg = 'Você não tem permissão para criar/editar colaboradores. Apenas usuários com nível SUPERIOR podem realizar esta ação.';
                     } else if (response) {
@@ -632,6 +1052,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     }
                     throw new Error(errorMsg);
                 }
+
+                console.log('🔍 Sucesso! Colaborador salvo com sucesso');
 
                 await Swal.fire({
                     title: colaboradorSelecionadoId ? "Atualizado!" : "Cadastrado!",
@@ -649,16 +1071,33 @@ document.addEventListener("DOMContentLoaded", async () => {
                 colaboradorSelecionadoId = null;
                 modalColaborador.querySelector("h2").textContent = "Cadastrar Novo Colaborador";
 
+                // Mostrar campo de senha para cadastro
+                const campoSenhaCadastro = document.getElementById('campoSenhaCadastro');
+                if (campoSenhaCadastro) {
+                    campoSenhaCadastro.style.display = 'block';
+                }
+                
+                // Ocultar botão de alterar senha no cadastro
+                const btnAlterarSenha = document.getElementById('btnAlterarSenha');
+                if (btnAlterarSenha) {
+                    btnAlterarSenha.style.display = 'none';
+                }
+
                 // Recarregar lista
                 await carregarColaboradores();
 
             } catch (error) {
+                console.log('🔍 Erro capturado no formulário:', error);
                 Swal.fire({
                     title: "Erro!",
                     text: error.message || "Não foi possível salvar o colaborador.",
                     icon: "error",
                     confirmButtonColor: "#d33"
                 });
+            } finally {
+                // Sempre resetar a flag ao final
+                formularioSubmetendo = false;
+                console.log('🔍 Submissão do formulário finalizada');
             }
         });
     }
@@ -669,15 +1108,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         fabAddColaborador.addEventListener("click", () => {
             // Verificar se o usuário tem permissão de SUPERIOR
             const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
-            const usuarioLogado = localStorage.getItem('usuarioLogado');
-            const accessLevel = localStorage.getItem('accessLevel');
-            
-            console.log('🔍 Verificando permissões do usuário:', {
-                usuarioLogado,
-                isUsuarioSuperior,
-                accessLevel,
-                'isUsuarioSuperior (localStorage)': localStorage.getItem('isUsuarioSuperior')
-            });
             
             if (!isUsuarioSuperior) {
                 Swal.fire({
@@ -689,10 +1119,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
             
+            // Abrir modal corretamente
             modalColaborador.style.display = "flex";
+            modalColaborador.style.zIndex = "9999";
+            modalColaborador.removeAttribute('aria-hidden');
             formCadastro.reset();
             colaboradorSelecionadoId = null;
             modalColaborador.querySelector("h2").textContent = "Cadastrar Novo Colaborador";
+            
+            // Mostrar campo de senha para cadastro
+            const campoSenhaCadastro = document.getElementById('campoSenhaCadastro');
+            if (campoSenhaCadastro) {
+                campoSenhaCadastro.style.display = 'block';
+            }
+            
+            // Ocultar botão de alterar senha no cadastro
+            const btnAlterarSenha = document.getElementById('btnAlterarSenha');
+            if (btnAlterarSenha) {
+                btnAlterarSenha.style.display = 'none';
+            }
         });
     }
 
@@ -702,4 +1147,161 @@ document.addEventListener("DOMContentLoaded", async () => {
             sidebar.classList.toggle("open");
         });
     }
+
+    // Event listener para fechar modal de edição
+    document.getElementById('fecharModal').addEventListener('click', fecharModalEdicao);
+    
+    // Event listener para fechar modal de alteração de senha
+    document.getElementById('fecharModalSenha').addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        fecharModalAlterarSenha();
+    });
+    document.getElementById('cancelarAlterarSenha').addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        fecharModalAlterarSenha();
+    });
+    
+    // Event listener para formulário de alteração de senha
+    document.getElementById('formAlterarSenha').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const senhaAtual = document.getElementById('senhaAtual').value;
+        const novaSenha = document.getElementById('novaSenha').value;
+        const confirmarNovaSenha = document.getElementById('confirmarNovaSenha').value;
+        
+        console.log('🔐 Formulário de alteração de senha submetido');
+        console.log('🔐 ID do colaborador:', window.colaboradorAlterandoSenhaId);
+        console.log('🔐 Senha atual (length):', senhaAtual ? senhaAtual.length : 0);
+        console.log('🔐 Nova senha (length):', novaSenha ? novaSenha.length : 0);
+        console.log('🔐 Confirmar nova senha (length):', confirmarNovaSenha ? confirmarNovaSenha.length : 0);
+        
+        // Validações
+        if (!senhaAtual || !novaSenha || !confirmarNovaSenha) {
+            console.log('🔐 Validação falhou: campos vazios');
+            Swal.fire({
+                title: "Campos Obrigatórios",
+                text: "Por favor, preencha todos os campos.",
+                icon: "warning",
+                confirmButtonColor: "#3085d6"
+            });
+            return;
+        }
+        
+        if (novaSenha !== confirmarNovaSenha) {
+            console.log('🔐 Validação falhou: senhas não coincidem');
+            Swal.fire({
+                title: "Senhas Diferentes",
+                text: "A nova senha e a confirmação não coincidem.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
+            return;
+        }
+        
+        if (novaSenha.length < 6) {
+            console.log('🔐 Validação falhou: senha muito curta');
+            Swal.fire({
+                title: "Senha Muito Curta",
+                text: "A nova senha deve ter pelo menos 6 caracteres.",
+                icon: "warning",
+                confirmButtonColor: "#3085d6"
+            });
+            return;
+        }
+        
+        if (senhaAtual === novaSenha) {
+            console.log('🔐 Validação falhou: nova senha igual à atual');
+            Swal.fire({
+                title: "Senha Inválida",
+                text: "A nova senha deve ser diferente da senha atual.",
+                icon: "warning",
+                confirmButtonColor: "#3085d6"
+            });
+            return;
+        }
+        
+        console.log('🔐 Validações passaram, iniciando alteração de senha...');
+        
+        // Mostrar loading
+        Swal.fire({
+            title: "Alterando Senha...",
+            text: "Aguarde enquanto processamos sua solicitação.",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        try {
+            await alterarSenhaColaborador(window.colaboradorAlterandoSenhaId, senhaAtual, novaSenha);
+            
+            Swal.fire({
+                title: "Sucesso!",
+                text: "Senha alterada com sucesso!",
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            fecharModalAlterarSenha();
+        } catch (error) {
+            console.log('🔐 Erro capturado no formulário:', error);
+            
+            Swal.fire({
+                title: "Erro ao Alterar Senha",
+                text: error.message || "Não foi possível alterar a senha. Verifique os dados e tente novamente.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
+        }
+    });
+    
+    // Funcionalidade de mostrar/ocultar senha
+    const setupPasswordToggles = () => {
+        const toggles = document.querySelectorAll('.toggle-password');
+        toggles.forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                const type = input.getAttribute('type');
+                
+                if (type === 'password') {
+                    input.setAttribute('type', 'text');
+                    this.classList.remove('fa-eye');
+                    this.classList.add('fa-eye-slash');
+                } else {
+                    input.setAttribute('type', 'password');
+                    this.classList.remove('fa-eye-slash');
+                    this.classList.add('fa-eye');
+                }
+            });
+        });
+    };
+    
+    // Configurar toggles de senha
+    setupPasswordToggles();
+
+    // Detectar quando a página volta a ficar visível (quando o usuário volta de outra tela)
+    let visibilityTimeout;
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            clearTimeout(visibilityTimeout);
+            visibilityTimeout = setTimeout(() => {
+                console.log('🔍 Página voltou a ficar visível, reaplicando event listeners...'); // Debug
+                reaplicarEventListeners();
+            }, 500); // Delay maior para evitar múltiplas execuções
+        }
+    });
+    
+    // Também detectar quando a janela ganha foco
+    let focusTimeout;
+    window.addEventListener('focus', () => {
+        clearTimeout(focusTimeout);
+        focusTimeout = setTimeout(() => {
+            console.log('🔍 Janela ganhou foco, reaplicando event listeners...'); // Debug
+            reaplicarEventListeners();
+        }, 500); // Delay maior para evitar múltiplas execuções
+    });
 });

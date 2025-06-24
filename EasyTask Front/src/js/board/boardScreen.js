@@ -458,10 +458,24 @@ async function salvarTarefa(event) {
         
         await carregarTarefas();
         fecharModalTarefa();
-        mostrarNotificacao('Tarefa salva com sucesso!', 'success');
+        if (typeof Swal !== 'undefined') {
+            await Swal.fire({
+                title: 'Sucesso!',
+                text: 'Tarefa salva com sucesso!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            mostrarNotificacao('Tarefa salva com sucesso!', 'success');
+        }
     } catch (error) {
         console.error('Erro ao salvar tarefa:', error);
-        mostrarNotificacao('Erro ao salvar tarefa', 'error');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire('Erro', 'Erro ao salvar tarefa', 'error');
+        } else {
+            mostrarNotificacao('Erro ao salvar tarefa', 'error');
+        }
     }
 }
 
@@ -607,12 +621,16 @@ function formatarData(data) {
 }
 
 function mostrarNotificacao(mensagem, tipo) {
-    Swal.fire({
-        text: mensagem,
-        icon: tipo,
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000
-    });
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            text: mensagem,
+            icon: tipo,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+        });
+    } else {
+        alert(mensagem);
+    }
 } 

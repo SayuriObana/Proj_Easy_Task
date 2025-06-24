@@ -1,3 +1,16 @@
+// Função para fazer requisições com token de autenticação
+async function fetchComToken(url, options = {}) {
+    const token = localStorage.getItem('accessToken');
+    const defaultOptions = {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    };
+    return fetch(url, { ...defaultOptions, ...options });
+}
+
 // Verifica se o usuário está logado e é superior
 document.addEventListener("DOMContentLoaded", async () => {
     // Controle de tema - Padronizado para todo o sistema
@@ -138,6 +151,176 @@ async function criarQuadro() {
     }
 }
 
+let modalEditar = null;
+let inputNomeEditar = null;
+let idQuadroEditando = null;
+let colaboradoresCache = [];
+
+function criarModalEditarQuadro() {
+    if (document.getElementById('modal-editar-quadro')) return; // já existe
+    const modal = document.createElement('div');
+    modal.id = 'modal-editar-quadro';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.5)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '9999';
+    modal.innerHTML = `
+        <div style="background:#222;padding:24px 32px;border-radius:8px;min-width:400px;max-width:90vw;max-height:80vh;overflow-y:auto;box-shadow:0 2px 16px #000">
+            <h2 style="color:#ffd700;margin-bottom:16px;">Editar Quadro</h2>
+            <label for="input-nome-editar" style="color:#fff;font-weight:bold;">Nome:</label>
+            <input id="input-nome-editar" type="text" style="width:100%;margin:8px 0 16px 0;padding:8px;border-radius:4px;border:1px solid #ccc;" />
+            <div style="margin: 16px 0;">
+                <h3 style="color:#ffd700;margin-bottom:12px;font-size:16px;">Colaboradores Vinculados:</h3>
+                <div id="colaboradoresContainer" style="max-height:200px;overflow-y:auto;border:1px solid #444;padding:12px;border-radius:4px;background:#333;"></div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button id="btn-cancelar-editar" style="padding:8px 16px;border-radius:4px;border:none;background:#888;color:#fff;cursor:pointer;">Cancelar</button>
+                <button id="btn-salvar-editar" style="padding:8px 16px;border-radius:4px;border:none;background:#ffd700;color:#222;font-weight:bold;cursor:pointer;">Salvar</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modalEditar = modal;
+    inputNomeEditar = document.getElementById('input-nome-editar');
+    document.getElementById('btn-cancelar-editar').onclick = fecharModalEditarQuadro;
+    document.getElementById('btn-salvar-editar').onclick = salvarEdicaoQuadro;
+}
+
+async function abrirModalEditarQuadro(board) {
+    criarModalEditarQuadro();
+    idQuadroEditando = board.id;
+    inputNomeEditar.value = board.name;
+    modalEditar.style.display = 'flex';
+    inputNomeEditar.focus();
+
+    try {
+        // Buscar todos os colaboradores disponíveis
+        const respColaboradores = await fetchComToken('http://localhost:8080/collaborators');
+        const colaboradores = await respColaboradores.json();
+        colaboradoresCache = colaboradores;
+
+        // Usar os colaboradores que já vêm no objeto board
+        const colaboradoresVinculados = board.collaborators || [];
+
+        console.log('Colaboradores disponíveis:', colaboradores);
+        console.log('Colaboradores vinculados ao board:', colaboradoresVinculados);
+        console.log('Board completo:', board);
+
+        // Renderizar usando nomes para comparação (já que board.collaborators contém nomes)
+        renderizarColaboradoresNoModal(colaboradores, colaboradoresVinculados);
+    } catch (e) {
+        console.error('Erro ao carregar colaboradores:', e);
+        Swal.fire('Erro', 'Não foi possível carregar os colaboradores.', 'error');
+    }
+}
+
+function renderizarColaboradoresNoModal(colaboradores, colaboradoresVinculados) {
+    const container = document.getElementById('colaboradoresContainer');
+    if (!container) return;
+    
+    if (colaboradores.length === 0) {
+        container.innerHTML = '<p style="color:#888;text-align:center;margin:20px 0;">Nenhum colaborador disponível</p>';
+        return;
+    }
+    
+    // board.collaborators é um array de nomes, então comparamos por nome
+    container.innerHTML = colaboradores.map(colab => {
+        const isVinculado = colaboradoresVinculados.includes(colab.name);
+        return `
+            <label style="display:flex;align-items:center;margin-bottom:8px;padding:6px;border-radius:4px;background:${isVinculado ? '#2a4a2a' : '#333'};cursor:pointer;">
+                <input type="checkbox" value="${colab.idCollaborator}" 
+                    ${isVinculado ? 'checked' : ''} style="margin-right:8px;">
+                <span style="color:#fff;font-size:14px;">${colab.name}</span>
+                ${isVinculado ? '<span style="color:#4CAF50;font-size:12px;margin-left:auto;">(Vinculado)</span>' : ''}
+            </label>
+        `;
+    }).join('');
+}
+
+async function salvarEdicaoQuadro() {
+    const novoNome = inputNomeEditar.value.trim();
+    if (!novoNome) {
+        if (typeof Swal !== 'undefined') {
+            await Swal.fire('Campo Obrigatório', 'O nome não pode ser vazio!', 'warning');
+        } else {
+            alert('O nome não pode ser vazio!');
+        }
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('accessToken');
+        
+        // Primeiro, atualiza o nome do board
+        const respNome = await fetch(`http://localhost:8080/boards/${idQuadroEditando}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ name: novoNome })
+        });
+        
+        if (!respNome.ok) throw new Error('Erro ao atualizar nome do quadro');
+
+        // Pega os checkboxes marcados e não marcados
+        const checkboxes = document.querySelectorAll('#colaboradoresContainer input[type=checkbox]');
+        const colaboradoresMarcados = Array.from(checkboxes).filter(cb => cb.checked).map(cb => Number(cb.value));
+        const colaboradoresDesmarcados = Array.from(checkboxes).filter(cb => !cb.checked).map(cb => Number(cb.value));
+
+        // Adiciona colaboradores marcados
+        for (const collaboratorId of colaboradoresMarcados) {
+            const respAdd = await fetch(`http://localhost:8080/boards/${idQuadroEditando}/collaborators/${collaboratorId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!respAdd.ok) {
+                console.warn(`Erro ao adicionar colaborador ${collaboratorId}`);
+            }
+        }
+
+        // Remove colaboradores desmarcados
+        for (const collaboratorId of colaboradoresDesmarcados) {
+            const respRemove = await fetch(`http://localhost:8080/boards/${idQuadroEditando}/collaborators/${collaboratorId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!respRemove.ok) {
+                console.warn(`Erro ao remover colaborador ${collaboratorId}`);
+            }
+        }
+
+        fecharModalEditarQuadro();
+        if (typeof Swal !== 'undefined') {
+            await Swal.fire({
+                title: 'Sucesso!',
+                text: 'Quadro editado com sucesso!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+        await carregarQuadros();
+    } catch (e) {
+        console.error('Erro ao salvar edição:', e);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire('Erro', 'Erro ao salvar edição!', 'error');
+        } else {
+            alert('Erro ao salvar edição!');
+        }
+    }
+}
+
 function renderizarQuadros(boards) {
     const container = document.querySelector('.quadro-container');
     if (!container) {
@@ -160,106 +343,75 @@ function renderizarQuadros(boards) {
                 <p>Colaboradores: ${board.collaborators ? board.collaborators.length : 0}</p>
             </div>
             <button class="btn-entrar-quadro" data-id="${board.id}">Entrar no quadro</button>
-            ${StorageUtils ? StorageUtils.isSuperiorUser() : localStorage.getItem("isUsuarioSuperior") === "true" ? `
-                <div class="quadro-actions">
-                    <button class="btn-editar-quadro" data-id="${board.id}">Editar</button>
+            <div class="quadro-actions">
+                <button class="btn-editar-quadro" data-id="${board.id}">Editar</button>
                 <button class="btn-excluir-quadro" data-id="${board.id}">Excluir</button>
-                </div>
-            ` : ''}
+            </div>
         `;
 
         // Event listeners
         div.querySelector('.btn-entrar-quadro').addEventListener('click', () => {
             window.location.href = `../task/taskListScreen.html?id=${board.id}`;
-
         });
 
-        if (StorageUtils ? StorageUtils.isSuperiorUser() : localStorage.getItem("isUsuarioSuperior") === "true") {
-            const btnEditar = div.querySelector('.btn-editar-quadro');
-            const btnExcluir = div.querySelector('.btn-excluir-quadro');
-            if (btnEditar) btnEditar.addEventListener('click', () => editarQuadro(board));
-            if (btnExcluir) btnExcluir.addEventListener('click', () => excluirQuadro(board.id));
-        }
+        // Adiciona funcionalidade ao botão editar
+        div.querySelector('.btn-editar-quadro').addEventListener('click', (e) => {
+            e.stopPropagation();
+            abrirModalEditarQuadro(board);
+        });
+
+        // Adiciona funcionalidade ao botão excluir
+        div.querySelector('.btn-excluir-quadro').addEventListener('click', (e) => {
+            e.stopPropagation();
+            excluirQuadro(board.id, board.name);
+        });
 
         container.appendChild(div);
     });
 }
 
-async function excluirQuadro(id) {
-    // Verificar permissão de SUPERIOR
-    const isUsuarioSuperior = localStorage.getItem("isUsuarioSuperior") === "true";
-    if (!isUsuarioSuperior) {
-        Swal.fire({
-            title: "Acesso Restrito",
-            text: "Apenas usuários superiores podem excluir quadros.",
-            icon: "warning",
-            confirmButtonColor: "#3085d6"
+async function excluirQuadro(id, nome) {
+    if (typeof Swal === 'undefined') {
+        // fallback se SweetAlert2 não estiver disponível
+        if (!confirm(`Tem certeza que deseja excluir o quadro "${nome}"? Essa ação não pode ser desfeita!`)) return;
+    } else {
+        const result = await Swal.fire({
+            title: 'Excluir Quadro?',
+            text: `Tem certeza que deseja excluir o quadro "${nome}"? Essa ação não pode ser desfeita!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar'
         });
-        return;
+        if (!result.isConfirmed) return;
     }
-
-    const result = await Swal.fire({
-        title: 'Excluir Quadro?',
-        text: 'Essa ação não pode ser desfeita!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#FFD700',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sim, excluir',
-        cancelButtonText: 'Cancelar'
-    });
-
-    if (result.isConfirmed) {
-        try {
-            const response = await window.authManager.fetchWithAuth(
-                `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BOARDS}/${id}`,
-                { method: 'DELETE' }
-            );
-
-            if (!response.ok) throw new Error('Erro ao excluir quadro');
-            
-            await Swal.fire('Excluído!', 'Quadro removido com sucesso.', 'success');
-            await carregarQuadros();
-        } catch (error) {
-            console.error('Erro ao excluir quadro:', error);
-            Swal.fire('Erro', 'Não foi possível excluir o quadro.', 'error');
+    try {
+        const token = localStorage.getItem('accessToken');
+        const resp = await fetch(`http://localhost:8080/boards/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!resp.ok) throw new Error('Erro ao excluir quadro');
+        if (typeof Swal !== 'undefined') {
+            await Swal.fire({
+                title: 'Excluído!',
+                text: 'O quadro foi removido com sucesso.',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
         }
-    }
-}
-
-async function editarQuadro(board) {
-    const { value: novoNome } = await Swal.fire({
-        title: 'Editar Quadro',
-        input: 'text',
-        inputLabel: 'Novo nome do quadro',
-        inputValue: board.name,
-        showCancelButton: true,
-        inputValidator: (value) => {
-            if (!value) return 'Digite um nome para o quadro!';
-        }
-    });
-
-    if (novoNome) {
-        try {
-            const response = await window.authManager.fetchWithAuth(
-                `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BOARDS}/${board.id}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: novoNome,
-                        collaboratorIds: board.collaborators.map(c => c.id_collaborator)
-                    })
-                }
-            );
-
-            if (!response.ok) throw new Error('Erro ao atualizar quadro');
-            
-            await Swal.fire('Sucesso!', 'Quadro atualizado com sucesso.', 'success');
-            await carregarQuadros();
-        } catch (error) {
-            console.error('Erro ao atualizar quadro:', error);
-            Swal.fire('Erro', 'Não foi possível atualizar o quadro.', 'error');
+        if (typeof carregarBoards === 'function') carregarBoards();
+        else window.location.reload();
+    } catch (e) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire('Erro', 'Erro ao excluir quadro!', 'error');
+        } else {
+            alert('Erro ao excluir quadro!');
         }
     }
 }
@@ -421,56 +573,6 @@ function editarNomeQuadro(elemento) {
   });
 }
 
-function excluirQuadro(botao) {
-    const isUsuarioSuperior = localStorage.getItem("isUsuarioSuperior") === "true";
-    if (!isUsuarioSuperior) {
-        Swal.fire({
-            title: "Acesso Restrito",
-            text: "Apenas usuários superiores podem excluir quadros.",
-            icon: "warning",
-            confirmButtonColor: "#3085d6"
-        });
-        return;
-    }
-
-  const quadro = botao.closest(".quadro");
-  const id = quadro.dataset.id;
-
-  Swal.fire({
-    title: 'Tem certeza?',
-    text: "Esta ação não poderá ser desfeita!",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Sim, excluir!',
-    cancelButtonText: 'Cancelar'
-  }).then((result) => {
-    if (result.isConfirmed) {
-            // Remove do localStorage
-      let quadros = StorageUtils ? 
-          StorageUtils.getLocalJSON("quadros", []) : 
-          JSON.parse(localStorage.getItem("quadros")) || [];
-      quadros = quadros.filter(q => q.id_board !== id);
-      StorageUtils ? 
-          StorageUtils.setLocalJSON("quadros", quadros) : 
-          localStorage.setItem("quadros", JSON.stringify(quadros));
-
-            // Remove da interface
-      quadro.remove();
-
-            Swal.fire({
-                title: 'Excluído!',
-                text: 'O quadro foi removido com sucesso.',
-                icon: 'success',
-                confirmButtonColor: '#28a745',
-                timer: 1500,
-                showConfirmButton: false
-            });
-    }
-  });
-}
-
 document.addEventListener('DOMContentLoaded', carregarQuadros);
 
 /* Início do arquivo (board.js) – Adicionar trecho para salvar token e refreshToken no localStorage */
@@ -534,6 +636,16 @@ function abrirModalNovaTarefa() {
 
     carregarFasesDoQuadro(quadroId); // Aqui carrega as fases vinculadas ao quadro correto
     document.getElementById("modalNovaTarefa").style.display = "flex"; // Abre o modal
+}
+
+// Adicionando a função para fechar o modal de edição do quadro
+function fecharModalEditarQuadro() {
+    if (modalEditar) {
+        modalEditar.remove();
+        modalEditar = null;
+        inputNomeEditar = null;
+        idQuadroEditando = null;
+    }
 }
 
 

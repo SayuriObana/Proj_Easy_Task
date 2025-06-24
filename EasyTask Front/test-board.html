@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Quadros</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="src/css/global/base.css">
+    <link rel="stylesheet" href="src/css/board/boardListScreen.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <div class="main-content">
+        <h1>Teste dos Botões de Board</h1>
+        
+        <div class="boards-grid">
+            <div class="board-card">
+                <div class="board-card-header">
+                    <h3 class="board-card-title">Board de Teste</h3>
+                </div>
+                <div class="board-card-body">
+                    <div class="board-card-stats">
+                        <div class="board-stat">
+                            <i class="fas fa-columns"></i>
+                            <span>3 fases</span>
+                        </div>
+                        <div class="board-stat">
+                            <i class="fas fa-tasks"></i>
+                            <span>5 tarefas</span>
+                        </div>
+                        <div class="board-stat">
+                            <i class="fas fa-users"></i>
+                            <span>2 colaboradores</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="board-card-actions">
+                    <button class="board-action-btn" onclick="testarEditar()" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="board-action-btn" onclick="testarExcluir()" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testarEditar() {
+            console.log('Botão editar clicado!');
+            Swal.fire({
+                title: 'Teste de Edição',
+                text: 'Botão de editar funcionando!',
+                icon: 'success'
+            });
+        }
+
+        function testarExcluir() {
+            console.log('Botão excluir clicado!');
+            Swal.fire({
+                title: 'Teste de Exclusão',
+                text: 'Botão de excluir funcionando!',
+                icon: 'warning'
+            });
+        }
+    </script>
+</body>
+</html> 

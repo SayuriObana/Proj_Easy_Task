@@ -126,32 +126,42 @@ async function fetchComToken(url, options = {}) {
 
 // Funções de inicialização
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Inicializando página de boards...');
     carregarBoards();
 });
 
 // Funções de manipulação de boards
 async function carregarBoards() {
     try {
+        console.log('📋 Carregando boards...');
         const response = await fetchComToken('http://localhost:8080/boards');
         if (!response.ok) throw new Error('Erro ao carregar boards');
         
         boards = await response.json();
+        console.log('✅ Boards carregados:', boards);
         renderizarBoards();
     } catch (error) {
-        console.error('Erro ao carregar boards:', error);
+        console.error('❌ Erro ao carregar boards:', error);
         mostrarNotificacao('Erro ao carregar boards', 'error');
     }
 }
 
 function renderizarBoards() {
+    console.log('🎨 Renderizando boards...');
     const boardsGrid = document.querySelector('.boards-grid');
-    if (!boardsGrid) return;
+    if (!boardsGrid) {
+        console.error('❌ Container .boards-grid não encontrado');
+        return;
+    }
+
+    // Verificar se o usuário tem permissão de SUPERIOR
+    const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
+    console.log('👤 Usuário é SUPERIOR:', isUsuarioSuperior);
 
     boardsGrid.innerHTML = boards.map(board => `
-        <div class="board-card" onclick="abrirBoard(${board.id})">
+        <div class="board-card" data-board-id="${board.id}">
             <div class="board-card-header">
                 <h3 class="board-card-title">${board.name}</h3>
-                <p class="board-card-description">${board.description || 'Sem descrição'}</p>
             </div>
             <div class="board-card-body">
                 <div class="board-card-stats">
@@ -169,55 +179,151 @@ function renderizarBoards() {
                     </div>
                 </div>
             </div>
-            <div class="board-card-actions">
-                <button class="board-action-btn" onclick="editarBoard(event, ${board.id})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="board-action-btn" onclick="excluirBoard(event, ${board.id})">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
+            ${isUsuarioSuperior ? `
+                <div class="board-card-actions">
+                    <button class="board-action-btn" onclick="editarBoard(event, ${board.id})" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="board-action-btn" onclick="excluirBoard(event, ${board.id})" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            ` : ''}
         </div>
     `).join('');
+    
+    // Adicionar evento de clique nos cards
+    boardsGrid.addEventListener('click', function(event) {
+        const card = event.target.closest('.board-card');
+        if (card && !event.target.closest('.board-card-actions')) {
+            const boardId = card.dataset.boardId;
+            if (boardId) {
+                abrirBoard(parseInt(boardId));
+            }
+        }
+    });
+    
+    console.log('✅ Boards renderizados com sucesso');
 }
 
 // Funções de modal
 function criarNovoBoard() {
+    console.log('➕ Criando novo board...');
     currentBoardId = null;
-    document.getElementById('boardModalTitle').textContent = 'Novo Board';
-    document.getElementById('boardForm').reset();
-    document.getElementById('boardModal').style.display = 'block';
+    
+    const modalTitle = document.getElementById('boardModalTitle');
+    const modal = document.getElementById('boardModal');
+    const form = document.getElementById('boardForm');
+    
+    if (!modalTitle || !modal || !form) {
+        console.error('❌ Elementos do modal não encontrados:', {
+            modalTitle: !!modalTitle,
+            modal: !!modal,
+            form: !!form
+        });
+        mostrarNotificacao('Erro ao abrir modal', 'error');
+        return;
+    }
+    
+    modalTitle.textContent = 'Novo Board';
+    form.reset();
+    modal.style.display = 'block';
 }
 
 function editarBoard(event, boardId) {
+    console.log('✏️ Editando board:', boardId);
     event.stopPropagation();
     currentBoardId = boardId;
     const board = boards.find(b => b.id === boardId);
-    if (!board) return;
+    if (!board) {
+        console.error('❌ Board não encontrado:', boardId);
+        return;
+    }
 
-    document.getElementById('boardModalTitle').textContent = 'Editar Board';
-    document.getElementById('boardName').value = board.name;
-    document.getElementById('boardDescription').value = board.description || '';
-    document.getElementById('boardModal').style.display = 'block';
+    const modalTitle = document.getElementById('boardModalTitle');
+    const modal = document.getElementById('boardModal');
+    const nameInput = document.getElementById('boardName');
+    
+    if (!modalTitle || !modal || !nameInput) {
+        console.error('❌ Elementos do modal não encontrados:', {
+            modalTitle: !!modalTitle,
+            modal: !!modal,
+            nameInput: !!nameInput
+        });
+        mostrarNotificacao('Erro ao abrir modal', 'error');
+        return;
+    }
+
+    modalTitle.textContent = 'Editar Board';
+    nameInput.value = board.name;
+    modal.style.display = 'block';
 }
 
 function fecharModalBoard() {
-    document.getElementById('boardModal').style.display = 'none';
+    console.log('❌ Fechando modal...');
+    const modal = document.getElementById('boardModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
     currentBoardId = null;
 }
 
-// Funções de manipulação de dados
+// Ajustar z-index do modal de board para 1050
+(function ajustarZIndexModalBoard() {
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('boardModal');
+        if (modal) {
+            modal.style.zIndex = '1050';
+        }
+    });
+})();
+
+// Função de manipulação de dados
 async function salvarBoard(event) {
     event.preventDefault();
+    console.log('💾 Salvando board...');
+    
+    const nameInput = document.getElementById('boardName');
+    if (!nameInput) {
+        console.error('❌ Campo de nome não encontrado');
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Erro',
+                text: 'Campo de nome não encontrado',
+                icon: 'error',
+                confirmButtonColor: '#3085d6',
+            });
+        } else {
+            alert('Erro ao salvar board');
+        }
+        return;
+    }
+    
+    if (!nameInput.value.trim()) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Campo Obrigatório',
+                text: 'Digite o nome do board!',
+                icon: 'warning',
+                confirmButtonColor: '#3085d6',
+            });
+        } else {
+            alert('Digite o nome do board!');
+        }
+        return;
+    }
     
     const formData = {
-        name: document.getElementById('boardName').value,
-        description: document.getElementById('boardDescription').value
+        name: nameInput.value
     };
+
+    console.log('📝 Dados do formulário:', formData);
 
     try {
         const url = currentBoardId ? `http://localhost:8080/boards/${currentBoardId}` : 'http://localhost:8080/boards';
         const method = currentBoardId ? 'PUT' : 'POST';
+        
+        console.log(`🌐 Enviando requisição ${method} para:`, url);
         
         const response = await fetchComToken(url, {
             method: method,
@@ -227,20 +333,41 @@ async function salvarBoard(event) {
         if (!response.ok) throw new Error('Erro ao salvar board');
         
         await carregarBoards();
-        fecharModalBoard();
-        mostrarNotificacao('Board salvo com sucesso!', 'success');
+        fecharModalBoard(); // FECHA O MODAL ANTES DO ALERT DE SUCESSO
+        if (typeof Swal !== 'undefined') {
+            await Swal.fire({
+                title: 'Sucesso!',
+                text: 'Board salvo com sucesso!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            mostrarNotificacao('Board salvo com sucesso!', 'success');
+        }
     } catch (error) {
-        console.error('Erro ao salvar board:', error);
-        mostrarNotificacao('Erro ao salvar board', 'error');
+        console.error('❌ Erro ao salvar board:', error);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Erro',
+                text: 'Erro ao salvar board',
+                icon: 'error',
+                confirmButtonColor: '#3085d6',
+            });
+        } else {
+            mostrarNotificacao('Erro ao salvar board', 'error');
+        }
     }
 }
 
 async function excluirBoard(event, boardId) {
+    console.log('🗑️ Excluindo board:', boardId);
     event.stopPropagation();
     
     // Verificar se o usuário tem permissão de SUPERIOR
     const isUsuarioSuperior = localStorage.getItem('isUsuarioSuperior') === 'true';
     if (!isUsuarioSuperior) {
+        console.log('🚫 Usuário não tem permissão para excluir');
         Swal.fire({
             title: "Acesso Negado",
             text: "Você não tem permissão para excluir boards. Apenas usuários com nível SUPERIOR podem realizar esta ação.",
@@ -261,9 +388,13 @@ async function excluirBoard(event, boardId) {
         cancelButtonText: "Cancelar"
     });
 
-    if (!result.isConfirmed) return;
+    if (!result.isConfirmed) {
+        console.log('❌ Exclusão cancelada pelo usuário');
+        return;
+    }
 
     try {
+        console.log('🌐 Enviando requisição DELETE para:', `http://localhost:8080/boards/${boardId}`);
         const response = await fetchComToken(`http://localhost:8080/boards/${boardId}`, {
             method: 'DELETE'
         });
@@ -273,18 +404,20 @@ async function excluirBoard(event, boardId) {
         await carregarBoards();
         mostrarNotificacao('Board excluído com sucesso!', 'success');
     } catch (error) {
-        console.error('Erro ao excluir board:', error);
+        console.error('❌ Erro ao excluir board:', error);
         mostrarNotificacao('Erro ao excluir board', 'error');
     }
 }
 
 // Funções de navegação
 function abrirBoard(boardId) {
+    console.log('🚪 Abrindo board:', boardId);
     window.location.href = `boardScreen.html?id=${boardId}`;
 }
 
 // Funções de utilidade
 function mostrarNotificacao(mensagem, tipo) {
+    console.log(`📢 Notificação [${tipo}]:`, mensagem);
     Swal.fire({
         text: mensagem,
         icon: tipo,

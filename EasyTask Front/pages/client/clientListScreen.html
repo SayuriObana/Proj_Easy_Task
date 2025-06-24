@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>clientListScreen</title>
+    <title>Clientes</title>
     <link rel="stylesheet" href="../../src/css/client/clientListScreen.css">
     <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
     <link rel="stylesheet" href="../../src/components/css/sidebar.css">
@@ -14,6 +14,7 @@
     <script src="../../src/js/config/databaseMapping.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="icon" type="image/png" sizes="64x64" href="../../src/imagens/IMAGEM_LOGO_EASYTASK.PNG">
 </head>
 
 <body>
@@ -114,11 +115,11 @@
                         </div>
                         <div class="form-group">
                             <label for="telefoneClienteEditar">Telefone</label>
-                            <input type="tel" id="telefoneClienteEditar" placeholder="Telefone" required>
+                            <input type="tel" id="telefoneClienteEditar" placeholder="Telefone" required maxlength="15" oninput="mascaraTelefone(this)">
                         </div>
                         <div class="form-group">
                             <label for="cnpjClienteEditar">CNPJ</label>
-                            <input type="text" id="cnpjClienteEditar" placeholder="CNPJ" required>
+                            <input type="text" id="cnpjClienteEditar" placeholder="CNPJ" required maxlength="18" oninput="mascaraCNPJ(this)">
                         </div>
                         <button type="submit" class="save-btn">SALVAR ALTERAÇÕES</button>
                     </form>

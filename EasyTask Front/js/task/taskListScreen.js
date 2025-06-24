@@ -11,6 +11,47 @@ let isSubmitting = false; // Flag para evitar múltiplos submits
 let currentTarefa = null; // Para o modal de detalhes
 let currentEditingPhaseId = null; // Para controlar a edição de fases
 let currentUser = null; // Para armazenar os dados do usuário logado
+let isEditingMode = false; // Flag para controlar se está em modo de edição
+
+// =================================================================
+//                 FUNÇÕES DE PERMISSÃO
+// =================================================================
+
+// Função para verificar se o usuário tem permissão de administrador
+window.hasAdminPermission = function() {
+    try {
+        // Verificar via authManager
+        if (window.authManager && window.authManager.isSuperiorUser) {
+            return window.authManager.isSuperiorUser();
+        }
+        
+        // Verificar via localStorage
+        const isSuperior = localStorage.getItem('isUsuarioSuperior');
+        return isSuperior === 'true';
+        
+    } catch (error) {
+        console.error("❌ Erro ao verificar permissões:", error);
+        return false;
+    }
+};
+
+// Função para verificar se o usuário está autenticado
+window.isUserAuthenticated = function() {
+    try {
+        if (window.authManager && window.authManager.isAuthenticated) {
+            return window.authManager.isAuthenticated();
+        }
+        
+        const token = localStorage.getItem('accessToken') || 
+                     localStorage.getItem('auth_token') || 
+                     localStorage.getItem('token');
+        return !!token;
+        
+    } catch (error) {
+        console.error("❌ Erro ao verificar autenticação:", error);
+        return false;
+    }
+};
 
 // =================================================================
 //                 INICIALIZAÇÃO DO SISTEMA
@@ -21,23 +62,46 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("🚀 Inicializando sistema de tarefas...");
         
         // 1. Verificar autenticação
-        if (!window.authManager || window.authManager.isTokenExpired()) {
-            console.warn("⚠️ Token expirado, redirecionando para login...");
+        if (!window.isUserAuthenticated()) {
+            console.warn("⚠️ Usuário não autenticado, redirecionando para login...");
             window.location.href = '../login/loginSystem.html';
             return;
         }
         
-        // 2. Obter ID do quadro da URL
+        // 2. Verificar permissões
+        if (!window.hasAdminPermission()) {
+            console.warn("⚠️ Usuário sem permissão SUPERIOR");
+            Swal.fire({
+                title: 'Acesso Limitado',
+                text: 'Você não tem permissão para criar ou editar tarefas. Apenas usuários SUPERIOR podem gerenciar tarefas.',
+                icon: 'warning',
+                confirmButtonText: 'Continuar Visualizando',
+                showCancelButton: true,
+                cancelButtonText: 'Sair'
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    window.location.href = '../globalMenu/mainMenu.html';
+                }
+            });
+        }
+        
+        // 3. Obter ID do quadro da URL
         const urlParams = new URLSearchParams(window.location.search);
         currentBoardId = urlParams.get('id');
         
         if (!currentBoardId) {
             console.error("❌ ID do quadro não encontrado na URL");
-            mostrarMensagemErro("ID do quadro não encontrado");
+            Swal.fire({
+                title: 'Erro',
+                text: 'ID do quadro não encontrado na URL. Redirecionando para lista de quadros.',
+                icon: 'error'
+            }).then(() => {
+                window.location.href = '../board/boardListScreen.html';
+            });
             return;
         }
         
-        // 3. Buscar dados do usuário logado
+        // 4. Buscar dados do usuário logado
         try {
             currentUser = await window.authManager.getCurrentUser();
             console.log("👤 Usuário logado:", currentUser);
@@ -47,20 +111,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         console.log(`✅ ID do Quadro: ${currentBoardId}`);
         
-        // 4. Configurar event listeners
+        // 5. Testar conectividade com o backend
+        await testarBackend();
+        
+        // 6. Configurar event listeners
         configurarEventListeners();
         
-        // 5. Carregar dados do quadro
+        // 7. Carregar dados do quadro
         await carregarDadosDoQuadro();
         
-        // 6. Carregar e renderizar tarefas
+        // 8. Carregar e renderizar tarefas
         await carregarTarefasDoQuadro();
         
         console.log("✅ Sistema inicializado com sucesso!");
         
     } catch (error) {
         console.error("❌ Erro ao inicializar sistema:", error);
-        mostrarMensagemErro("Erro ao inicializar o sistema");
+        Swal.fire({
+            title: 'Erro de Inicialização',
+            text: 'Erro ao inicializar o sistema: ' + error.message,
+            icon: 'error',
+            confirmButtonText: 'Recarregar Página'
+        }).then(() => {
+            window.location.reload();
+        });
     }
 });
 
@@ -376,11 +450,6 @@ function criarCardTarefa(tarefa) {
                 </div>
             </div>
         </div>
-        <div class="card-footer">
-            <button class="btn-edit">
-                <i class="fas fa-edit"></i>
-            </button>
-        </div>
     `;
     
     // Event listeners para drag and drop
@@ -392,20 +461,12 @@ function criarCardTarefa(tarefa) {
     card.addEventListener('dragend', (e) => {
         card.classList.remove('dragging');
     });
-    // Event listener para abrir detalhes da tarefa
+    
+    // Event listener para abrir detalhes da tarefa (clique em qualquer lugar do card)
     card.addEventListener('click', (e) => {
-        if (!e.target.closest('.btn-edit')) {
-            abrirDetalhesTarefa(tarefa);
-        }
+        abrirDetalhesTarefa(tarefa);
     });
-    // Event listener para o botão de editar
-    const editBtn = card.querySelector('.btn-edit');
-    if (editBtn) {
-        editBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            abrirDetalhesTarefa(tarefa);
-        });
-    }
+    
     return card;
 }
 
@@ -741,6 +802,24 @@ async function abrirModalFases() {
 async function abrirModalNovaTarefa() {
     try {
         console.log("✨ Abrindo modal de nova tarefa...");
+        
+        // Definir modo de criação (não edição)
+        isEditingMode = false;
+        
+        // Verificar permissões do usuário
+        if (!window.hasAdminPermission && !window.authManager.isSuperiorUser()) {
+            console.warn("⚠️ Usuário sem permissão para criar tarefas");
+            Swal.fire('Acesso Negado', 'Apenas usuários SUPERIOR podem criar tarefas.', 'error');
+            return;
+        }
+        
+        // Verificar se o quadro está carregado
+        if (!currentBoardId) {
+            console.error("❌ ID do quadro não encontrado");
+            Swal.fire('Erro', 'Quadro não encontrado. Recarregue a página.', 'error');
+            return;
+        }
+        
         console.log(" boardPhases.length:", boardPhases.length);
         console.log("🔍 boardPhases:", boardPhases);
         
@@ -750,7 +829,14 @@ async function abrirModalNovaTarefa() {
             Swal.fire({
                 title: 'Atenção',
                 text: 'Este quadro não possui fases vinculadas. Adicione fases antes de criar tarefas.',
-                icon: 'warning'
+                icon: 'warning',
+                confirmButtonText: 'Gerenciar Fases',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    abrirModalFases();
+                }
             });
             return;
         }
@@ -779,54 +865,212 @@ async function abrirModalNovaTarefa() {
                 console.warn("⚠️ Elemento taskModalTitle não encontrado");
             }
             
+            // Definir data mínima como hoje
+            const dataEntregaInput = document.getElementById('dataEntrega');
+            if (dataEntregaInput) {
+                const hoje = new Date().toISOString().split('T')[0];
+                dataEntregaInput.min = hoje;
+                dataEntregaInput.value = hoje;
+            }
+            
+            // Configurar validação em tempo real
+            configurarValidacaoTempoReal();
+            
             console.log("✅ Modal exibido com sucesso");
         } else {
             console.error("❌ Modal não encontrado no DOM");
+            Swal.fire('Erro', 'Modal não encontrado. Recarregue a página.', 'error');
         }
         
     } catch (error) {
         console.error("❌ Erro ao abrir modal de tarefa:", error);
-        Swal.fire('Erro', 'Não foi possível abrir o formulário de tarefa', 'error');
+        Swal.fire({
+            title: 'Erro',
+            text: 'Não foi possível abrir o formulário de tarefa: ' + error.message,
+            icon: 'error'
+        });
     }
 }
 
 async function carregarDadosParaFormularioTarefa() {
     try {
-        console.log("CARREGANDO DADOS PARA FORM");
+        console.log("📋 CARREGANDO DADOS PARA FORM");
+        console.log("🔍 API_CONFIG.BASE_URL:", window.API_CONFIG.BASE_URL);
+
+        // Verificar se há fases disponíveis
+        if (!boardPhases || boardPhases.length === 0) {
+            throw new Error('Nenhuma fase disponível no quadro');
+        }
 
         // Carregar clientes
-        const clientsResponse = await window.authManager.fetchWithAuth(`${window.API_CONFIG.BASE_URL}/clients`);
-        if (!clientsResponse.ok) throw new Error('Falha ao carregar clientes');
+        console.log("📋 Carregando clientes...");
+        const clientsUrl = `${window.API_CONFIG.BASE_URL}/clients`;
+        console.log("🔍 URL dos clientes:", clientsUrl);
+        
+        const clientsResponse = await window.authManager.fetchWithAuth(clientsUrl);
+        console.log("📡 Resposta dos clientes:", clientsResponse.status, clientsResponse.statusText);
+        
+        if (!clientsResponse.ok) {
+            const errorText = await clientsResponse.text();
+            console.error("❌ Erro na resposta dos clientes:", errorText);
+            throw new Error(`Falha ao carregar clientes: ${clientsResponse.status} - ${errorText}`);
+        }
+        
         const clients = await clientsResponse.json();
-        preencherSelect('cliente', clients, 'name', 'clientId');
+        console.log("📋 Clientes carregados:", clients);
+        console.log("📋 Número de clientes:", clients.length);
+        
+        // Verificar estrutura dos dados de clientes
+        if (clients.length > 0) {
+            console.log("🔍 Estrutura do primeiro cliente:", clients[0]);
+            console.log("🔍 Campos disponíveis no cliente:", Object.keys(clients[0]));
+            
+            // Verificar se os campos esperados existem
+            const primeiroCliente = clients[0];
+            console.log("🔍 Campo 'name' existe:", 'name' in primeiroCliente);
+            console.log("🔍 Campo 'clientId' existe:", 'clientId' in primeiroCliente);
+            console.log("🔍 Campo 'idClient' existe:", 'idClient' in primeiroCliente);
+            console.log("🔍 Campo 'id' existe:", 'id' in primeiroCliente);
+        }
+        
+        if (clients.length === 0) {
+            throw new Error('Nenhum cliente cadastrado no sistema');
+        }
+        
+        // Determinar os campos corretos baseado na estrutura dos dados
+        const clientDisplayField = clients[0].name ? 'name' : 'clientName';
+        const clientValueField = clients[0].clientId ? 'clientId' : 
+                                clients[0].idClient ? 'idClient' : 
+                                clients[0].id ? 'id' : 'clientId';
+        
+        console.log("🔍 Campos escolhidos para clientes:", { displayField: clientDisplayField, valueField: clientValueField });
+        
+        preencherSelect('cliente', clients, clientDisplayField, clientValueField);
 
         // Carregar colaboradores
-        const collaboratorsResponse = await window.authManager.fetchWithAuth(`${window.API_CONFIG.BASE_URL}/collaborators`);
-        if (!collaboratorsResponse.ok) throw new Error('Falha ao carregar colaboradores');
+        console.log("📋 Carregando colaboradores...");
+        const collaboratorsUrl = `${window.API_CONFIG.BASE_URL}/collaborators`;
+        console.log("🔍 URL dos colaboradores:", collaboratorsUrl);
+        
+        const collaboratorsResponse = await window.authManager.fetchWithAuth(collaboratorsUrl);
+        console.log("📡 Resposta dos colaboradores:", collaboratorsResponse.status, collaboratorsResponse.statusText);
+        
+        if (!collaboratorsResponse.ok) {
+            const errorText = await collaboratorsResponse.text();
+            console.error("❌ Erro na resposta dos colaboradores:", errorText);
+            throw new Error(`Falha ao carregar colaboradores: ${collaboratorsResponse.status} - ${errorText}`);
+        }
+        
         const collaborators = await collaboratorsResponse.json();
-        preencherSelect('colaborador', collaborators, 'name', 'collaboratorId');
+        console.log("📋 Colaboradores carregados:", collaborators);
+        console.log("📋 Número de colaboradores:", collaborators.length);
+        
+        // Verificar estrutura dos dados de colaboradores
+        if (collaborators.length > 0) {
+            console.log("🔍 Estrutura do primeiro colaborador:", collaborators[0]);
+            console.log("🔍 Campos disponíveis no colaborador:", Object.keys(collaborators[0]));
+            
+            // Verificar se os campos esperados existem
+            const primeiroColaborador = collaborators[0];
+            console.log("🔍 Campo 'name' existe:", 'name' in primeiroColaborador);
+            console.log("🔍 Campo 'collaboratorId' existe:", 'collaboratorId' in primeiroColaborador);
+            console.log("🔍 Campo 'idCollaborator' existe:", 'idCollaborator' in primeiroColaborador);
+            console.log("🔍 Campo 'id' existe:", 'id' in primeiroColaborador);
+        }
+        
+        if (collaborators.length === 0) {
+            throw new Error('Nenhum colaborador cadastrado no sistema');
+        }
+        
+        // Determinar os campos corretos baseado na estrutura dos dados
+        const collaboratorDisplayField = collaborators[0].name ? 'name' : 'collaboratorName';
+        const collaboratorValueField = collaborators[0].collaboratorId ? 'collaboratorId' : 
+                                      collaborators[0].idCollaborator ? 'idCollaborator' : 
+                                      collaborators[0].id ? 'id' : 'collaboratorId';
+        
+        console.log("🔍 Campos escolhidos para colaboradores:", { displayField: collaboratorDisplayField, valueField: collaboratorValueField });
+        
+        preencherSelect('colaborador', collaborators, collaboratorDisplayField, collaboratorValueField);
 
         // Carregar fases do quadro
+        console.log("📋 Carregando fases do quadro...");
+        console.log("📋 Fases disponíveis:", boardPhases);
         preencherSelect('fase', boardPhases, 'name', 'idPhase');
+        
+        console.log("✅ Todos os dados carregados com sucesso");
 
     } catch (error) {
-        console.error("Erro ao carregar dados para o formulário:", error);
-        mostrarMensagemErro(error.message);
+        console.error("❌ Erro ao carregar dados para o formulário:", error);
+        
+        // Fechar modal se houver erro
+        fecharModalTarefa();
+        
+        Swal.fire({
+            title: 'Erro ao Carregar Dados',
+            text: error.message,
+            icon: 'error',
+            confirmButtonColor: '#d33'
+        });
+        
+        throw error;
     }
 }
 
 function preencherSelect(selectId, data, displayField, valueField) {
-    const select = document.getElementById(selectId);
-    if (!select) return;
+    console.log(`🔍 Preenchendo select '${selectId}' com dados:`, data);
+    console.log(`🔍 Campos esperados: displayField='${displayField}', valueField='${valueField}'`);
     
+    const select = document.getElementById(selectId);
+    if (!select) {
+        console.error(`❌ Select com ID '${selectId}' não encontrado`);
+        return;
+    }
+    
+    console.log(`✅ Select '${selectId}' encontrado:`, select);
+    
+    if (!Array.isArray(data)) {
+        console.error(`❌ Dados para select '${selectId}' não são um array:`, data);
+        return;
+    }
+    
+    if (data.length === 0) {
+        console.warn(`⚠️ Nenhum dado disponível para select '${selectId}'`);
+        select.innerHTML = `<option value="">Nenhum item disponível</option>`;
+        return;
+    }
+    
+    // Verificar estrutura dos dados
+    console.log(`🔍 Primeiro item dos dados:`, data[0]);
+    console.log(`🔍 Campos disponíveis no primeiro item:`, Object.keys(data[0]));
+    
+    // Limpar select
     select.innerHTML = `<option value="">Selecione...</option>`;
     
-    data.forEach(item => {
+    // Adicionar opções
+    let opcoesAdicionadas = 0;
+    data.forEach((item, index) => {
+        console.log(`🔍 Processando item ${index}:`, item);
+        
+        if (!item[displayField] || !item[valueField]) {
+            console.warn(`⚠️ Item inválido para select '${selectId}' (índice ${index}):`, item);
+            console.warn(`⚠️ displayField '${displayField}' =`, item[displayField]);
+            console.warn(`⚠️ valueField '${valueField}' =`, item[valueField]);
+            return;
+        }
+        
         const option = document.createElement('option');
         option.value = item[valueField];
         option.textContent = item[displayField];
         select.appendChild(option);
+        opcoesAdicionadas++;
+        
+        console.log(`✅ Opção adicionada: ${item[displayField]} (${item[valueField]})`);
     });
+    
+    console.log(`✅ Select '${selectId}' preenchido com ${opcoesAdicionadas} itens de ${data.length} disponíveis`);
+    
+    // Verificar resultado final
+    console.log(`🔍 Opções finais do select '${selectId}':`, select.innerHTML);
 }
 
 async function salvarTarefa(event) {
@@ -840,7 +1084,28 @@ async function salvarTarefa(event) {
     
     try {
         isSubmitting = true;
-        console.log("💾 Salvando nova tarefa...");
+        
+        console.log("🔍 isEditingMode no início de salvarTarefa:", isEditingMode);
+        
+        if (isEditingMode) {
+            console.log("✏️ Atualizando tarefa existente...");
+        } else {
+            console.log("💾 Salvando nova tarefa...");
+        }
+        
+        // Verificar permissões do usuário
+        if (!window.hasAdminPermission && !window.authManager.isSuperiorUser()) {
+            console.warn("⚠️ Usuário sem permissão para criar/editar tarefas");
+            Swal.fire('Acesso Negado', 'Apenas usuários SUPERIOR podem criar/editar tarefas.', 'error');
+            return;
+        }
+        
+        // Verificar se o quadro está carregado
+        if (!currentBoardId) {
+            console.error("❌ ID do quadro não encontrado");
+            Swal.fire('Erro', 'Quadro não encontrado. Recarregue a página.', 'error');
+            return;
+        }
         
         // Obter valores dos campos do formulário
         const titulo = document.getElementById('tituloTarefa').value.trim();
@@ -855,35 +1120,63 @@ async function salvarTarefa(event) {
             titulo, descricao, prioridade, dataEntrega, fase, cliente, colaborador
         });
         
-        // Validações básicas
-        if (!titulo || !prioridade || !fase || !cliente || !colaborador) {
-            console.warn("⚠️ Campos obrigatórios não preenchidos");
-            Swal.fire('Atenção', 'Por favor, preencha todos os campos obrigatórios.', 'warning');
+        // Validações detalhadas
+        const erros = [];
+        
+        if (!titulo) {
+            erros.push("Título da tarefa é obrigatório");
+        } else if (titulo.length < 3) {
+            erros.push("Título deve ter pelo menos 3 caracteres");
+        }
+        
+        if (!prioridade) {
+            erros.push("Prioridade é obrigatória");
+        }
+        
+        if (!dataEntrega) {
+            erros.push("Data de entrega é obrigatória");
+        } else {
+            const dataEntregaObj = new Date(dataEntrega);
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            
+            if (dataEntregaObj < hoje) {
+                erros.push("Data de entrega não pode ser anterior a hoje");
+            }
+        }
+        
+        if (!fase) {
+            erros.push("Fase é obrigatória");
+        }
+        
+        if (!cliente) {
+            erros.push("Cliente é obrigatório");
+        }
+        
+        if (!colaborador) {
+            erros.push("Colaborador é obrigatório");
+        }
+        
+        if (erros.length > 0) {
+            const mensagemErro = erros.join('\n');
+            console.error("❌ Erros de validação:", erros);
+            Swal.fire('Erro de Validação', mensagemErro, 'error');
             return;
         }
         
-        // Verificar se já existe uma tarefa com o mesmo título no mesmo quadro
-        const tarefaExistente = allTasks.find(tarefa => 
-            tarefa.title.toLowerCase() === titulo.toLowerCase() && 
-            tarefa.boardId === parseInt(currentBoardId)
-        );
-        
-        if (tarefaExistente) {
-            console.warn("⚠️ Tarefa com este título já existe:", tarefaExistente);
-            Swal.fire({
-                title: 'Tarefa Duplicada',
-                text: `Já existe uma tarefa com o título "${titulo}" neste quadro.`,
-                icon: 'warning',
-                confirmButtonColor: '#3085d6'
-            });
+        // Verificar se a fase pertence ao quadro atual
+        const faseValida = boardPhases.find(f => f.idPhase == fase);
+        if (!faseValida) {
+            console.warn("⚠️ Fase não pertence ao quadro atual");
+            Swal.fire('Erro', 'A fase selecionada não pertence a este quadro.', 'error');
             return;
         }
         
         const tarefaData = {
             title: titulo,
-            description: descricao,
+            description: descricao || null,
             priority: parseInt(prioridade),
-            dueDate: dataEntrega || null,
+            dueDate: dataEntrega,
             boardId: parseInt(currentBoardId),
             phaseId: parseInt(fase),
             clientId: parseInt(cliente),
@@ -896,46 +1189,102 @@ async function salvarTarefa(event) {
         const submitBtn = event.target.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Salvando...';
+        submitBtn.textContent = isEditingMode ? 'Atualizando...' : 'Salvando...';
         
-        const response = await window.authManager.fetchWithAuth(
-            `${window.API_CONFIG.BASE_URL}/tasks`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(tarefaData)
-            }
-        );
+        let response;
+        if (isEditingMode) {
+            // Modo de edição - fazer PUT
+            response = await window.authManager.fetchWithAuth(
+                `${window.API_CONFIG.BASE_URL}/tasks/${currentTarefa.idTask}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(tarefaData)
+                }
+            );
+        } else {
+            // Modo de criação - fazer POST
+            response = await window.authManager.fetchWithAuth(
+                `${window.API_CONFIG.BASE_URL}/tasks`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(tarefaData)
+                }
+            );
+        }
         
         console.log("📡 Resposta do servidor:", response.status, response.statusText);
         
         if (!response.ok) {
             const errorText = await response.text();
             console.error("❌ Erro na resposta:", errorText);
-            throw new Error(`Erro ao criar tarefa: ${response.status} - ${errorText}`);
+            
+            let errorMessage = isEditingMode ? 'Erro ao atualizar tarefa' : 'Erro ao criar tarefa';
+            
+            if (response.status === 403) {
+                errorMessage = 'Você não tem permissão para criar/editar tarefas. Apenas usuários SUPERIOR podem criar/editar tarefas.';
+            } else if (response.status === 400) {
+                try {
+                    const errorData = JSON.parse(errorText);
+                    errorMessage = errorData.message || 'Dados inválidos fornecidos';
+                } catch {
+                    errorMessage = 'Dados inválidos fornecidos';
+                }
+            } else if (response.status === 409) {
+                errorMessage = 'Já existe uma tarefa com este título neste quadro.';
+            } else if (response.status === 404) {
+                errorMessage = isEditingMode ? 'Tarefa não encontrada.' : 'Quadro, fase, cliente ou colaborador não encontrado.';
+            } else {
+                errorMessage = `Erro do servidor: ${response.status} - ${errorText}`;
+            }
+            
+            throw new Error(errorMessage);
         }
         
-        const novaTarefa = await response.json();
-        console.log("✅ Tarefa criada com sucesso:", novaTarefa);
+        const tarefaSalva = await response.json();
+        console.log("✅ Tarefa salva com sucesso:", tarefaSalva);
+        
+        // Armazenar o modo antes de resetar
+        const modoAtual = isEditingMode;
         
         // Limpar formulário
         event.target.reset();
         
-        // Fechar modal e recarregar tarefas
+        // Fechar modal manualmente (sem chamar fecharModalTarefa para não resetar isEditingMode prematuramente)
         console.log("🔒 Fechando modal...");
-        fecharModalTarefa();
+        const modal = document.getElementById('taskModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        
+        // Resetar modo de edição APÓS fechar o modal
+        isEditingMode = false;
+        currentTarefa = null;
         
         console.log("🔄 Recarregando tarefas do quadro...");
         await carregarTarefasDoQuadro();
         
         console.log("✅ Processo concluído com sucesso!");
-        Swal.fire('Sucesso!', 'Tarefa criada com sucesso!', 'success');
+        Swal.fire({
+            title: 'Sucesso!',
+            text: modoAtual ? 'Tarefa atualizada com sucesso!' : 'Tarefa criada com sucesso!',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
         
     } catch (error) {
         console.error("❌ Erro ao salvar tarefa:", error);
-        Swal.fire('Erro', 'Não foi possível criar a tarefa', 'error');
+        Swal.fire({
+            title: 'Erro',
+            text: error.message,
+            icon: 'error'
+        });
     } finally {
         // Reabilitar botão de submit
         const submitBtn = event.target.querySelector('button[type="submit"]');
@@ -943,6 +1292,8 @@ async function salvarTarefa(event) {
             submitBtn.disabled = false;
             submitBtn.textContent = 'SALVAR';
         }
+        
+        // Resetar flag de submissão
         isSubmitting = false;
     }
 }
@@ -1364,6 +1715,14 @@ function configurarEventListeners() {
     // Drag and drop para kanban e lixeira
     configurarDragAndDropLixeira();
     
+    // Botão de editar tarefa no popup de detalhes
+    const btnEditarTarefa = document.getElementById('btnEditarTarefa');
+    if (btnEditarTarefa) {
+        const novoBtn = btnEditarTarefa.cloneNode(true);
+        btnEditarTarefa.parentNode.replaceChild(novoBtn, btnEditarTarefa);
+        novoBtn.addEventListener('click', abrirEdicaoTarefa);
+    }
+    
     console.log("✅ Event listeners configurados");
 }
 
@@ -1422,6 +1781,24 @@ function fecharModalTarefa() {
     const modal = document.getElementById('taskModal');
     if (modal) {
         modal.classList.remove('show');
+        
+        // Limpar formulário
+        const form = document.getElementById('tarefaForm');
+        if (form) {
+            form.reset();
+            console.log("✅ Formulário limpo");
+        }
+        
+        // Resetar modo de edição
+        isEditingMode = false;
+        currentTarefa = null;
+        
+        // Resetar flag de submissão
+        isSubmitting = false;
+        
+        console.log("✅ Modal fechado com sucesso");
+    } else {
+        console.warn("⚠️ Modal não encontrado");
     }
 }
 
@@ -1446,10 +1823,57 @@ function mostrarMensagemErro(mensagem) {
     Swal.fire('Erro', mensagem, 'error');
 }
 
-function abrirEdicaoTarefa() {
+async function abrirEdicaoTarefa() {
     console.log("✏️ Abrindo edição de tarefa...");
-    // TODO: Implementar edição de tarefa
-    Swal.fire('Em desenvolvimento', 'A funcionalidade de edição será implementada em breve.', 'info');
+    console.log("🔍 isEditingMode antes:", isEditingMode);
+    
+    // Fecha o popup de detalhes
+    fecharDetalhesTarefa();
+
+    // Preenche o modal de edição com os dados da tarefa atual
+    if (!currentTarefa) {
+        Swal.fire('Erro', 'Nenhuma tarefa selecionada para edição.', 'error');
+        return;
+    }
+
+    try {
+        // Definir modo de edição
+        isEditingMode = true;
+        console.log("🔍 isEditingMode após definir:", isEditingMode);
+        
+        // Carregar dados para os selects primeiro
+        await carregarDadosParaFormularioTarefa();
+
+        // Preencher campos do formulário após carregar os dados
+        document.getElementById('tituloTarefa').value = currentTarefa.title || '';
+        document.getElementById('descricao').value = currentTarefa.description || '';
+        document.getElementById('prioridade').value = currentTarefa.priority || '';
+        document.getElementById('dataEntrega').value = currentTarefa.dueDate ? new Date(currentTarefa.dueDate).toISOString().split('T')[0] : '';
+        document.getElementById('fase').value = currentTarefa.phaseId || '';
+        document.getElementById('cliente').value = currentTarefa.clientId || '';
+        document.getElementById('colaborador').value = currentTarefa.collaboratorId || '';
+
+        // Atualiza o título do modal
+        const titleElement = document.getElementById('taskModalTitle');
+        if (titleElement) {
+            titleElement.textContent = 'Editar Tarefa';
+        }
+
+        // Exibe o modal de edição
+        const modal = document.getElementById('taskModal');
+        if (modal) {
+            modal.classList.add('show');
+        }
+
+        // Configura validação em tempo real
+        configurarValidacaoTempoReal();
+
+        console.log("✅ Modal de edição aberto com sucesso");
+        console.log("🔍 isEditingMode final:", isEditingMode);
+    } catch (error) {
+        console.error("❌ Erro ao abrir modal de edição:", error);
+        Swal.fire('Erro', 'Não foi possível carregar os dados para edição: ' + error.message, 'error');
+    }
 }
 
 async function excluirTarefaPorId(taskId) {
@@ -1550,5 +1974,145 @@ async function moverTarefaParaFase(taskId, novaFaseId) {
     } catch (error) {
         console.error("❌ Erro ao mover tarefa:", error);
         Swal.fire('Erro', 'Não foi possível mover a tarefa', 'error');
+    }
+}
+
+// Função para validar formulário em tempo real
+function validarFormularioTarefa() {
+    const titulo = document.getElementById('tituloTarefa').value.trim();
+    const prioridade = document.getElementById('prioridade').value;
+    const dataEntrega = document.getElementById('dataEntrega').value;
+    const fase = document.getElementById('fase').value;
+    const cliente = document.getElementById('cliente').value;
+    const colaborador = document.getElementById('colaborador').value;
+    
+    const submitBtn = document.querySelector('#tarefaForm button[type="submit"]');
+    
+    const camposValidos = titulo && prioridade && dataEntrega && fase && cliente && colaborador;
+    
+    if (submitBtn) {
+        submitBtn.disabled = !camposValidos;
+        submitBtn.style.opacity = camposValidos ? '1' : '0.6';
+        submitBtn.style.cursor = camposValidos ? 'pointer' : 'not-allowed';
+    }
+    
+    return camposValidos;
+}
+
+// Função para configurar validação em tempo real
+function configurarValidacaoTempoReal() {
+    const campos = ['tituloTarefa', 'prioridade', 'dataEntrega', 'fase', 'cliente', 'colaborador'];
+    
+    campos.forEach(campoId => {
+        const campo = document.getElementById(campoId);
+        if (campo) {
+            campo.addEventListener('input', validarFormularioTarefa);
+            campo.addEventListener('change', validarFormularioTarefa);
+        }
+    });
+    
+    // Validar inicialmente
+    validarFormularioTarefa();
+}
+
+// Função para testar conectividade com o backend
+async function testarBackend() {
+    try {
+        console.log("🔍 Testando conectividade com o backend...");
+        console.log("🔍 URL base:", window.API_CONFIG.BASE_URL);
+        
+        // Teste 1: Verificar se o backend está online (usar endpoint que sabemos que existe)
+        try {
+            const healthResponse = await fetch(`${window.API_CONFIG.BASE_URL}/health`);
+            console.log("📡 Health check:", healthResponse.status, healthResponse.statusText);
+        } catch (error) {
+            console.log("📡 Health check falhou (endpoint pode não existir):", error.message);
+        }
+        
+        // Teste 2: Verificar token
+        const token = window.authManager.getToken();
+        console.log("🔑 Token disponível:", !!token);
+        if (token) {
+            console.log("🔑 Token (primeiros 50 chars):", token.substring(0, 50) + "...");
+        }
+        
+        // Teste 3: Verificar se o token está expirado
+        const isExpired = window.authManager.isTokenExpired();
+        console.log("⏰ Token expirado:", isExpired);
+        
+        // Teste 4: Verificar se o usuário está autenticado
+        const isAuthenticated = window.authManager.isAuthenticated();
+        console.log("🔐 Usuário autenticado:", isAuthenticated);
+        
+        // Teste 5: Verificar se é usuário superior
+        const isSuperior = window.authManager.isSuperiorUser();
+        console.log("👑 Usuário superior:", isSuperior);
+        
+        // Teste 6: Testar endpoint de clientes sem autenticação
+        try {
+            const clientsResponseNoAuth = await fetch(`${window.API_CONFIG.BASE_URL}/clients`);
+            console.log("📡 Clientes sem auth:", clientsResponseNoAuth.status, clientsResponseNoAuth.statusText);
+            
+            if (clientsResponseNoAuth.ok) {
+                const clients = await clientsResponseNoAuth.json();
+                console.log("📋 Clientes sem auth retornados:", clients.length);
+            }
+        } catch (error) {
+            console.error("❌ Erro ao testar clientes sem auth:", error);
+        }
+        
+        // Teste 7: Testar endpoint de colaboradores sem autenticação
+        try {
+            const collaboratorsResponseNoAuth = await fetch(`${window.API_CONFIG.BASE_URL}/collaborators`);
+            console.log("📡 Colaboradores sem auth:", collaboratorsResponseNoAuth.status, collaboratorsResponseNoAuth.statusText);
+            
+            if (collaboratorsResponseNoAuth.ok) {
+                const collaborators = await collaboratorsResponseNoAuth.json();
+                console.log("📋 Colaboradores sem auth retornados:", collaborators.length);
+            }
+        } catch (error) {
+            console.error("❌ Erro ao testar colaboradores sem auth:", error);
+        }
+        
+        // Teste 8: Testar com autenticação
+        try {
+            const clientsResponseAuth = await window.authManager.fetchWithAuth(`${window.API_CONFIG.BASE_URL}/clients`);
+            console.log("📡 Clientes com auth:", clientsResponseAuth.status, clientsResponseAuth.statusText);
+            
+            if (clientsResponseAuth.ok) {
+                const clients = await clientsResponseAuth.json();
+                console.log("📋 Clientes com auth retornados:", clients.length);
+                if (clients.length > 0) {
+                    console.log("📋 Primeiro cliente:", clients[0]);
+                }
+            } else {
+                const errorText = await clientsResponseAuth.text();
+                console.error("❌ Erro na resposta de clientes:", errorText);
+            }
+        } catch (error) {
+            console.error("❌ Erro ao testar clientes com auth:", error);
+        }
+        
+        // Teste 9: Testar colaboradores com autenticação
+        try {
+            const collaboratorsResponseAuth = await window.authManager.fetchWithAuth(`${window.API_CONFIG.BASE_URL}/collaborators`);
+            console.log("📡 Colaboradores com auth:", collaboratorsResponseAuth.status, collaboratorsResponseAuth.statusText);
+            
+            if (collaboratorsResponseAuth.ok) {
+                const collaborators = await collaboratorsResponseAuth.json();
+                console.log("📋 Colaboradores com auth retornados:", collaborators.length);
+                if (collaborators.length > 0) {
+                    console.log("📋 Primeiro colaborador:", collaborators[0]);
+                }
+            } else {
+                const errorText = await collaboratorsResponseAuth.text();
+                console.error("❌ Erro na resposta de colaboradores:", errorText);
+            }
+        } catch (error) {
+            console.error("❌ Erro ao testar colaboradores com auth:", error);
+        }
+        
+    } catch (error) {
+        console.error("❌ Erro no teste do backend:", error);
     }
 }

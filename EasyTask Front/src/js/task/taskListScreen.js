@@ -1229,14 +1229,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 // Validar dados obrigatórios
                 if (!dadosTarefa.title || !dadosTarefa.priority || !dadosTarefa.dueDate || !dadosTarefa.phaseId) {
-                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    Swal.fire({
+                        title: 'Campos obrigatórios',
+                        text: 'Por favor, preencha todos os campos obrigatórios.',
+                        icon: 'warning',
+                        confirmButtonColor: '#3085d6'
+                    });
                     return;
                 }
                 
                 // Validar boardId
                 if (!dadosTarefa.boardId || dadosTarefa.boardId <= 0) {
                     console.error("❌ Board ID inválido:", dadosTarefa.boardId);
-                    alert('Board ID inválido. Verifique se você está acessando um quadro válido.');
+                    Swal.fire({
+                        title: 'Board inválido',
+                        text: 'Board ID inválido. Verifique se você está acessando um quadro válido.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
                     return;
                 }
                 
@@ -1263,13 +1273,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     modal.style.display = 'none';
                     modal.classList.remove('show');
                 }
-                
-                // Limpar formulário
                 tarefaForm.reset();
                 
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: 'Tarefa criada com sucesso!',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
             } catch (error) {
                 console.error("❌ Erro ao criar tarefa:", error);
-                alert('Erro ao criar tarefa: ' + error.message);
+                Swal.fire({
+                    title: 'Erro ao criar tarefa',
+                    text: error.message || 'Erro desconhecido ao criar tarefa.',
+                    icon: 'error',
+                    confirmButtonColor: '#d33'
+                });
             }
         });
     }

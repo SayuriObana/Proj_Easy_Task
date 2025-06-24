@@ -4,12 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quadro de Tarefas</title>
+  <title>Tarefas</title>
   <link rel="stylesheet" href="../../src/css/client/clientListScreen.css">
   <link rel="stylesheet" href="../../src/css/tema/temaSystem.css">
   <link rel="stylesheet" href="../../src/css/task/taskListScreen.css">
   <link rel="stylesheet" href="../../src/components/css/sidebar.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="icon" type="image/png" sizes="64x64" href="../../src/imagens/IMAGEM_LOGO_EASYTASK.PNG">
   
   <!-- Scripts externos -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -107,18 +108,22 @@
         <div class="taskForm-header">
           <h2 id="taskModalTitle">Nova Tarefa</h2>
         </div>
-        <form id="tarefaForm" onsubmit="salvarTarefa(event); return false;">
+        <form id="tarefaForm">
           <div class="taskForm-input-group">
             <label for="tituloTarefa">Título da Tarefa</label>
             <input type="text" id="tituloTarefa" class="taskForm-input" required placeholder="Digite o título da tarefa">
           </div>
           <div class="taskForm-input-group">
             <label for="colaborador">Nome do Colaborador</label>
-            <select id="colaborador" class="taskForm-select"></select>
+            <select id="colaborador" class="taskForm-select" required>
+              <option value="">Selecione um colaborador</option>
+            </select>
           </div>
           <div class="taskForm-input-group">
             <label for="cliente">Nome do Cliente</label>
-            <select id="cliente" class="taskForm-select"></select>
+            <select id="cliente" class="taskForm-select" required>
+              <option value="">Selecione um cliente</option>
+            </select>
           </div>
           <div class="taskForm-row">
             <div class="taskForm-input-group">
@@ -137,11 +142,13 @@
           </div>
           <div class="taskForm-input-group">
             <label for="descricao">Descrição</label>
-            <textarea id="descricao" class="taskForm-textarea"></textarea>
+            <textarea id="descricao" class="taskForm-textarea" placeholder="Digite uma descrição para a tarefa"></textarea>
           </div>
           <div class="taskForm-input-group">
             <label for="fase">Fase da Tarefa</label>
-            <select id="fase" class="taskForm-select"></select>
+            <select id="fase" class="taskForm-select" required>
+              <option value="">Selecione uma fase</option>
+            </select>
           </div>
           <button type="submit" class="taskForm-button">SALVAR</button>
           <button type="button" class="taskForm-button deletar-btn" id="btnDeletarRascunho">DELETAR</button>

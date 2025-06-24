@@ -95,6 +95,7 @@ body {
     text-align: center;
     position: relative;
     padding: 15px;
+    overflow: visible;
 }
 
 .profile-card:hover {
@@ -193,6 +194,8 @@ body {
     justify-content: center;
     gap: 9px;
     margin-top: 80px;
+    position: relative;
+    z-index: 10;
 }
 
 .buttons-container button {
@@ -203,6 +206,9 @@ body {
     font-weight: bold;
     transition: background-color 0.3s ease;
     font-size: 0.9rem;
+    position: relative;
+    z-index: 15;
+    pointer-events: auto;
 }
 
 
