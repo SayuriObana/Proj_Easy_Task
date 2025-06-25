@@ -1,5 +1,5 @@
-let graficoAtual = null;
-let graficoPizza = null;
+// Configuração da API - usar API_CONFIG centralizado
+const API_URL = window.API_CONFIG ? window.API_CONFIG.BASE_URL : 'http://localhost:8080';
 
 // Ao carregar a tela, verifica se o token e refreshToken já estão salvos no localStorage.
 // Caso não estejam, salva (por exemplo, copiando de sessionStorage ou de um cookie, se disponível).
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const refreshResp = await fetch('http://localhost:8080/collaborators/refresh-token', {
+            const refreshResp = await fetch(`${API_URL}/collaborators/refresh-token`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -161,470 +161,302 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error('Máximo de tentativas excedido');
     }
 
-    // Busca os dados de estatísticas gerais do backend
-    async function carregarEstatisticasGerais() {
-        const container = document.getElementById("estatisticasGerais");
-        if (!container) return;
-
+    // Busca os dados de estatísticas gerais do backend usando o endpoint correto
+    async function carregarEstatisticas() {
         try {
-            console.log('📊 Carregando estatísticas gerais...');
-            
-            // Buscar dados de múltiplas fontes
-            const [tarefasResponse, clientesResponse, colaboradoresResponse, fasesResponse] = await Promise.all([
-                fetchComToken("http://localhost:8080/tasks"),
-                fetchComToken("http://localhost:8080/clients"),
-                fetchComToken("http://localhost:8080/collaborators"),
-                fetchComToken("http://localhost:8080/phases")
-            ]);
+            const response = await fetchComToken('http://localhost:8080/reports/statistics');
+            if (!response.ok) throw new Error('Erro ao buscar estatísticas');
+            const estatisticas = await response.json();
 
-            // Processar respostas
-            const tarefas = tarefasResponse.ok ? await tarefasResponse.json() : [];
-            const clientes = clientesResponse.ok ? await clientesResponse.json() : [];
-            const colaboradores = colaboradoresResponse.ok ? await colaboradoresResponse.json() : [];
-            const fases = fasesResponse.ok ? await fasesResponse.json() : [];
-
-            console.log('📈 Dados recebidos:', {
-                tarefas: tarefas.length,
-                clientes: clientes.length,
-                colaboradores: colaboradores.length,
-                fases: fases.length
-            });
-
-            // Calcular estatísticas
-            const hoje = new Date();
-            const estatisticas = {
-                totalTarefas: tarefas.length,
-                totalClientes: clientes.length,
-                totalColaboradores: colaboradores.length,
-                tarefasConcluidas: 0,
-                tarefasAndamento: 0,
-                tarefasAtrasadas: 0
-            };
-
-            // Contar tarefas por status
-            tarefas.forEach(tarefa => {
-                if (tarefa.phase && tarefa.phase.name) {
-                    const faseNome = tarefa.phase.name.toLowerCase();
-                    if (faseNome.includes('concluído') || faseNome.includes('concluida')) {
-                        estatisticas.tarefasConcluidas++;
-                    } else {
-                        estatisticas.tarefasAndamento++;
-                    }
-                } else {
-                    estatisticas.tarefasAndamento++;
-                }
-
-                // Verificar se está atrasada
-                if (tarefa.due_date) {
-                    const dataVencimento = new Date(tarefa.due_date);
-                    if (dataVencimento < hoje && !tarefa.phase?.name?.toLowerCase().includes('concluído')) {
-                        estatisticas.tarefasAtrasadas++;
-                    }
-                }
-            });
-
-            // Atualizar elementos HTML
-            document.getElementById('totalTarefas').textContent = estatisticas.totalTarefas;
-            document.getElementById('totalClientes').textContent = estatisticas.totalClientes;
-            document.getElementById('totalColaboradores').textContent = estatisticas.totalColaboradores;
-            document.getElementById('tarefasConcluidas').textContent = estatisticas.tarefasConcluidas;
-            document.getElementById('tarefasAndamento').textContent = estatisticas.tarefasAndamento;
-            document.getElementById('tarefasAtrasadas').textContent = estatisticas.tarefasAtrasadas;
-
-            // Criar gráfico de distribuição por fase
-            const contagemPorFase = {};
-            fases.forEach(fase => {
-                contagemPorFase[fase.name] = 0;
-            });
-
-            tarefas.forEach(tarefa => {
-                if (tarefa.phase && tarefa.phase.name) {
-                    contagemPorFase[tarefa.phase.name] = (contagemPorFase[tarefa.phase.name] || 0) + 1;
-                }
-            });
-
-            // Renderizar gráfico
-            const labels = Object.keys(contagemPorFase);
-            const dados = Object.values(contagemPorFase);
-            
-            if (labels.length > 0 && dados.some(d => d > 0)) {
-                renderizarGraficoPizza(labels, dados);
-            }
-
-            console.log('✅ Estatísticas carregadas com sucesso');
-
-        } catch (err) {
-            console.error("❌ Erro ao carregar estatísticas gerais:", err);
-            
-            // Não redirecionar para login, apenas mostrar erro
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({ 
-                    title: "Aviso", 
-                    text: "Relatório de estatísticas gerais não disponível no momento.", 
-                    icon: "info", 
-                    confirmButtonColor: "#FFD700", 
-                    confirmButtonText: "OK" 
-                });
-            } else {
-                alert("Relatório de estatísticas gerais não disponível no momento.");
-            }
-            
-            container.innerHTML = "<p>Relatório de estatísticas gerais não disponível no momento.</p>";
+            // Atualiza os elementos na tela com os novos campos do backend
+            document.getElementById('totalTarefas').textContent = estatisticas.totalTasks ?? 0;
+            document.getElementById('totalClientes').textContent = estatisticas.activeClients ?? 0;
+            document.getElementById('totalColaboradores').textContent = estatisticas.activeCollaborators ?? 0;
+            document.getElementById('tarefasConcluidas').textContent = estatisticas.tasksCompleted ?? 0;
+            document.getElementById('tarefasAndamento').textContent = estatisticas.tasksInProgress ?? 0;
+            document.getElementById('tarefasAtrasadas').textContent = estatisticas.overdueTasks ?? 0;
+        } catch (error) {
+            console.error('Erro ao carregar estatísticas:', error);
+            // Opcional: exibir mensagem de erro na tela
         }
     }
 
     // Função para gerar o PDF do relatório (usando jsPDF)
     window.gerarPDF = async function() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        // Título
-        doc.setFontSize(16);
-        doc.text("Relatório de Estatísticas Gerais", 14, 15);
-        
-        // Data de geração
-        doc.setFontSize(10);
-        doc.text(`Gerado em: ${new Date().toLocaleDateString()}`, 14, 25);
+        try {
+            // Buscar dados atualizados do backend
+            const response = await fetchComToken('http://localhost:8080/reports/statistics');
+            if (!response.ok) throw new Error('Erro ao buscar dados para PDF');
+            const estatisticas = await response.json();
 
-        // Estatísticas
-        doc.setFontSize(12);
-        doc.text("Estatísticas Gerais:", 14, 35);
-        doc.setFontSize(10);
-        doc.text(`Total de Tarefas: ${document.getElementById('totalTarefas').textContent}`, 20, 45);
-        doc.text(`Total de Clientes: ${document.getElementById('totalClientes').textContent}`, 20, 55);
-        doc.text(`Total de Colaboradores: ${document.getElementById('totalColaboradores').textContent}`, 20, 65);
-        doc.text(`Tarefas Concluídas: ${document.getElementById('tarefasConcluidas').textContent}`, 20, 75);
-        doc.text(`Tarefas em Andamento: ${document.getElementById('tarefasAndamento').textContent}`, 20, 85);
-        doc.text(`Tarefas Atrasadas: ${document.getElementById('tarefasAtrasadas').textContent}`, 20, 95);
+            // Dados para o gráfico e PDF (mesmos estágios da tela)
+            const labels = [
+                "Total de Tarefas",
+                "Total de Clientes",
+                "Total de Colaboradores",
+                "Tarefas Concluídas",
+                "Tarefas em Andamento",
+                "Tarefas Atrasadas"
+            ];
+            const data = [
+                estatisticas.totalTasks ?? 0,
+                estatisticas.activeClients ?? 0,
+                estatisticas.activeCollaborators ?? 0,
+                estatisticas.tasksCompleted ?? 0,
+                estatisticas.tasksInProgress ?? 0,
+                estatisticas.overdueTasks ?? 0
+            ];
 
-        // Adiciona o gráfico ao PDF
-        if (graficoPizza) {
-            const canvas = document.getElementById('graficoPizza');
-            const imgData = canvas.toDataURL('image/png');
-            const imgWidth = 180;
-            const imgHeight = 180;
+            // Cores pastéis distintas para cada estágio
+            const pastelColors = [
+                '#FFE066', // amarelo pastel
+                '#A7C7E7', // azul pastel
+                '#FFB3C6', // rosa pastel
+                '#C3AED6', // roxo pastel
+                '#B5EAD7', // verde água pastel
+                '#FFDAC1'  // laranja claro pastel
+            ];
+
+            // Ajustar o canvas para ser quadrado e garantir gráfico redondo
+            const canvas = document.getElementById('pieChart');
+            canvas.width = 400;
+            canvas.height = 400;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas
+            if (window.pizzaChart) window.pizzaChart.destroy();
+            window.pizzaChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: pastelColors,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    cutout: 0,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                color: '#232323',
+                                font: { size: 14, weight: 'bold' },
+                                generateLabels: function(chart) {
+                                    const original = Chart.overrides.pie.plugins.legend.labels.generateLabels;
+                                    const labels = original(chart);
+                                    // Adiciona descrição de cada cor
+                                    return labels.map((label, i) => {
+                                        let descricao = '';
+                                        switch (i) {
+                                            case 0: descricao = 'Total de Tarefas'; break;
+                                            case 1: descricao = 'Total de Clientes'; break;
+                                            case 2: descricao = 'Total de Colaboradores'; break;
+                                            case 3: descricao = 'Tarefas Concluídas'; break;
+                                            case 4: descricao = 'Tarefas em Andamento'; break;
+                                            case 5: descricao = 'Tarefas Atrasadas'; break;
+                                            default: descricao = 'Outro'; break;
+                                        }
+                                        return {
+                                            ...label,
+                                            text: descricao
+                                        };
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Espera o gráfico renderizar
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Pega imagem do gráfico
+            const chartImg = canvas.toDataURL('image/png');
+
+            // Gera o PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(16);
+            doc.text("Relatório de Estatísticas Gerais - EasyTask", 14, 15);
+
+            doc.setFontSize(10);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 14, 25);
+
+            // Estatísticas
+            doc.setFontSize(12);
+            doc.text("Estatísticas Gerais:", 14, 35);
+            doc.setFontSize(10);
+            doc.text(`Total de Tarefas: ${data[0]}`, 20, 45);
+            doc.text(`Total de Clientes: ${data[1]}`, 20, 53);
+            doc.text(`Total de Colaboradores: ${data[2]}`, 20, 61);
+            doc.text(`Tarefas Concluídas: ${data[3]}`, 20, 69);
+            doc.text(`Tarefas em Andamento: ${data[4]}`, 20, 77);
+            doc.text(`Tarefas Atrasadas: ${data[5]}`, 20, 85);
+
+            // Adiciona o gráfico de pizza centralizado e redondo
+            doc.setFontSize(12);
+            doc.text("Distribuição das Estatísticas:", 14, 100);
+            // Centralizar na página A4 (210mm largura), imagem 100x100mm
+            const imgWidth = 100;
+            const imgHeight = 100;
             const pageWidth = doc.internal.pageSize.getWidth();
-            const imgX = (pageWidth - imgWidth) / 2;
-            doc.addImage(imgData, 'PNG', imgX, 105, imgWidth, imgHeight);
-        }
+            const x = (pageWidth - imgWidth) / 2;
+            doc.addImage(chartImg, 'PNG', x, 105, imgWidth, imgHeight);
 
-        doc.save("relatorio-estatisticas-gerais.pdf");
+            // Legenda das cores
+            doc.setFontSize(10);
+            const legendY = 210;
+            const legendX = 30;
+            const legendLabels = [
+                { cor: pastelColors[0], texto: 'Total de Tarefas' },
+                { cor: pastelColors[1], texto: 'Total de Clientes' },
+                { cor: pastelColors[2], texto: 'Total de Colaboradores' },
+                { cor: pastelColors[3], texto: 'Tarefas Concluídas' },
+                { cor: pastelColors[4], texto: 'Tarefas em Andamento' },
+                { cor: pastelColors[5], texto: 'Tarefas Atrasadas' }
+            ];
+            legendLabels.forEach((item, idx) => {
+                doc.setFillColor(item.cor);
+                doc.rect(legendX, legendY + idx * 8, 6, 6, 'F');
+                doc.text(item.texto, legendX + 10, legendY + 5 + idx * 8);
+            });
+
+            doc.save("relatorio-estatisticas-gerais.pdf");
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'PDF Gerado!',
+                    text: 'O relatório foi baixado com sucesso.',
+                    confirmButtonColor: '#28a745'
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao gerar PDF:', error);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao Gerar PDF',
+                    text: 'Não foi possível gerar o relatório.',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        }
+    };
+
+    // Função para testar conectividade com o backend
+    window.testarConectividade = async function() {
+        try {
+            console.log('🔍 Testando conectividade com o backend...');
+            
+            // Pega o token do localStorage
+            const token = localStorage.getItem('accessToken');
+            const headers = {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            };
+            
+            // Teste 1: Verificar se o servidor está respondendo
+            const healthResponse = await fetch(`${API_URL}/health`, {
+                method: 'GET',
+                headers
+            });
+            console.log('🏥 Health check:', healthResponse.status);
+            
+            // Teste 2: Verificar se o endpoint de estatísticas existe
+            const statsResponse = await fetch(`${API_URL}/reports/statistics`, {
+                method: 'GET',
+                headers
+            });
+            console.log('📊 Statistics endpoint:', statsResponse.status);
+            
+            // Teste 3: Verificar se o endpoint de tarefas funciona (para comparação)
+            const tasksResponse = await fetch(`${API_URL}/tasks`, {
+                method: 'GET',
+                headers
+            });
+            console.log('📋 Tasks endpoint:', tasksResponse.status);
+            
+            const resultado = {
+                health: healthResponse.status,
+                statistics: statsResponse.status,
+                tasks: tasksResponse.status
+            };
+            
+            console.log('🔍 Resultado do teste de conectividade:', resultado);
+            
+            // Mostrar resultado para o usuário
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Teste de Conexão',
+                    html: `
+                        <div style="text-align: left;">
+                            <p><strong>Health Check:</strong> ${resultado.health}</p>
+                            <p><strong>Statistics Endpoint:</strong> ${resultado.statistics}</p>
+                            <p><strong>Tasks Endpoint:</strong> ${resultado.tasks}</p>
+                        </div>
+                    `,
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            }
+            
+            return resultado;
+            
+        } catch (error) {
+            console.error('❌ Erro no teste de conectividade:', error);
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro no Teste',
+                    text: `Erro ao testar conectividade: ${error.message}`,
+                    confirmButtonColor: '#d33'
+                });
+            }
+            
+            return { error: error.message };
+        }
+    };
+
+    // Função para atualizar estatísticas (pode ser chamada por um botão de refresh)
+    window.atualizarEstatisticas = async function() {
+        try {
+            console.log('🔄 Atualizando estatísticas...');
+            
+            await carregarEstatisticas();
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Atualizado!',
+                    text: 'Estatísticas atualizadas com sucesso.',
+                    confirmButtonColor: '#28a745',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar estatísticas:', error);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: `Não foi possível atualizar as estatísticas: ${error.message}`,
+                    confirmButtonColor: '#d33'
+                });
+            }
+        }
     };
 
     // Inicia a busca dos dados ao carregar a página
-    carregarEstatisticasGerais();
-});
-
-
-function renderizarGraficoPizza(labels, dados) {
-    const canvas = document.getElementById('graficoPizza');
-    if (!canvas) {
-        console.error("❌ Canvas 'graficoPizza' não encontrado.");
-        return;
-    }
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-        console.error("❌ Falha ao obter contexto 2D do canvas.");
-        return;
-    }
-
-    if (graficoAtual) {
-        graficoAtual.destroy();
-    }
-
-    graficoAtual = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: dados,
-                backgroundColor: ['#FFC107', '#4CAF50', '#2196F3', '#FF5722', '#9C27B0', '#00BCD4', '#E91E63', '#8BC34A'] // Você pode expandir
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-}
-
-
-// 🔹 Função para buscar e exibir as estatísticas gerais
-async function carregarEstatisticas() {
-    try {
-        // Buscar todas fases
-        const responsePhases = await fetch("http://localhost:8080/phases");
-        if (!responsePhases.ok) throw new Error("Erro ao buscar fases!");
-
-        const phases = await responsePhases.json();
-        console.log("Fases recebidas:", phases);
-
-        // Buscar todas tarefas
-        const responseTasks = await fetch("http://localhost:8080/tasks");
-        if (!responseTasks.ok) throw new Error("Erro ao buscar tarefas!");
-
-        const tarefas = await responseTasks.json();
-        console.log("Tarefas recebidas:", tarefas);
-
-        // Inicializar contador para cada fase
-        const contagemPorFase = {};
-        phases.forEach(phase => {
-            contagemPorFase[phase.name] = 0;
-        });
-
-        // Contar tarefas em cada fase
-        tarefas.forEach(tarefa => {
-            if (tarefa.phase?.name) {
-                if (contagemPorFase[tarefa.phase.name] !== undefined) {
-                    contagemPorFase[tarefa.phase.name]++;
-                } else {
-                    console.warn(`Fase não reconhecida: ${tarefa.phase.name}`);
-                }
-            }
-        });
-
-        console.log("Contagem por fase:", contagemPorFase);
-
-        // Atualizar tela
-        const container = document.getElementById("estatisticas-container");
-        container.innerHTML = Object.entries(contagemPorFase)
-            .map(([fase, quantidade]) => `<p><strong>${fase}:</strong> ${quantidade}</p>`)
-            .join('') +
-            `<p><strong>Total de Tarefas:</strong> ${tarefas.length}</p>`;
-
-        // Atualizar gráfico
-        const labels = Object.keys(contagemPorFase);
-        const dados = Object.values(contagemPorFase);
-
-        requestAnimationFrame(() => renderizarGraficoPizza(labels, dados));
-
-    } catch (error) {
-        console.error("Erro ao carregar estatísticas:", error);
-        Swal.fire({
-            title: "Erro!",
-            text: error.message,
-            icon: "error",
-            confirmButtonColor: "#d33",
-            confirmButtonText: "OK"
-        });
-    }
-}
-
-
-async function gerarRelatorioEstatisticasPDF() {
-    try {
-        const response = await fetch("http://localhost:8080/tasks");
-        if (!response.ok) throw new Error(`Erro ${response.status}: ${response.statusText}`);
-
-        const tarefas = await response.json();
-        console.log("📋 Tarefas recebidas para o PDF:", tarefas);
-
-        // Buscar fases
-        const responsePhases = await fetch("http://localhost:8080/phases");
-        if (!responsePhases.ok) throw new Error("Erro ao buscar fases!");
-
-        const phases = await responsePhases.json();
-
-        // Contar tarefas por fase
-        const contagemPorFase = {};
-        phases.forEach(phase => {
-            contagemPorFase[phase.name] = 0;
-        });
-
-        tarefas.forEach(tarefa => {
-            if (tarefa.phase?.name && contagemPorFase.hasOwnProperty(tarefa.phase.name)) {
-                contagemPorFase[tarefa.phase.name]++;
-            }
-        });
-
-
-        // 🖨 Criar o PDF
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        doc.setFont("times", "bold");
-        doc.setFontSize(18);
-        doc.text("Relatório de Estatísticas Gerais", 105, 20, { align: "center" });
-
-        doc.setFontSize(14);
-        doc.text(`Data: ${new Date().toLocaleDateString()}`, 15, 35);
-
-        doc.setDrawColor(0);
-        doc.setLineWidth(0.5);
-        doc.line(15, 40, 195, 40);
-
-        doc.setFont("times", "bold");
-        doc.text("Resumo das Estatísticas:", 15, 50);
-        doc.setFont("times", "normal");
-
-        let y = 60; // 🔵 Posição inicial vertical para escrever
-
-        const fasesOrdenadas = Object.entries(contagemPorFase).sort((a, b) => a[0].localeCompare(b[0]));
-
-        for (const [fase, quantidade] of fasesOrdenadas) {
-            doc.text(`• ${fase}: ${quantidade}`, 15, y);
-            y += 10;
-        }
-
-        doc.text(`• Total de Tarefas: ${tarefas.length}`, 15, y);
-
-        // 🔥 Inserir gráfico melhorado (como fizemos antes)
-        const canvas = document.getElementById('graficoPizza');
-        const imgData = canvas.toDataURL('image/png');
-        const imgWidth = 100;
-        const imgHeight = 100;
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const imgX = (pageWidth - imgWidth) / 2;
-        doc.addImage(imgData, 'PNG', imgX, y + 20, imgWidth, imgHeight);
-
-        const nomeArquivo = `Relatorio_Estatisticas_${new Date().toISOString().split("T")[0]}.pdf`;
-        doc.save(nomeArquivo);
-
-        Swal.fire({
-            title: "Sucesso!",
-            text: "O relatório foi gerado com sucesso!",
-            icon: "success",
-            confirmButtonColor: "#28a745",
-            confirmButtonText: "OK"
-        });
-
-    } catch (error) {
-        console.error("Erro ao gerar relatório:", error);
-        Swal.fire({
-            title: "Erro!",
-            text: `Erro ao gerar relatório: ${error.message || "Ocorreu um erro desconhecido."}`,
-            icon: "error",
-            confirmButtonColor: "#d33",
-            confirmButtonText: "OK"
-        });
-    }
-}
-
-// Função para criar o gráfico de pizza
-function criarGraficoPizza(dados) {
-    const ctx = document.getElementById('graficoPizza').getContext('2d');
-    
-    // Destrói o gráfico anterior se existir
-    if (graficoPizza) {
-        graficoPizza.destroy();
-    }
-
-    // Configuração do gráfico
-    graficoPizza = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ['Concluídas', 'Em Andamento', 'Atrasadas'],
-            datasets: [{
-                data: [
-                    dados.tarefasConcluidas,
-                    dados.tarefasAndamento,
-                    dados.tarefasAtrasadas
-                ],
-                backgroundColor: [
-                    '#00C853', // Verde para concluídas
-                    '#FFD700', // Amarelo para em andamento
-                    '#FF3D00'  // Vermelho para atrasadas
-                ],
-                borderColor: '#000000',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        color: document.body.classList.contains('light-theme') ? '#222222' : '#ffffff',
-                        font: {
-                            size: 14
-                        }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = Math.round((value / total) * 100);
-                            return `${label}: ${value} (${percentage}%)`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
-// Função para atualizar as estatísticas e o gráfico
-async function atualizarEstatisticas() {
-    try {
-        const [tarefasResponse, clientesResponse, colaboradoresResponse] = await Promise.all([
-            fetchComToken("http://localhost:8080/tasks"),
-            fetchComToken("http://localhost:8080/clients"),
-            fetchComToken("http://localhost:8080/collaborators")
-        ]);
-
-        if (!tarefasResponse.ok || !clientesResponse.ok || !colaboradoresResponse.ok) {
-            throw new Error("Erro ao carregar dados");
-        }
-
-        const tarefas = await tarefasResponse.json();
-        const clientes = await clientesResponse.json();
-        const colaboradores = await colaboradoresResponse.json();
-
-        // Calcula as estatísticas
-        const estatisticas = {
-            totalTarefas: tarefas.length,
-            totalClientes: clientes.length,
-            totalColaboradores: colaboradores.length,
-            tarefasConcluidas: 0,
-            tarefasAndamento: 0,
-            tarefasAtrasadas: 0
-        };
-
-        tarefas.forEach(tarefa => {
-            if (tarefa.stage && tarefa.stage.name === "Concluído") {
-                estatisticas.tarefasConcluidas++;
-            } else {
-                estatisticas.tarefasAndamento++;
-            }
-
-            if (tarefa.deadline && new Date(tarefa.deadline) < new Date() && 
-                tarefa.stage && tarefa.stage.name !== "Concluído") {
-                estatisticas.tarefasAtrasadas++;
-            }
-        });
-
-        // Atualiza os elementos HTML
-        document.getElementById('totalTarefas').textContent = estatisticas.totalTarefas;
-        document.getElementById('totalClientes').textContent = estatisticas.totalClientes;
-        document.getElementById('totalColaboradores').textContent = estatisticas.totalColaboradores;
-        document.getElementById('tarefasConcluidas').textContent = estatisticas.tarefasConcluidas;
-        document.getElementById('tarefasAndamento').textContent = estatisticas.tarefasAndamento;
-        document.getElementById('tarefasAtrasadas').textContent = estatisticas.tarefasAtrasadas;
-
-        // Atualiza o gráfico
-        criarGraficoPizza(estatisticas);
-
-    } catch (error) {
-        console.error("Erro ao carregar estatísticas:", error);
-        Swal.fire({
-            title: "Erro!",
-            text: "Não foi possível carregar as estatísticas.",
-            icon: "error"
-        });
-    }
-}
-
-// Inicializa as estatísticas ao carregar a página
-document.addEventListener("DOMContentLoaded", () => {
-    atualizarEstatisticas();
+    carregarEstatisticas();
 });

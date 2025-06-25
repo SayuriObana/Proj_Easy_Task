@@ -14,9 +14,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="icon" type="image/png" sizes="64x64" href="../../src/imagens/IMAGEM_LOGO_EASYTASK.PNG">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -39,7 +39,7 @@
     <!-- Container central -->
     <div class="container">
         <h2>Relatório Estatísticas Gerais</h2>
-        <p>Oferece uma visão geral das principais métricas do sistema, como número total de tarefas criadas, em andamento e concluídas, número de clientes ativos, estágios mais utilizados, entre outros. Tem como objetivo fornecer uma visão macro do desempenho do sistema e dos projetos em execução, ajudando na tomada de decisões estratégicas.</p>
+        <p>Oferece uma visão geral das principais métricas do sistema, como número total de tarefas criadas, em andamento e concluídas, número de clientes ativos, colaboradores ativos, tarefas atrasadas, entre outros. Tem como objetivo fornecer uma visão macro do desempenho do sistema e dos projetos em execução, ajudando na tomada de decisões estratégicas.</p>
 
         <!-- Seção de Estatísticas -->
         <div class="estatisticas-container">
@@ -76,17 +76,16 @@
                     <p id="tarefasAtrasadas">0</p>
                 </div>
             </div>
+            <!-- Canvas oculto para o gráfico de pizza do PDF -->
+            <canvas id="pieChart" width="400" height="400" style="display:none;"></canvas>
         </div>
 
-        <!-- Seção do Gráfico -->
-        <div class="grafico-container">
-            <h3>Distribuição de Tarefas</h3>
-            <div class="grafico-wrapper">
-                <canvas id="graficoPizza"></canvas>
-            </div>
+        <!-- Botões de ação -->
+        <div class="acoes-container">
+            <button id="btnDownloadPDF" onclick="gerarPDF()" class="btn-download">
+                <i class="fas fa-download"></i> Baixar Relatório (PDF)
+            </button>
         </div>
-
-        <button id="btnDownloadPDF" onclick="gerarPDF()">Baixar Relatório (PDF)</button>
     </div>
 
     <script src="../../src/js/report/generalStatsReport.js"></script>

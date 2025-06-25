@@ -869,7 +869,7 @@ async function abrirModalNovaTarefa() {
             const dataEntregaInput = document.getElementById('dataEntrega');
             if (dataEntregaInput) {
                 const hoje = new Date().toISOString().split('T')[0];
-                dataEntregaInput.min = hoje;
+                // Removida a limitação de data mínima para permitir tarefas atrasadas
                 dataEntregaInput.value = hoje;
             }
             
@@ -1135,14 +1135,6 @@ async function salvarTarefa(event) {
         
         if (!dataEntrega) {
             erros.push("Data de entrega é obrigatória");
-        } else {
-            const dataEntregaObj = new Date(dataEntrega);
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-            
-            if (dataEntregaObj < hoje) {
-                erros.push("Data de entrega não pode ser anterior a hoje");
-            }
         }
         
         if (!fase) {
